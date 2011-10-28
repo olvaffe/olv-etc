@@ -1,0 +1,20 @@
+#!/bin/sh
+
+ETC=olv-etc
+
+err() {
+	echo $@
+	exit 1
+}
+
+err_if_exist() {
+	if [ -f "$1" ]; then
+		err "$1 already exists"
+	fi
+}
+
+err_if_exist ~/.bashrc
+err_if_exist ~/.vimrc
+
+ln -sf "$ETC/bashrc" ~/.bashrc
+ln -sf "$ETC/vimrc" ~/.vimrc
