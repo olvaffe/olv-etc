@@ -34,6 +34,13 @@ if [ -x /usr/bin/dircolors ]; then
     alias grep='grep --color=auto'
 fi
 
+if [ "$(uname -s)" == "Darwin"; then
+	# MacPorts
+	export PATH=/opt/local/sbin:/opt/local/bin:$PATH
+	# do not copy dot underscore files
+	export COPYFILE_DISABLE=true
+fi
+
 # Alias definitions.
 
 # utils
@@ -45,21 +52,24 @@ alias gg='git grep'
 alias sg='grep --exclude-dir=.svn --exclude-dir=.git -R'
 
 # dpkg
-alias dl='dpkg -l'
-alias dL='dpkg -L'
-alias dg='dpkg -l | grep'
-alias dS='dpkg -S'
-alias di='sudo dpkg -i'
-alias dP='sudo dpkg -P'
+if which dpkg > /dev/null; then
+	alias dl='dpkg -l'
+	alias dL='dpkg -L'
+	alias dg='dpkg -l | grep'
+	alias dS='dpkg -S'
+	alias di='sudo dpkg -i'
+	alias dP='sudo dpkg -P'
+fi
 
-# apt-get
-alias aU='sudo apt-get update'
-alias au='sudo apt-get upgrade'
-alias adu='sudo apt-get dist-upgrade'
-alias ai='sudo apt-get install'
-alias aP='sudo apt-get purge'
+# apt-get/apt-cache
+if which apt-get > /dev/null; then
+	alias aU='sudo apt-get update'
+	alias au='sudo apt-get upgrade'
+	alias adu='sudo apt-get dist-upgrade'
+	alias ai='sudo apt-get install'
+	alias aP='sudo apt-get purge'
 
-# apt-cache
-alias aS='apt-cache search'
-alias as='apt-cache show'
-alias ap='apt-cache showpkg'
+	alias aS='apt-cache search'
+	alias as='apt-cache show'
+	alias ap='apt-cache showpkg'
+fi
