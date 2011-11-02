@@ -48,7 +48,7 @@ alias g='grep'
 alias l='less'
 
 # source control
-alias gg='git grep'
+alias gg='git grep --color'
 alias sg='grep --exclude-dir=.svn --exclude-dir=.git -R'
 
 # dpkg
