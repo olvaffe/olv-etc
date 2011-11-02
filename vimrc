@@ -44,3 +44,8 @@ fun! StylePiglit()
 	set sw=4 sts=4 et
 endfun
 au BufNewFile,BufRead ~/fdo/piglit/*.[ch] :call StylePiglit()
+
+fun! StyleAndroid()
+	set sw=4 sts=4 et
+endfun
+au BufNewFile,BufRead ~/google/gingerbread*/*.[ch],~/google/gingerbread*/*.cpp :call StyleAndroid()
