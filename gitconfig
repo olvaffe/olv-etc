@@ -1,0 +1,20 @@
+[user]
+	name = Chia-I Wu
+	email = olvaffe@gmail.com
+
+[sendemail]
+	smtpencryption = tls
+	smtpserver = smtp.gmail.com
+	smtpuser = olvaffe@gmail.com
+	chainreplayto = no
+	suppresscc = author
+	from = Chia-I Wu <olvaffe@gmail.com>
+
+[alias]
+	alog = log --graph --stat
+
+[url "ssh://olv@apollo/"]
+	insteadOf = ssh://apollo/
+
+[url "ssh://olv@git.freedesktop.org/"]
+	insteadOf = ssh://git.freedesktop.org/
