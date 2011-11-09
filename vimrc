@@ -13,8 +13,6 @@ syntax on
 colorscheme delek
 
 " search settings
-set ignorecase
-set smartcase
 nohl
 
 " edit settings
