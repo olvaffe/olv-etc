@@ -23,7 +23,7 @@ set copyindent
 
 " programming settings
 set tags+=./tags;
-set cino=:0,l1,t0,(0
+set cino=:0,l1,t0
 let c_space_errors=1
 
 nmap <F5>  :make<CR>
