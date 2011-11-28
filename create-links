@@ -20,3 +20,5 @@ err_if_exist ~/.gitconfig
 ln -sf "$ETC/bashrc" ~/.bashrc
 ln -sf "$ETC/vimrc" ~/.vimrc
 ln -sf "$ETC/gitconfig" ~/.gitconfig
+
+ln -sf "~/$ETC/mesa-config" ~/fdo/mesa/mesa

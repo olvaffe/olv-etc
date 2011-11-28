@@ -1,0 +1,10 @@
+#!/bin/sh
+
+APIS="--enable-gles1 --enable-gles2 --enable-openvg --disable-glu"
+DRIVERS="--with-dri-drivers=i965 --with-gallium-drivers=swrast"
+FEATURES="--enable-gallium-egl --enable-shared-glapi --enable-xcb --enable-glx-tls"
+FLAGS="--enable-debug"
+
+./configure $APIS $DRIVERS $FEATURES $FLAGS $@ \
+	CC="ccache gcc" CXX="ccache g++" \
+	LLVM_CONFIG="$(which llvm-config-2.9)"
