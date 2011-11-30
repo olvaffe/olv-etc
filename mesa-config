@@ -5,6 +5,12 @@ DRIVERS="--with-dri-drivers=i965 --with-gallium-drivers=swrast"
 FEATURES="--enable-gallium-egl --enable-shared-glapi --enable-xcb --enable-glx-tls"
 FLAGS="--enable-debug"
 
+LLVM_CONFIG=$(which llvm-config)
+if [ -z "$LLVM_CONFIG" ]; then
+	LLVM_CONFIG=$(which llvm-config-2.9)
+fi
+
 ./configure $APIS $DRIVERS $FEATURES $FLAGS $@ \
 	CC="ccache gcc" CXX="ccache g++" \
-	LLVM_CONFIG="$(which llvm-config-2.9)"
+	CFLAGS="-O0" CXXFLAGS="-O0" \
+	LLVM_CONFIG="$LLVM_CONFIG"

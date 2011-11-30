@@ -22,3 +22,4 @@ ln -sf "$ETC/vimrc" ~/.vimrc
 ln -sf "$ETC/gitconfig" ~/.gitconfig
 
 ln -sf "~/$ETC/mesa-config" ~/fdo/mesa/mesa
+ln -sf "~/$ETC/mesa-setup-env" ~/fdo/mesa/mesa
