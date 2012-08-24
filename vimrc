@@ -38,7 +38,6 @@ au FileType python set sw=4 sts=4 et
 fun! Style4Spaces()
 	set sw=4 sts=4 et
 endfun
-au BufNewFile,BufRead ~/fdo/piglit/*.[ch] :call Style4Spaces()
 au BufNewFile,BufRead ~/projects/apitrace/*.[ch]pp :call Style4Spaces()
 au BufNewFile,BufRead ~/google/gingerbread*/*.[ch],~/google/gingerbread*/*.cpp :call Style4Spaces()
 

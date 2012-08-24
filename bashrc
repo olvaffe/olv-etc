@@ -2,6 +2,7 @@
 [ -z "$PS1" ] && return
 
 PATH="$HOME/.local/bin"
+PATH="$PATH:$HOME/google/android-sdk-linux/tools:$HOME/google/android-ndk-r7"
 PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 PATH="$PATH:/usr/local/games:/usr/games"
 export PATH
@@ -50,6 +51,9 @@ alias l='less'
 # source control
 alias gg='git grep --color'
 alias sg='grep --exclude-dir=.svn --exclude-dir=.git -R'
+
+alias ptt='ssh bbsu@ptt.cc'
+alias ptt2='ssh bbsu@ptt2.cc'
 
 # dpkg
 if which dpkg > /dev/null; then

@@ -1,16 +1,26 @@
 #!/bin/sh
 
-APIS="--enable-gles1 --enable-gles2 --enable-openvg --disable-glu"
-DRIVERS="--with-dri-drivers=i965 --with-gallium-drivers=swrast"
-FEATURES="--enable-gallium-egl --enable-shared-glapi --enable-xcb --enable-glx-tls"
-FLAGS="--enable-debug"
+APIS="--enable-opengl
+      --enable-gles1
+      --enable-gles2
+      --enable-openvg
+      --disable-opencl
+      --enable-egl
+      --enable-dri
+      --enable-glx
+      --disable-glu"
 
-LLVM_CONFIG=$(which llvm-config)
-if [ -z "$LLVM_CONFIG" ]; then
-	LLVM_CONFIG=$(which llvm-config-2.9)
-fi
+FEATURES="--enable-gallium-egl
+          --with-egl-platforms=x11,null
+          --enable-shared-glapi
+          --enable-glx-tls
+          --enable-texture-float"
+
+DRIVERS="--with-dri-drivers=i965,swrast
+         --with-gallium-drivers=swrast,i965"
+
+FLAGS="--enable-debug"
 
 ./configure $APIS $DRIVERS $FEATURES $FLAGS $@ \
 	CC="ccache gcc" CXX="ccache g++" \
-	CFLAGS="-O0" CXXFLAGS="-O0" \
-	LLVM_CONFIG="$LLVM_CONFIG"
+	CFLAGS="-O0" CXXFLAGS="-O0"
