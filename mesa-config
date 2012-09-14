@@ -4,11 +4,10 @@ APIS="--enable-opengl
       --enable-gles1
       --enable-gles2
       --enable-openvg
-      --disable-opencl
+      --enable-opencl
       --enable-egl
       --enable-dri
-      --enable-glx
-      --disable-glu"
+      --enable-glx"
 
 FEATURES="--enable-gallium-egl
           --with-egl-platforms=x11,null
@@ -21,6 +20,9 @@ DRIVERS="--with-dri-drivers=i965,swrast
 
 FLAGS="--enable-debug"
 
-./configure $APIS $DRIVERS $FEATURES $FLAGS $@ \
+MISC="--with-clang-libdir=/usr/include
+      --with-opencl-libdir=\${libdir}/opencl:$HOME/fdo/mesa/mesa/lib/opencl"
+
+./configure $APIS $DRIVERS $FEATURES $FLAGS $MISC $@ \
 	CC="ccache gcc" CXX="ccache g++" \
 	CFLAGS="-O0" CXXFLAGS="-O0"
