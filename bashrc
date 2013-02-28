@@ -35,13 +35,6 @@ if [ -x /usr/bin/dircolors ]; then
     alias grep='grep --color=auto'
 fi
 
-if [ "$(uname -s)" == "Darwin" ]; then
-	# MacPorts
-	export PATH=/opt/local/sbin:/opt/local/bin:$PATH
-	# do not copy dot underscore files
-	export COPYFILE_DISABLE=true
-fi
-
 # Alias definitions.
 
 # utils

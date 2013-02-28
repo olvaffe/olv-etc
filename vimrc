@@ -13,7 +13,7 @@ syntax on
 colorscheme delek
 
 " search settings
-nohl
+set nohls
 
 " edit settings
 set pt=<F10>
@@ -23,7 +23,7 @@ set copyindent
 
 " programming settings
 set tags+=./tags;
-set cino=:0,l1,t0
+set cino=:0,l1,t0,W1
 let c_space_errors=1
 
 nmap <F5>  :make<CR>

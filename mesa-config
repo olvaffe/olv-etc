@@ -4,12 +4,14 @@ APIS="--enable-opengl
       --enable-gles1
       --enable-gles2
       --enable-openvg
-      --enable-opencl
       --enable-egl
       --enable-dri
       --enable-glx"
 
+#APIS="$APIS --enable-opencl"
+
 FEATURES="--enable-gallium-egl
+          --enable-gallium-tests
           --with-egl-platforms=x11,null
           --enable-shared-glapi
           --enable-glx-tls
@@ -21,7 +23,7 @@ DRIVERS="--with-dri-drivers=i965,swrast
 FLAGS="--enable-debug"
 
 MISC="--with-clang-libdir=/usr/include
-      --with-opencl-libdir=\${libdir}/opencl:$HOME/fdo/mesa/mesa/lib/opencl"
+      --with-opencl-libdir=\${libdir}/opencl:$HOME/fdo/mesa/mesa/src/gallium/targets/pipe-loader"
 
 ./configure $APIS $DRIVERS $FEATURES $FLAGS $MISC $@ \
 	CC="ccache gcc" CXX="ccache g++" \

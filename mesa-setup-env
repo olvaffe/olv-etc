@@ -3,6 +3,6 @@ if [ -z "$MESA_SETUP_ENV" ]; then
 	MESA_SETUP_ENV=1
 	export LD_LIBRARY_PATH="$MESA_TOP/lib"
 	export EGL_DRIVERS_PATH="$MESA_TOP/lib/egl"
-	export LIBGL_DRIVERS_PATH="$MESA_TOP/lib:$MESA_TOP/lib/gallium"
+	export LIBGL_DRIVERS_PATH="$MESA_TOP/lib/gallium:$MESA_TOP/lib"
 	PS1="[mesa] $PS1"
 fi
