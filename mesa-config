@@ -11,14 +11,16 @@ APIS="--enable-opengl
 #APIS="$APIS --enable-opencl"
 
 FEATURES="--enable-gallium-egl
-          --enable-gallium-tests
           --with-egl-platforms=x11,null
           --enable-shared-glapi
           --enable-glx-tls
           --enable-texture-float"
 
+FEATURES="$FEATURES --disable-gallium-llvm"
+#FEATURES="$FEATURES --enable-gallium-tests"
+
 DRIVERS="--with-dri-drivers=i965,swrast
-         --with-gallium-drivers=swrast,i965"
+         --with-gallium-drivers=swrast,ilo"
 
 FLAGS="--enable-debug"
 
@@ -27,4 +29,4 @@ MISC="--with-clang-libdir=/usr/include
 
 ./configure $APIS $DRIVERS $FEATURES $FLAGS $MISC $@ \
 	CC="ccache gcc" CXX="ccache g++" \
-	CFLAGS="-O0" CXXFLAGS="-O0"
+	CFLAGS="-O0 -g" CXXFLAGS="-O0 -g"
