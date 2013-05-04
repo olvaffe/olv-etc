@@ -7,7 +7,8 @@
 	smtpserver = smtp.gmail.com
 	smtpuser = olvaffe@gmail.com
 	chainreplayto = no
-	suppresscc = author
+	confirm = auto
+	suppresscc = all
 	from = Chia-I Wu <olvaffe@gmail.com>
 
 [alias]
