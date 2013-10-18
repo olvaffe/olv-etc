@@ -49,7 +49,7 @@ alias ptt='ssh bbsu@ptt.cc'
 alias ptt2='ssh bbsu@ptt2.cc'
 
 # dpkg
-if which dpkg > /dev/null; then
+if which dpkg > /dev/null 2>&1; then
 	alias dl='dpkg -l'
 	alias dL='dpkg -L'
 	alias dg='dpkg -l | grep'
@@ -59,7 +59,7 @@ if which dpkg > /dev/null; then
 fi
 
 # apt-get/apt-cache
-if which apt-get > /dev/null; then
+if which apt-get > /dev/null 2>&1; then
 	alias aU='sudo apt-get update'
 	alias au='sudo apt-get upgrade'
 	alias adu='sudo apt-get dist-upgrade'

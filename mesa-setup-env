@@ -1,8 +1,12 @@
-if [ -z "$MESA_SETUP_ENV" ]; then
-	MESA_TOP="$HOME/fdo/mesa/mesa"
-	MESA_SETUP_ENV=1
-	export LD_LIBRARY_PATH="$MESA_TOP/lib"
-	export EGL_DRIVERS_PATH="$MESA_TOP/lib/egl"
-	export LIBGL_DRIVERS_PATH="$MESA_TOP/lib/gallium:$MESA_TOP/lib"
-	PS1="[mesa] $PS1"
+MESA_VARIANT=mesa
+MESA_TOP="$HOME/fdo/mesa/$MESA_VARIANT"
+
+export LD_LIBRARY_PATH="$MESA_TOP/lib"
+export EGL_DRIVERS_PATH="$MESA_TOP/lib/egl"
+export LIBGL_DRIVERS_PATH="$MESA_TOP/lib/gallium:$MESA_TOP/lib"
+
+if [ -z "$MESA_PS1" ]; then
+	MESA_PS1=$PS1
 fi
+
+PS1="[$MESA_VARIANT] $MESA_PS1"
