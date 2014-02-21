@@ -70,3 +70,5 @@ if which apt-get > /dev/null 2>&1; then
 	alias as='apt-cache show'
 	alias ap='apt-cache showpkg'
 fi
+
+alias y=ydict.js
