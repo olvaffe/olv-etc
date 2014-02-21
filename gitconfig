@@ -8,7 +8,8 @@
 	smtpuser = olvaffe@gmail.com
 	chainreplayto = no
 	confirm = auto
-	suppresscc = all
+	suppresscc = sob
+	suppresscc = self
 	from = Chia-I Wu <olvaffe@gmail.com>
 
 [alias]
