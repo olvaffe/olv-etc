@@ -8,6 +8,6 @@ cmake \
 	-DCMAKE_CXX_COMPILER="/usr/bin/ccache" \
 	-DCMAKE_CXX_COMPILER_ARG1="/usr/bin/g++" \
 	-DCMAKE_BUILD_TYPE=Debug \
-	-DCMAKE_C_FLAGS="-ggdb3 -O0" \
-	-DCMAKE_CXX_FLAGS="-ggdb3 -O0" \
+	-DCMAKE_C_FLAGS_DEBUG="-ggdb3 -O0" \
+	-DCMAKE_CXX_FLAGS_DEBUG="-ggdb3 -O0" \
 	$@
