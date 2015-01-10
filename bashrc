@@ -2,7 +2,6 @@
 [ -z "$PS1" ] && return
 
 PATH="$HOME/.local/bin"
-PATH="$PATH:$HOME/google/android-sdk-linux/tools:$HOME/google/android-ndk-r7"
 PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 PATH="$PATH:/usr/local/games:/usr/games"
 export PATH

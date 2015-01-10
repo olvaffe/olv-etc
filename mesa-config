@@ -3,7 +3,6 @@
 APIS="--enable-opengl
       --enable-gles1
       --enable-gles2
-      --enable-openvg
       --enable-egl
       --enable-dri
       --enable-glx
@@ -11,13 +10,12 @@ APIS="--enable-opengl
 
 #APIS="$APIS --enable-opencl"
 
-FEATURES="--enable-gallium-egl
-          --with-egl-platforms=x11,null
+FEATURES="--with-egl-platforms=x11,null
           --enable-shared-glapi
           --enable-glx-tls
           --enable-texture-float"
 
-#FEATURES="$FEATURES --disable-gallium-llvm"
+FEATURES="$FEATURES --disable-gallium-llvm"
 #FEATURES="$FEATURES --enable-gallium-tests"
 
 DRIVERS="--with-dri-drivers=i965,swrast
@@ -29,4 +27,4 @@ MISC="--with-clang-libdir=/usr/include
       --with-opencl-libdir=\${libdir}/opencl:$HOME/fdo/mesa/mesa/src/gallium/targets/pipe-loader"
 
 ./configure $APIS $DRIVERS $FEATURES $FLAGS $MISC $@ \
-	CC="ccache gcc" CXX="ccache g++"
+	CC="ccache gcc" CXX="ccache g++" CFLAGS="-g3 -O0" CXXFLAGS="-g3 -O0"
