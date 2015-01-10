@@ -1,0 +1,20 @@
+[general]
+accounts = Gmail
+
+[Account Gmail]
+localrepository = GmailLocal
+remoterepository = GmailRemote
+status_backend = sqlite
+maxage = 7
+
+[Repository GmailLocal]
+type = Maildir
+localfolders = ~/Mail/Gmail
+
+[Repository GmailRemote]
+type = Gmail
+sslcacertfile = /etc/ssl/certs/ca-certificates.crt
+remoteuser = olvaffe@gmail.com
+maxconnections = 2
+readonly = True
+folderfilter = lambda foldername: foldername in ['Inbox']
