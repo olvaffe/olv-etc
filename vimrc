@@ -34,6 +34,7 @@ au BufNewFile,BufRead SConstruct,SConscript :set ft=python
 " coding styles
 
 au FileType python set sw=4 sts=4 et
+au FileType cmake set sw=4 sts=4 et
 
 fun! Style4Spaces()
 	set sw=4 sts=4 et
