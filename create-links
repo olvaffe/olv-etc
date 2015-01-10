@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ETC=olv-etc
+ETC=~/olv-etc
 
 err() {
 	echo $@
@@ -14,12 +14,14 @@ err_if_exist() {
 }
 
 err_if_exist ~/.bashrc
-err_if_exist ~/.vimrc
 err_if_exist ~/.gitconfig
+err_if_exist ~/.offlineimaprc
+err_if_exist ~/.vimrc
 
 ln -sf "$ETC/bashrc" ~/.bashrc
-ln -sf "$ETC/vimrc" ~/.vimrc
 ln -sf "$ETC/gitconfig" ~/.gitconfig
+ln -sf "$ETC/offlineimaprc" ~/.offlineimaprc
+ln -sf "$ETC/vimrc" ~/.vimrc
 
 ln -sf "$ETC/mesa-config" ~/fdo/mesa/mesa
 ln -sf "$ETC/mesa-setup-env" ~/fdo/mesa/mesa
