@@ -17,11 +17,13 @@ err_if_exist ~/.bashrc
 err_if_exist ~/.gitconfig
 err_if_exist ~/.offlineimaprc
 err_if_exist ~/.vimrc
+err_if_exist ~/.i3/config
 
 ln -sf "$ETC/bashrc" ~/.bashrc
 ln -sf "$ETC/gitconfig" ~/.gitconfig
 ln -sf "$ETC/offlineimaprc" ~/.offlineimaprc
 ln -sf "$ETC/vimrc" ~/.vimrc
+ln -sf "$ETC/i3-config" ~/.i3/config
 
 ln -sf "$ETC/mesa-config" ~/fdo/mesa/mesa
 ln -sf "$ETC/mesa-setup-env" ~/fdo/mesa/mesa
