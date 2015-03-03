@@ -1,6 +1,9 @@
-xterm*background: black
-xterm*foreground: gray
-xterm*faceName: monospace:size=16
-xterm*faceNameDoublesize: Noto Sans CJK TC:size=16
-xterm*saveLines: 2000
-xterm*utf8: always
+XTerm*background: black
+XTerm*foreground: gray
+XTerm*faceName: monospace:size=16
+XTerm*faceNameDoublesize: Noto Sans CJK TC:size=16
+XTerm*saveLines: 5000
+XTerm*utf8: always
+XTerm*charClass: 33:48,36-47:48,58-59:48,61:48,63-64:48,95:48,126:48
+XTerm*selectToClipboard: 1
+XTerm*VT100*translations: #override Alt <Btn1Up>: exec-formatted("xdg-open '%t'", CLIPBOARD)
