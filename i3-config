@@ -18,7 +18,7 @@ set $mod Mod4
 # clear in small sizes. However, if you need a lot of unicode glyphs or
 # right-to-left text rendering, you should instead use pango for rendering and
 # chose a FreeType font, such as:
-font pango:DejaVu Sans Mono 10
+font pango:monospace:size=16
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -154,6 +154,7 @@ bar {
 #exec --no-startup-id gnome-screensaver
 exec --no-startup-id synclient VertEdgeScroll=1 TouchpadOff=0
 exec --no-startup-id nm-applet
+exec --no-startup-id ibus-daemon -d -x
 
 new_window pixel 2
 
