@@ -1,0 +1,6 @@
+xterm*background: black
+xterm*foreground: gray
+xterm*faceName: monospace:size=16
+xterm*faceNameDoublesize: Noto Sans CJK TC:size=16
+xterm*saveLines: 2000
+xterm*utf8: always
