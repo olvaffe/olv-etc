@@ -71,3 +71,6 @@ if which apt-get > /dev/null 2>&1; then
 fi
 
 alias y=ydict.js
+
+alias vi=vim
+export EDITOR=vim

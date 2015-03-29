@@ -1,9 +1,11 @@
 XTerm*background: black
 XTerm*foreground: gray
-XTerm*faceName: monospace:size=16
-XTerm*faceNameDoublesize: Noto Sans CJK TC:size=16
-XTerm*saveLines: 5000
+XTerm*faceName: monospace
+XTerm*faceNameDoublesize: Noto Sans CJK TC
+XTerm*faceSize: 16
+XTerm*saveLines: 16384
+!XTerm*scrollTtyOutput: false
 XTerm*utf8: always
-XTerm*charClass: 33:48,36-47:48,58-59:48,61:48,63-64:48,95:48,126:48
+XTerm*charClass: 33:48,36-38:48,43-47:48,58:48,61:48,63-64:48,126:48
 XTerm*selectToClipboard: 1
 XTerm*VT100*translations: #override Alt <Btn1Up>: exec-formatted("xdg-open '%t'", CLIPBOARD)
