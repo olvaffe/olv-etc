@@ -36,13 +36,12 @@ au BufNewFile,BufRead SConstruct,SConscript :set ft=python
 au FileType python set sw=4 sts=4 et
 au FileType cmake set sw=4 sts=4 et
 
-fun! Style4Spaces()
-	set sw=4 sts=4 et
-endfun
-au BufNewFile,BufRead ~/projects/apitrace/*.[ch]pp :call Style4Spaces()
-au BufNewFile,BufRead ~/google/gingerbread*/*.[ch],~/google/gingerbread*/*.cpp :call Style4Spaces()
-
 fun! Style3Spaces()
 	set sw=3 sts=3 et
 endfun
+
+fun! Style4Spaces()
+	set sw=4 sts=4 et
+endfun
+
 au BufNewFile,BufRead ~/*/mesa/*.[ch],~/*/mesa/*.cpp :call Style3Spaces()
