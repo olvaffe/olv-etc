@@ -152,7 +152,7 @@ bar {
 
 #exec --no-startup-id gnome-settings-daemon
 #exec --no-startup-id gnome-screensaver
-exec --no-startup-id synclient VertEdgeScroll=1 TouchpadOff=0
+exec --no-startup-id synclient TouchpadOff=0 ClickPad=1
 exec --no-startup-id nm-applet
 exec --no-startup-id ibus-daemon -d -x
 
@@ -160,11 +160,11 @@ new_window pixel 2
 
 
 # Pulse Audio controls
-bindsym XF86AudioRaiseVolume exec pactl set-sink-volume 0 +5%
-bindsym XF86AudioLowerVolume exec pactl set-sink-volume 0 -- -5%
-bindsym XF86AudioMute exec pactl set-sink-mute 0 toggle # mute sound
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume 1 +5%
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume 1 -5%
+bindsym XF86AudioMute exec pactl set-sink-mute 1 toggle # mute sound
 
 # Sreen brightness controls
-#bindsym XF86MonBrightnessUp exec xbacklight -inc 20
-#bindsym XF86MonBrightnessDown exec xbacklight -dec 20
+bindsym XF86MonBrightnessUp exec xbacklight -inc 20
+bindsym XF86MonBrightnessDown exec xbacklight -dec 20
 
