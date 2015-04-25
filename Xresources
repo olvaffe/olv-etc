@@ -1,7 +1,7 @@
 XTerm*background: black
 XTerm*foreground: gray
-XTerm*faceName: monospace
-XTerm*faceNameDoublesize: Noto Sans CJK TC
+XTerm*faceName: Inconsolata
+XTerm*faceNameDoublesize: monospace:lang=zh-tw
 XTerm*faceSize: 16
 XTerm*saveLines: 16384
 !XTerm*scrollTtyOutput: false
