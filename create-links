@@ -1,29 +1,30 @@
 #!/bin/sh
 
-ETC=~/olv-etc
+ETC=$HOME/olv-etc
+DST=$HOME
 
-err() {
-	echo $@
-	exit 1
-}
+install() {
+	if [ -h "$2" -a "$1" = "`readlink $2`" ]; then
+		return
+	elif [ -f "$2" ]; then
+		echo "$2 already exists"
+		return
+	fi
 
-err_if_exist() {
-	if [ -f "$1" ]; then
-		err "$1 already exists"
+	if mkdir -p "`dirname $2`" && ln -s "$1" "$2"; then
+		echo "`basename $1` installed"
 	fi
 }
 
-err_if_exist ~/.bashrc
-err_if_exist ~/.gitconfig
-err_if_exist ~/.offlineimaprc
-err_if_exist ~/.vimrc
-err_if_exist ~/.i3/config
+install "$ETC/bashrc" "$DST/.bashrc"
+install "$ETC/gitconfig" "$DST/.gitconfig"
+install "$ETC/i3-config" "$DST/.config/i3/config"
+install "$ETC/i3status-config" "$DST/.config/i3status/config"
+install "$ETC/msmtprc" "$DST/.msmtprc"
+install "$ETC/offlineimaprc" "$DST/.offlineimaprc"
+install "$ETC/vimrc" "$DST/.vimrc"
+install "$ETC/xinitrc" "$DST/.xinitrc"
+install "$ETC/Xresources" "$DST/.Xresources"
 
-ln -sf "$ETC/bashrc" ~/.bashrc
-ln -sf "$ETC/gitconfig" ~/.gitconfig
-ln -sf "$ETC/offlineimaprc" ~/.offlineimaprc
-ln -sf "$ETC/vimrc" ~/.vimrc
-ln -sf "$ETC/i3-config" ~/.i3/config
-
-ln -sf "$ETC/mesa-config" ~/fdo/mesa/mesa
-ln -sf "$ETC/mesa-setup-env" ~/fdo/mesa/mesa
+install "$ETC/mesa-config" "$DST/fdo/mesa/mesa/mesa-config"
+install "$ETC/mesa-setup-env" "$DST/fdo/mesa/mesa/mesa-setup-env"
