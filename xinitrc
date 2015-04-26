@@ -11,13 +11,17 @@ fi
 
 export NO_AT_BRIDGE=1
 
-export GTK_IM_MODULE=ibus
-export XMODIFIERS=@im=ibus
-export QT_IM_MODULE=ibus
-
 eval $(gnome-keyring-daemon --start)
 export SSH_AUTH_SOCK
 
+export GTK_IM_MODULE=ibus
+export XMODIFIERS=@im=ibus
+export QT_IM_MODULE=ibus
+ibus-daemon -d -x
+
+nm-applet &
+
 xrdb -merge ~/.Xresources
+synclient TouchpadOff=0 ClickPad=1
 
 exec i3
