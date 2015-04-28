@@ -22,6 +22,7 @@ ibus-daemon -d -x
 nm-applet &
 
 xrdb -merge ~/.Xresources
-synclient TouchpadOff=0 ClickPad=1
+
+xinput set-prop "DLL0665:01 06CB:76AD UNKNOWN" "libinput Tapping Enabled" 1
 
 exec i3
