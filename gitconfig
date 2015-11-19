@@ -15,8 +15,5 @@
 [push]
 	default = simple
 
-[url "ssh://olv@apollo/"]
-	insteadOf = ssh://apollo/
-
 [url "ssh://olv@git.freedesktop.org/"]
 	insteadOf = ssh://git.freedesktop.org/

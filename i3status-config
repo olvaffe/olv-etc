@@ -7,7 +7,8 @@ order += "cpu_temperature 1"
 order += "battery 0"
 order += "volume master"
 order += "path_exists VPN"
-order += "tztime fc"
+order += "tztime BLD"
+order += "tztime MTV"
 order += "time"
 
 cpu_usage {
@@ -32,11 +33,15 @@ path_exists VPN {
 	path = "/proc/sys/net/ipv4/conf/tun0"
 }
 
-tztime fc {
+tztime BLD {
 	timezone = America/Denver
-	format = "FC: %H:%M"
+	format = "BLD: %H:%M"
 }
 
+tztime MTV {
+	timezone = America/Los_Angeles
+	format = "MTV: %H:%M"
+}
 
 time {
 	format = "%Y-%m-%d %H:%M"

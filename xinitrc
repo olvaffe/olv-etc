@@ -23,6 +23,12 @@ nm-applet &
 
 xrdb -merge ~/.Xresources
 
-xinput set-prop "DLL0665:01 06CB:76AD UNKNOWN" "libinput Tapping Enabled" 1
+product_version="/sys/devices/virtual/dmi/id/product_version"
+if grep -q Carbon $product_version; then
+	xrandr --dpi 144
+	gnome-screensaver &
+else
+	xinput set-prop "DLL0665:01 06CB:76AD UNKNOWN" "libinput Tapping Enabled" 1
+fi
 
 exec i3
