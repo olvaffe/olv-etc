@@ -16,6 +16,7 @@ install() {
 	fi
 }
 
+install "$ETC/bash_aliases" "$DST/.bash_aliases"
 install "$ETC/bashrc" "$DST/.bashrc"
 install "$ETC/gitconfig" "$DST/.gitconfig"
 install "$ETC/i3-config" "$DST/.config/i3/config"
