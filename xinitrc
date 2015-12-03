@@ -23,8 +23,8 @@ nm-applet &
 
 xrdb -merge ~/.Xresources
 
-product_version="/sys/devices/virtual/dmi/id/product_version"
-if grep -q Carbon $product_version; then
+dmi_id="/sys/devices/virtual/dmi/id"
+if grep -q Carbon "$dmi_id/product_version"; then
 	xrandr --dpi 144
 	gnome-screensaver &
 else
