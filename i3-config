@@ -157,6 +157,7 @@ new_window pixel 2
 bindsym XF86AudioRaiseVolume exec pactl set-sink-volume 1 +5%
 bindsym XF86AudioLowerVolume exec pactl set-sink-volume 1 -5%
 bindsym XF86AudioMute exec pactl set-sink-mute 1 toggle # mute sound
+bindsym XF86AudioMicMute exec pactl set-source-mute 2 toggle # mute mic
 
 # Sreen brightness controls
 bindsym XF86MonBrightnessUp exec xbacklight -inc 20
