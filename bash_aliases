@@ -6,6 +6,7 @@ alias l='less'
 alias gg='git grep --color'
 alias sg='grep --exclude-dir=.svn --exclude-dir=.git -R'
 
+# PTT
 alias ptt='ssh bbsu@ptt.cc'
 alias ptt2='ssh bbsu@ptt2.cc'
 
