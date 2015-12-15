@@ -26,19 +26,21 @@ set tags=./tags;
 set cino=:0,l1,t0,W1
 let c_space_errors=1
 
-nmap <F5>  :make<CR>
+nmap <F5> :make<CR>
 
-fun! Style3Spaces()
-	set sw=3 sts=3 et
+au BufNewFile,BufRead SConstruct,SConscript :setl ft=python
+
+au FileType python,cmake :setl sw=4 sts=4 et
+au FileType vim :setl sw=2 sts=2
+au FileType c,cpp :call ApplyCStyles()
+fun! ApplyCStyles()
+  let path = expand("%:p")
+
+  " Mesa
+  if path =~ "/mesa"
+    setl sw=3 sts=3 et
+  " Khronos
+  elseif path =~ "/khronos"
+    setl sw=4 sts=4 et
+  endif
 endfun
-
-fun! Style4Spaces()
-	set sw=4 sts=4 et
-endfun
-
-au BufNewFile,BufRead SConstruct,SConscript :set ft=python
-
-au FileType python :call Style4Spaces()
-au FileType cmake :call Style4Spaces()
-
-au BufNewFile,BufRead ~/*/mesa/*.[ch],~/*/mesa/*.cpp :call Style3Spaces()
