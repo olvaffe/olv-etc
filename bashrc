@@ -1,4 +1,4 @@
-[[ -z $DISPLAY && $XDG_VTNR -le 3 ]] && exec startx
+[[ -z $DISPLAY && -n $XDG_VTNR && $XDG_VTNR -le 3 ]] && exec startx
 
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
