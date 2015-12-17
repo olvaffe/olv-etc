@@ -6,7 +6,7 @@ order += "cpu_usage"
 order += "cpu_temperature 1"
 order += "battery 0"
 order += "volume master"
-order += "path_exists VPN"
+#order += "path_exists VPN"
 order += "tztime BLD"
 order += "tztime MTV"
 order += "time"
@@ -15,15 +15,17 @@ cpu_usage {
 	format ="CPU: %usage"
 }
 
+# /sys/class/thermal/thermal_zone%d
 cpu_temperature 1 {
 	format = "T: %degrees °C"
 }
 
+# /sys/class/power_supply/BAT%d
 battery 0 {
 	format = "%status %percentage"
 }
 
-volume master  {
+volume master {
 	device = "hw:1"
 	mixer = "Master"
 	format = "♪: %volume"
