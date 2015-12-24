@@ -30,6 +30,7 @@ nmap <F5> :make<CR>
 
 au BufNewFile,BufRead SConstruct,SConscript :setl ft=python
 
+au FileType gitcommit :setl tw-=4
 au FileType python,cmake :setl sw=4 sts=4 et
 au FileType vim :setl sw=2 sts=2
 au FileType c,cpp :call ApplyCStyles()
