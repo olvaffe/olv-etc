@@ -1,3 +1,6 @@
+[core]
+	editor = vim
+
 [user]
 	name = Chia-I Wu
 	email = olvaffe@gmail.com

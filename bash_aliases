@@ -2,6 +2,8 @@
 alias g='grep'
 alias l='less'
 
+alias vi=vim
+
 # source control
 alias gg='git grep --color'
 alias sg='grep --exclude-dir=.svn --exclude-dir=.git -R'
@@ -32,8 +34,3 @@ if which apt-get > /dev/null 2>&1; then
 	alias as='apt-cache show'
 	alias ap='apt-cache showpkg'
 fi
-
-alias y=ydict.js
-
-alias vi=vim
-export EDITOR=vim
