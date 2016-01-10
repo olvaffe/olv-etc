@@ -1,4 +1,5 @@
 adobe-source-han-sans-otc-fonts
+alsa-utils
 autoconf
 automake
 bash
@@ -15,6 +16,7 @@ cryptsetup
 ctags
 device-mapper
 dhcpcd
+dia
 dialog
 diffstat
 diffutils
@@ -39,6 +41,7 @@ gcc-libs
 gdb
 gedit
 gettext
+gimp
 git
 glew
 glibc
@@ -46,9 +49,9 @@ glm
 glproto
 gnome-keyring
 google-chrome
+gptfdisk
 grep
 groff
-gummiboot
 gzip
 hdparm
 i3-wm
@@ -58,6 +61,7 @@ ibus
 ibus-chewing
 imagemagick
 inetutils
+intel-gpu-tools
 iproute2
 iputils
 iw
@@ -76,9 +80,11 @@ man-db
 man-pages
 mdadm
 mlocate
+mplayer
 nano
 net-tools
 netctl
+nethogs
 network-manager-applet
 networkmanager
 networkmanager-openvpn
@@ -87,6 +93,7 @@ openssh
 openvpn
 package-query
 pacman
+pahole
 patch
 pavucontrol
 pciutils
@@ -103,17 +110,22 @@ presentproto
 procps-ng
 psmisc
 pulseaudio
+pulseaudio-alsa
+python-lxml
 python-mako
 python-numpy
 python2-mako
 python2-numpy
+python2-six
 qt5-svg
 rfkill
+rsync
 s-nail
 sed
 shadow
 sl
 sshfs
+strace
 subversion
 sudo
 sysfsutils
@@ -134,7 +146,7 @@ vim
 wget
 which
 wpa_supplicant
-xf86-input-synaptics
+xf86-input-libinput
 xf86-video-intel
 xorg-server
 xorg-server-devel
