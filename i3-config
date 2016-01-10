@@ -125,3 +125,5 @@ bindsym XF86AudioMicMute exec pactl set-source-mute 2 toggle # mute mic
 # Sreen brightness controls
 bindsym XF86MonBrightnessUp exec xbacklight -inc 20
 bindsym XF86MonBrightnessDown exec xbacklight -dec 20
+
+bindsym $mod+c exec xdg-screensaver lock
