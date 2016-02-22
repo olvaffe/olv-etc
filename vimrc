@@ -41,8 +41,8 @@ fun! ApplyCStyles()
   " Mesa
   if path =~ "/mesa"
     setl sw=3 sts=3 et
-  " Khronos
-  elseif path =~ "/khronos"
+  " Vulkan
+  elseif path =~ "/vulkan"
     setl sw=4 sts=4 et
   endif
 endfun
