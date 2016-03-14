@@ -1,11 +1,23 @@
-ANDROID_PRODUCT="angler"
-ANDROID_BUILD_VARIANT="eng"
+ANDROID_ENVSETUP="build/envsetup.sh"
 
-. build/envsetup.sh
-lunch ${ANDROID_PRODUCT}-${ANDROID_BUILD_VARIANT}
+if [ -r "$ANDROID_ENVSETUP" ]; then
+	ANDROID_PRODUCT="aosp_arm"
+	ANDROID_BUILD_VARIANT="eng"
 
-if [ -z "$ANDROID_PS1" ]; then
-	ANDROID_PS1=$PS1
+	. "$ANDROID_ENVSETUP"
+	lunch "$ANDROID_PRODUCT-$ANDROID_BUILD_VARIANT"
+
+	if [ -z "$ANDROID_PS1" ]; then
+		ANDROID_PS1=$PS1
+	fi
+
+	PS1="[$ANDROID_PRODUCT] $ANDROID_PS1"
+
+	function mmmakefile()
+	{
+		local T=$(gettop)
+		local M=$(findmakefile | sed s/$T\///)
+		echo "all:"
+		echo -e "\tONE_SHOT_MAKEFILE=$M make -C $T -f build/core/main.mk all_modules $@"
+	}
 fi
-
-PS1="[$ANDROID_PRODUCT] $ANDROID_PS1"

@@ -42,7 +42,10 @@ fun! ApplyCStyles()
   if path =~ "/mesa"
     setl sw=3 sts=3 et
   " Vulkan
-  elseif path =~ "/vulkan"
+  elseif path =~ "olv/vulkan"
+    setl sw=4 sts=4 et
+  " Android
+  elseif path =~ "/android"
     setl sw=4 sts=4 et
   endif
 endfun
