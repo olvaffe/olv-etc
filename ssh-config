@@ -1,0 +1,5 @@
+Host multiplexed
+	HostName multiplexed
+	ControlMaster auto
+	ControlPath ~/.ssh/control-%r@%h:%p
+	ControlPersist yes
