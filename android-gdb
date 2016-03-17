@@ -1,0 +1,20 @@
+#!/bin/sh
+
+PORT=1234
+
+if [ -z "$ANDROID_PRODUCT_OUT"]; then
+	echo "environment not set up"
+	exit 1
+fi
+
+SYSROOT="$ANDROID_PRODUCT_OUT/symbols"
+LIBPATHS="system/lib:vendor/lib:vendor/lib/hw:vendor/lib/egl"
+LIBPATHS64="system/lib64:vendor/lib64:vendor/lib64/hw:vendor/lib64/egl"
+
+adb forward tcp:$PORT tcp:$PORT
+
+$ANDROID_BUILD_TOP/prebuilts/gdb/linux-x86/bin/gdb \
+	-ex "set solib-absolute-prefix $ANDROID_PRODUCT_OUT/symbols" \
+	-ex "set solib-search-path $LIBPATHS64:$LIBPATHS" \
+	-ex "target remote :$PORT" \
+	$@
