@@ -18,6 +18,6 @@ if [ -r "$ANDROID_ENVSETUP" ]; then
 		local T=$(gettop)
 		local M=$(findmakefile | sed s,$T/,,)
 		echo "all:"
-		echo -e "\tONE_SHOT_MAKEFILE=$M $(MAKE) -C $T -f build/core/main.mk all_modules"
+		echo -e "\tONE_SHOT_MAKEFILE=$M \$(MAKE) -C $T -f build/core/main.mk all_modules"
 	}
 fi
