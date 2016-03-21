@@ -2,7 +2,7 @@
 
 PORT=1234
 
-if [ -z "$ANDROID_PRODUCT_OUT"]; then
+if [ -z "$ANDROID_PRODUCT_OUT" ]; then
 	echo "environment not set up"
 	exit 1
 fi
