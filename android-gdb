@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# useful for commandline tools; use development/scripts/gdbclient for
+# regular applications
+
 PORT=1234
 
 if [ -z "$ANDROID_PRODUCT_OUT" ]; then

@@ -1,23 +1,36 @@
-ANDROID_ENVSETUP="build/envsetup.sh"
+if [ -z "$MY_ANDROID_PS1" ]; then
+	MY_ANDROID_PS1=$PS1
+fi
 
-if [ -r "$ANDROID_ENVSETUP" ]; then
-	ANDROID_PRODUCT="aosp_arm"
-	ANDROID_BUILD_VARIANT="eng"
+my_android_setup_env()
+{
+	local ANDROID_ENVSETUP="build/envsetup.sh"
+	local ANDROID_BUILD_VARIANT="eng"
 
-	. "$ANDROID_ENVSETUP"
-	lunch "$ANDROID_PRODUCT-$ANDROID_BUILD_VARIANT"
-
-	if [ -z "$ANDROID_PS1" ]; then
-		ANDROID_PS1=$PS1
+	if [ ! -r "$ANDROID_ENVSETUP" ]; then
+		echo "Cannot find $ANDROID_ENVSETUP"
+		return 1
 	fi
 
-	PS1="[$ANDROID_PRODUCT] $ANDROID_PS1"
+	# get product
+	local product=`basename $BASH_SOURCE -setup-env`
+	if [ "$product" = "android" ]; then
+		product="aosp_arm"
+	fi
 
-	function mmmakefile()
+	. "$ANDROID_ENVSETUP"
+	lunch "$product-$ANDROID_BUILD_VARIANT"
+
+	PS1="[$product] $MY_ANDROID_PS1"
+
+	mmmakefile()
 	{
 		local T=$(gettop)
 		local M=$(findmakefile | sed s,$T/,,)
 		echo "all:"
 		echo -e "\tONE_SHOT_MAKEFILE=$M \$(MAKE) -C $T -f build/core/main.mk all_modules"
 	}
-fi
+}
+
+my_android_setup_env
+unset my_android_setup_env
