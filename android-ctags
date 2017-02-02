@@ -1,0 +1,14 @@
+#!/bin/sh
+
+PROJECTS="
+	bionic
+	system/core
+	system/libfmq
+	system/libhidl
+	system/libhwbinder
+	system/libvintf
+	frameworks/base/libs
+	frameworks/base/core/jni
+	frameworks/native"
+
+ctags -R $PROJECTS

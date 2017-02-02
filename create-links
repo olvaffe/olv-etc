@@ -28,5 +28,5 @@ install "$ETC/vimrc" "$DST/.vimrc"
 install "$ETC/xinitrc" "$DST/.xinitrc"
 install "$ETC/Xresources" "$DST/.Xresources"
 
-install "$ETC/mesa-config" "$DST/fdo/mesa/mesa/mesa-config"
-install "$ETC/mesa-setup-env" "$DST/fdo/mesa/mesa/mesa-setup-env"
+#install "$ETC/mesa-config" "$DST/fdo/mesa/mesa/mesa-config"
+#install "$ETC/mesa-setup-env" "$DST/fdo/mesa/mesa/mesa-setup-env"

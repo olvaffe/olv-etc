@@ -25,10 +25,19 @@ my_android_setup_env()
 
 	mmmakefile()
 	{
-		local T=$(gettop)
-		local M=$(findmakefile | sed s,$T/,,)
-		echo "all:"
-		echo -e "\tONE_SHOT_MAKEFILE=$M \$(MAKE) -C $T -f build/core/main.mk all_modules"
+		#local T=$(gettop)
+		#local M=$(findmakefile | sed s,$T/,,)
+		#echo "all:"
+		#echo -e "\tONE_SHOT_MAKEFILE=$M \$(MAKE) -C $T -f build/core/main.mk all_modules"
+
+		local T=$(gettop);
+		local DRV=$(getdriver $T);
+		local M=$(findmakefile);
+		local M=`echo $M|sed 's:'$T'/::'`;
+		local MODULES=MODULES-IN-$(dirname ${M});
+		local MODULES=${MODULES//\//-};
+		echo "all:";
+		echo -e "\tONE_SHOT_MAKEFILE=$M $DRV \$(MAKE) -C $T -f build/core/main.mk $MODULES"
 	}
 }
 
