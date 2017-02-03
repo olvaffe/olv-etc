@@ -8,7 +8,7 @@ order += "battery 0"
 order += "volume master"
 #order += "path_exists VPN"
 order += "tztime BLD"
-order += "tztime MTV"
+order += "tztime TPE"
 order += "time"
 
 cpu_usage {
@@ -40,9 +40,9 @@ tztime BLD {
 	format = "BLD: %H:%M"
 }
 
-tztime MTV {
-	timezone = America/Los_Angeles
-	format = "MTV: %H:%M"
+tztime TPE {
+	timezone = Asia/Taipei
+	format = "TPE: %H:%M"
 }
 
 time {

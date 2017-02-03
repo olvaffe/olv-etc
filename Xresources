@@ -2,7 +2,7 @@ XTerm*background: black
 XTerm*foreground: gray
 XTerm*faceName: Inconsolata
 XTerm*faceNameDoublesize: monospace:lang=zh-tw
-XTerm*faceSize: 16
+XTerm*faceSize: 18
 XTerm*saveLines: 16384
 !XTerm*scrollTtyOutput: false
 XTerm*utf8: always

@@ -26,6 +26,7 @@ install "$ETC/offlineimaprc" "$DST/.offlineimaprc"
 install "$ETC/ssh-config" "$DST/.ssh/config"
 install "$ETC/vimrc" "$DST/.vimrc"
 install "$ETC/xinitrc" "$DST/.xinitrc"
+install "$ETC/xinitrc" "$DST/.Xsession"
 install "$ETC/Xresources" "$DST/.Xresources"
 
 #install "$ETC/mesa-config" "$DST/fdo/mesa/mesa/mesa-config"
