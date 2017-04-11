@@ -1,8 +1,5 @@
 #!/bin/sh
 
-SCRIPT="repo-upload"
-PRODUCT=`basename $BASH_SOURCE -$SCRIPT`
-
 PROJECTS="
 	frameworks/native
 	hardware/interfaces"
