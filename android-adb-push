@@ -1,0 +1,30 @@
+#!/bin/sh
+
+SCRIPT="adb-push"
+PRODUCT=`basename $BASH_SOURCE -$SCRIPT`
+
+OUT="out/target/product/$PRODUCT"
+FILES=""
+
+# system/core
+#FILES="$FILES system/lib64/libcutils.so"
+#FILES="$FILES system/lib/libcutils.so"
+
+# HIDL
+#FILES="$FILES system/bin/hwservicemanager"
+#FILES="$FILES system/lib64/libhidltransport.so"
+#FILES="$FILES system/lib/libhidltransport.so"
+#FILES="$FILES system/lib64/android.hidl.manager@1.0.so"
+#FILES="$FILES system/lib/android.hidl.manager@1.0.so"
+
+# frameworks/native
+#FILES="$FILES system/lib64/libsurfaceflinger.so"
+#FILES="$FILES system/lib/libsurfaceflinger.so"
+#FILES="$FILES system/lib64/libgui.so"
+#FILES="$FILES system/lib/libgui.so"
+#FILES="$FILES system/lib64/libui.so"
+#FILES="$FILES system/lib/libui.so"
+
+for f in $FILES; do
+	adb push "$OUT/$f" "$f"
+done

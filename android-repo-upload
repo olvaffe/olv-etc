@@ -1,0 +1,17 @@
+#!/bin/sh
+
+SCRIPT="repo-upload"
+PRODUCT=`basename $BASH_SOURCE -$SCRIPT`
+
+PROJECTS="
+	frameworks/native
+	hardware/interfaces"
+
+for i in $PROJECTS; do
+	echo $i
+	#(cd $i; git revert HEAD)
+	#(cd $i; git reset --hard HEAD^)
+done
+
+#repo upload -t --br=blah $RPOJECTS
+#repo prune $RPOJECTS

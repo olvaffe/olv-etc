@@ -2,6 +2,8 @@
 
 PROJECTS="
 	bionic
+	hardware/interfaces
+	hardware/libhardware
 	system/core
 	system/libfmq
 	system/libhidl
