@@ -46,5 +46,5 @@ tztime TPE {
 }
 
 time {
-	format = "%Y-%m-%d %H:%M"
+	format = "%m-%d-%Y %H:%M"
 }
