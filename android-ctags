@@ -4,11 +4,13 @@ PROJECTS="
 	bionic
 	hardware/interfaces
 	hardware/libhardware
+	out/soong/.intermediates/hardware/interfaces/graphics/
 	system/core
 	system/libfmq
 	system/libhidl
 	system/libhwbinder
 	system/libvintf
+	frameworks/av
 	frameworks/base/libs
 	frameworks/base/core/jni
 	frameworks/native"

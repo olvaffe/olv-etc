@@ -11,8 +11,8 @@ if [ -z "$ANDROID_PRODUCT_OUT" ]; then
 fi
 
 SYSROOT="$ANDROID_PRODUCT_OUT/symbols"
-LIBPATHS="system/lib:vendor/lib:vendor/lib/hw:vendor/lib/egl"
-LIBPATHS64="system/lib64:vendor/lib64:vendor/lib64/hw:vendor/lib64/egl"
+LIBPATHS="system/lib:system/lib/vndk-sp:vendor/lib:vendor/lib/hw:vendor/lib/egl"
+LIBPATHS64="system/lib64:system/lib64/vndk-sp:vendor/lib64:vendor/lib64/hw:vendor/lib64/egl"
 
 adb forward tcp:$PORT tcp:$PORT
 

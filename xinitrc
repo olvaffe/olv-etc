@@ -22,6 +22,7 @@ if [ `basename "$0"` = ".xinitrc" ]; then
 fi
 
 nm-applet &
+xautolock -time 5 -locker "i3lock -c 000000" &
 
 xrdb -merge ~/.Xresources
 

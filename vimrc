@@ -29,9 +29,11 @@ let c_space_errors=1
 nmap <F5> :make<CR>
 
 au BufNewFile,BufRead SConstruct,SConscript :setl ft=python
+au BufNewFile,BufRead Android.bp :setl ft=go
+au BufNewFile,BufRead *.hal :setl ft=cpp
 
 au FileType gitcommit :setl tw-=4
-au FileType python,cmake,groovy :setl sw=4 sts=4 et
+au FileType python,cmake,groovy,java :setl sw=4 sts=4 et
 au FileType vim :setl sw=2 sts=2
 
 au FileType c,cpp :call ApplyCStyles()

@@ -25,6 +25,22 @@ FILES=""
 #FILES="$FILES system/lib64/libui.so"
 #FILES="$FILES system/lib/libui.so"
 
+# Common
+#FILES="$FILES system/lib64/android.hardware.graphics.common@1.0.so"
+#FILES="$FILES system/lib/android.hardware.graphics.common@1.0.so"
+
+# IComposer
+#FILES="$FILES system/lib64/android.hardware.graphics.composer@2.1.so"
+#FILES="$FILES system/lib/android.hardware.graphics.composer@2.1.so"
+
+# IMapper
+#FILES="$FILES system/lib64/android.hardware.graphics.mapper@2.0.so"
+#FILES="$FILES system/lib/android.hardware.graphics.mapper@2.0.so"
+
+# IAllocator
+#FILES="$FILES system/lib64/android.hardware.graphics.allocator@2.0.so"
+#FILES="$FILES system/lib/android.hardware.graphics.allocator@2.0.so"
+
 for f in $FILES; do
 	adb push "$OUT/$f" "$f"
 done
