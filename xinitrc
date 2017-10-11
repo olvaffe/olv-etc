@@ -1,5 +1,6 @@
 #!/bin/sh
 
+export GDK_SCALE=2
 export NO_AT_BRIDGE=1
 
 if [ `basename "$0"` = ".xinitrc" ]; then
@@ -22,14 +23,13 @@ if [ `basename "$0"` = ".xinitrc" ]; then
 fi
 
 nm-applet &
-xautolock -time 5 -locker "i3lock -c 000000" &
 
 xrdb -merge ~/.Xresources
 
 dmi_id="/sys/devices/virtual/dmi/id"
 if grep -q Carbon "$dmi_id/product_version"; then
-	xrandr --dpi 144
-	gnome-screensaver &
+	xrandr --dpi 192
+	cinnamon-screensaver &
 elif grep -q "XPS 13" "$dmi_id/product_name"; then
 	xinput set-prop "DLL0665:01 06CB:76AD UNKNOWN" "libinput Tapping Enabled" 1
 fi
