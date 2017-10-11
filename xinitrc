@@ -23,13 +23,16 @@ if [ `basename "$0"` = ".xinitrc" ]; then
 fi
 
 nm-applet &
+xautolock -time 5 -locker "i3lock -c 000000" &
 
 xrdb -merge ~/.Xresources
 
 dmi_id="/sys/devices/virtual/dmi/id"
 if grep -q Carbon "$dmi_id/product_version"; then
 	xrandr --dpi 192
-	cinnamon-screensaver &
+
+	xinput set-prop "SynPS/2 Synaptics TouchPad" "libinput Tapping Enabled" 1
+	xinput set-prop "SynPS/2 Synaptics TouchPad" "libinput Horizontal Scroll Enabled" 0
 elif grep -q "XPS 13" "$dmi_id/product_name"; then
 	xinput set-prop "DLL0665:01 06CB:76AD UNKNOWN" "libinput Tapping Enabled" 1
 fi
