@@ -1,22 +1,17 @@
-[[ -z $DISPLAY && -n $XDG_VTNR && $XDG_VTNR -le 3 ]] && exec startx
-
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
+
+[[ -z $DISPLAY && -n $XDG_VTNR && $XDG_VTNR -le 1 ]] && exec startx
 
 PATH="$HOME/.local/bin"
 PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 PATH="$PATH:/usr/local/games:/usr/games"
 export PATH
 
-# ignoredups and ignorespace
-HISTCONTROL=ignoreboth
-
-# append to the history file, don't overwrite it
-shopt -s histappend
-
-# check the window size after each command and, if necessary,
-# update the values of LINES and COLUMNS.
 shopt -s checkwinsize
+
+HISTCONTROL=ignoredups
+shopt -s histappend
 
 PS1='\u@\h:\w\$ '
 
@@ -37,6 +32,6 @@ if [ -x /usr/bin/dircolors ]; then
 fi
 
 # Alias definitions.
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
+if [ -f $HOME/.bash_aliases ]; then
+    . $HOME/.bash_aliases
 fi
