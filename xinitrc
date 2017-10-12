@@ -1,6 +1,5 @@
 #!/bin/sh
 
-export GDK_SCALE=2
 export NO_AT_BRIDGE=1
 
 if [ `basename "$0"` = ".xinitrc" ]; then
@@ -29,7 +28,8 @@ xrdb -merge ~/.Xresources
 
 dmi_id="/sys/devices/virtual/dmi/id"
 if grep -q Carbon "$dmi_id/product_version"; then
-	xrandr --dpi 192
+	xrandr --dpi 144
+	echo "Xft.dpi: 144" | xrdb -merge
 
 	xinput set-prop "SynPS/2 Synaptics TouchPad" "libinput Tapping Enabled" 1
 	xinput set-prop "SynPS/2 Synaptics TouchPad" "libinput Horizontal Scroll Enabled" 0
