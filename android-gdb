@@ -2,6 +2,9 @@
 
 # useful for commandline tools; use development/scripts/gdbclient for
 # regular applications
+#
+#  $ adb shell gdbserver64 :1234 <executable>
+#  $ adb shell gdbserver64 --attach :1234 <pid>
 
 PORT=1234
 
@@ -10,14 +13,18 @@ if [ -z "$ANDROID_PRODUCT_OUT" ]; then
 	exit 1
 fi
 
-SYSROOT="$ANDROID_PRODUCT_OUT/symbols"
-LIBPATHS="system/lib:system/lib/vndk-sp:vendor/lib:vendor/lib/hw:vendor/lib/egl"
-LIBPATHS64="system/lib64:system/lib64/vndk-sp:vendor/lib64:vendor/lib64/hw:vendor/lib64/egl"
+SUBDIRS=". egl hw vndk vndk-sp vndk-sp/hw"
+SEARCH_PATH64=""
+SEARCH_PATH32=""
+for sub in $SUBDIRS; do
+	SEARCH_PATH64="$SEARCH_PATH64:vendor/lib64/$sub:system/lib64/$sub"
+	SEARCH_PATH32="$SEARCH_PATH32:vendor/lib/$sub:system/lib/$sub"
+done
 
 adb forward tcp:$PORT tcp:$PORT
 
 $ANDROID_BUILD_TOP/prebuilts/gdb/linux-x86/bin/gdb \
 	-ex "set solib-absolute-prefix $ANDROID_PRODUCT_OUT/symbols" \
-	-ex "set solib-search-path $LIBPATHS64:$LIBPATHS" \
+	-ex "set solib-search-path $SEARCH_PATH64:$SEARCH_PATH32" \
 	-ex "target remote :$PORT" \
 	$@

@@ -1,5 +1,10 @@
 #!/bin/sh
 
+TOP="$ANDROID_BUILD_TOP"
+if [ -z "$TOP" ]; then
+	TOP="$PWD"
+fi
+
 PROJECTS="
 	bionic
 	hardware/interfaces
@@ -15,4 +20,4 @@ PROJECTS="
 	frameworks/base/core/jni
 	frameworks/native"
 
-ctags -R $PROJECTS
+(cd "$TOP" && ctags -R $PROJECTS)
