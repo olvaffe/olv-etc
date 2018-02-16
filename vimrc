@@ -29,7 +29,7 @@ let c_space_errors=1
 nmap <F5> :make<CR>
 
 au BufNewFile,BufRead SConstruct,SConscript :setl ft=python
-au BufNewFile,BufRead Android.bp :setl ft=go
+au BufNewFile,BufRead Android.bp :setl ft=go sw=4 sts=4 et
 au BufNewFile,BufRead *.hal :setl ft=cpp
 
 au FileType gitcommit :setl tw-=4

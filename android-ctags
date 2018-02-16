@@ -7,17 +7,22 @@ fi
 
 PROJECTS="
 	bionic
+	external/googletest
+	frameworks/av
+	frameworks/base/cmds
+	frameworks/base/core/jni
+	frameworks/base/libs
+	frameworks/native
 	hardware/interfaces
 	hardware/libhardware
 	out/soong/.intermediates/hardware/interfaces/graphics/
 	system/core
+	system/hwservicemanager
 	system/libfmq
 	system/libhidl
 	system/libhwbinder
 	system/libvintf
-	frameworks/av
-	frameworks/base/libs
-	frameworks/base/core/jni
-	frameworks/native"
+	system/tools/hidl/utils"
 
 (cd "$TOP" && ctags -R $PROJECTS)
+(cd "$TOP/frameworks/base" && ctags -R)
