@@ -36,8 +36,8 @@ path_exists VPN {
 }
 
 tztime BLD {
-	timezone = America/Denver
-	format = "BLD: %H:%M"
+	timezone = Europe/Paris
+	format = "PAR: %H:%M"
 }
 
 tztime TPE {
