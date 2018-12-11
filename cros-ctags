@@ -1,0 +1,14 @@
+#!/bin/sh
+
+TOP="$HOME/chromiumos"
+if [ -z "$TOP" ]; then
+	TOP="$PWD"
+fi
+
+PROJECTS="
+	src/platform/drm-tests
+	src/platform/minigbm
+	src/third_party/kernel/v4.19/include/uapi/drm
+	src/third_party/libdrm
+	src/third_party/mesa"
+(cd "$TOP" && ctags -R $PROJECTS)
