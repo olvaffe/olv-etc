@@ -1,20 +1,24 @@
 #!/bin/sh
 
+BOARD=""
+HOST=""
+
 PORT=1234
+SYSROOT="/build/$BOARD"
 
 PROJECTS="src/platform/drm-tests
 	  src/platform/minigbm
 	  src/third_party/libdrm
 	  src/third_party/mesa"
-DIRECTORIES="."
+SRC_DIRS="."
 for project in $PROJECTS; do
-	DIRECTORIES="$DIRECTORIES:$HOME/trunk/$project"
+	SRC_DIRS="$SRC_DIRS:$HOME/trunk/$project"
 done
 
 $HOST-gdb \
-        -ex "set sysroot /build/$BOARD" \
-        -ex "set solib-absolute-prefix /build/$BOARD" \
-        -ex "set debug-file-directory /build/$BOARD/usr/lib/debug" \
-        -ex "set directories $DIRECTORIES" \
+        -ex "set sysroot $SYSROOT" \
+        -ex "set solib-absolute-prefix $SYSROOT" \
+        -ex "set debug-file-directory $SYSROOT/usr/lib/debug" \
+        -ex "set directories $SRC_DIRS" \
         -ex "target remote :$PORT" \
 	$@

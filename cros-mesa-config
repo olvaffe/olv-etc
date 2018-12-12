@@ -1,9 +1,17 @@
 #!/bin/sh
 
+BOARD=""
+HOST=""
+DRIVERS=""
+MARCH=""
+
 SYSROOT="/build/$BOARD"
 
-#autoreconf -f -v -i -I $SYSROOT/usr/share/aclocal
-#exit
+autotool() {
+	autoreconf -f -v -i -I $SYSROOT/usr/share/aclocal
+	exit
+}
+#autotool
 
 export PATH="/usr/local/bin:/usr/bin:/bin:$SYSROOT/build/bin"
 export PKG_CONFIG="$SYSROOT/build/bin/pkg-config"
@@ -21,7 +29,7 @@ APIS="--disable-dri3
       --enable-gles2
       --enable-shared-glapi"
 
-FEATURES="--enable-texture-float"
+FEATURES=""
 
 DRIVERS="--with-dri-drivers=
          --with-vulkan-drivers=
@@ -29,6 +37,6 @@ DRIVERS="--with-dri-drivers=
 
 PLATFORMS="--with-platforms=surfaceless"
 
-FLAGS="--enable-debug"
+FLAGS="--prefix=/usr --enable-debug"
 
 ./configure --host=$HOST $APIS $FEATURES $PLATFORMS $DRIVERS $FLAGS $@

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+BOARD=""
+HOST=""
+DUT=""
+LIBS=""
+
+SYSROOT="/build/$BOARD"
+DST="$SYSROOT/usr"
+DEBUG_DST="$SYSROOT/usr/lib/debug/usr"
+
+ln -sf gallium lib/dri
+
+for lib in $LIBS; do
+	sudo $HOST-objcopy --only-keep-debug $lib $DEBUG_DST/$lib.debug
+	sudo $HOST-objcopy --strip-debug --add-gnu-debuglink=$DEBUG_DST/$lib.debug $lib $DST/$lib
+
+	scp $DST/$lib $DUT:/usr/$lib
+done
