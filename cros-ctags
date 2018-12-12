@@ -1,14 +1,18 @@
 #!/bin/sh
 
-TOP="$HOME/chromiumos"
-if [ -z "$TOP" ]; then
-	TOP="$PWD"
+CROS="$HOME/chromiumos"
+if [ -z "$CROS" ]; then
+	CROS="$PWD"
 fi
 
-PROJECTS="
-	src/platform/drm-tests
-	src/platform/minigbm
-	src/third_party/kernel/v4.19/include/uapi/drm
-	src/third_party/libdrm
-	src/third_party/mesa"
-(cd "$TOP" && ctags -R $PROJECTS)
+PROJECTS="src/platform/drm-tests
+	  src/platform/minigbm
+	  src/third_party/kernel/v4.19/include/uapi
+	  src/third_party/libdrm
+	  src/third_party/mesa"
+(cd "$CROS" && ctags -R $PROJECTS)
+
+LOCAL_PROJECTS="src/third_party/kernel/v4.19"
+for project in $LOCAL_PROJECTS; do
+	(cd "$CROS/$project" && ctags -R)
+done

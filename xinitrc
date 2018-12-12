@@ -59,7 +59,7 @@ setup_autostart() {
 	# see /etc/xdg/autostart
 
 	nm-applet &
-	xautolock -time 5 -locker "i3lock -c 000000" &
+	xautolock -time 3 -locker "i3lock -c 000000" &
 }
 
 setup_session
