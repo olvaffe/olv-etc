@@ -7,11 +7,9 @@ MARCH=""
 
 SYSROOT="/build/$BOARD"
 
-autotool() {
+if [ ! -x ./configure ]; then
 	autoreconf -f -v -i -I $SYSROOT/usr/share/aclocal
-	exit
-}
-#autotool
+fi
 
 export PATH="/usr/local/bin:/usr/bin:/bin:$SYSROOT/build/bin"
 export PKG_CONFIG="$SYSROOT/build/bin/pkg-config"
