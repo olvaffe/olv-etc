@@ -1,8 +1,8 @@
 Host multiplexed
 	HostName multiplexed
 	User root
-	ControlMaster auto
 	IdentityFile ~/.ssh/cros-testing_rsa
+	ControlMaster auto
 	ControlPath ~/.ssh/control-%r@%h:%p
 	ControlPersist yes
 	LocalForward 1234 localhost:1234
