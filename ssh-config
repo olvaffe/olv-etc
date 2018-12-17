@@ -1,5 +1,5 @@
-Host multiplexed
-	HostName multiplexed
+Host cros-dut
+	HostName cros-dut
 	User root
 	IdentityFile ~/.ssh/cros-testing_rsa
 	ControlMaster auto
