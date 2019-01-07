@@ -1,7 +1,7 @@
-MESA_BUILDDIR="$HOME/projects/mesa/builddir"
+OUT="$HOME/projects/mesa/out"
 
-export LD_LIBRARY_PATH="$MESA_BUILDDIR/lib"
-export LIBGL_DRIVERS_PATH="$MESA_BUILDDIR/lib"
+export LD_LIBRARY_PATH="$OUT/lib"
+export LIBGL_DRIVERS_PATH="$OUT/lib"
 
 if [ -z "$MESA_PS1" ]; then
 	MESA_PS1=$PS1

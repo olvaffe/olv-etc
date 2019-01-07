@@ -1,40 +1,87 @@
 #!/bin/sh
 
+if [ ! -f meson.build ]; then
+        echo "not a Mesa directory"
+        exit
+fi
+
+OUT="out"
+rm -rf $OUT
+
 BOARD=""
 HOST=""
 DRIVERS=""
-MARCH=""
-
+DRI=""
 SYSROOT="/build/$BOARD"
+DUT=""
 
-if [ ! -x ./configure ]; then
-	autoreconf -f -v -i -I $SYSROOT/usr/share/aclocal
-fi
+generate_cross_file() {
+	BOARD_COMPILER_FLAGS=""
+	# from make.defaults
+	CXXEXCEPTIONS_FLAGS="'-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables'"
 
-export PATH="/usr/local/bin:/usr/bin:/bin:$SYSROOT/build/bin"
-export PKG_CONFIG="$SYSROOT/build/bin/pkg-config"
-export CC="$HOST-clang"
-export CXX="$HOST-clang++"
-export CPPFLAGS="--sysroot=$SYSROOT"
-export CFLAGS="-O2 -pipe -g $MARCH -UENABLE_SHADER_CACHE"
-export CXXFLAGS="$CFLAGS -std=gnu++11"
-export LDFLAGS="--sysroot=$SYSROOT -Wl,-O2 -Wl,--as-needed"
+	# from make.conf.common
+	CROS_LDFLAGS="'--sysroot=$SYSROOT', '-Wl,-O2', '-Wl,--as-needed'"
+	CROS_CFLAGS="'--sysroot=$SYSROOT', $BOARD_COMPILER_FLAGS, $CXXEXCEPTIONS_FLAGS"
 
-APIS="--disable-dri3
-      --disable-glx
-      --disable-gbm
-      --disable-gles1
-      --enable-gles2
-      --enable-shared-glapi"
+	cat <<EOF
+[binaries]
+ar = '/usr/bin/$HOST-ar'
+c = '/usr/bin/$HOST-clang'
+cpp = '/usr/bin/$HOST-clang++'
+strip = '/usr/bin/$HOST-strip'
+pkgconfig = '$SYSROOT/build/bin/pkg-config'
 
-FEATURES=""
+[properties]
+c_args = [$CROS_CFLAGS]
+c_link_args = [$CROS_LDFLAGS]
+cpp_args = [$CROS_CFLAGS]
+cpp_link_args = [$CROS_LDFLAGS]
 
-DRIVERS="--with-dri-drivers=
-         --with-vulkan-drivers=
-	 --with-gallium-drivers=$DRIVERS"
+[host_machine]
+system = 'linux'
+cpu_family = 'arm'
+cpu = 'armv7a'
+endian = 'little'
+EOF
+}
 
-PLATFORMS="--with-platforms=surfaceless"
+generate_install_script() {
+	SRC="lib"
+	DST="$SYSROOT/usr/lib"
+	DEBUG_DST="$SYSROOT/usr/lib/debug/usr/lib"
 
-FLAGS="--prefix=/usr --enable-debug"
+	cat <<EOF
+sudo $HOST-objcopy --only-keep-debug $SRC/dri/$DRI $DEBUG_DST/dri/$DRI.debug
+sudo $HOST-objcopy --strip-debug --add-gnu-debuglink=$DEBUG_DST/dri/$DRI.debug $SRC/dri/$DRI $DST/dri/$DRI
+scp $DST/dri/$DRI $DUT:/usr/lib/dri
+EOF
+}
 
-./configure --host=$HOST $APIS $FEATURES $PLATFORMS $DRIVERS $FLAGS $@
+mkdir $OUT
+generate_cross_file > $OUT/cross_file.txt
+
+generate_install_script > $OUT/cros-mesa-install
+chmod +x $OUT/cros-mesa-install
+
+mkdir -p $OUT/lib/dri
+ln -sf ../../src/gallium/targets/dri/libgallium_dri.so $OUT/lib/dri/$DRI
+
+meson $OUT --cross-file $OUT/cross_file.txt \
+        -D glx=disabled \
+        -D gbm=false \
+        -D dri-drivers= \
+        -D gallium-xa=false \
+        -D llvm=false \
+        -D dri3=false \
+        -D buildtype=debug \
+        -D warning_level=1 \
+        -D shared-glapi=true \
+        -D opengl=true \
+        -D gles1=false \
+        -D gles2=true \
+        -D egl=true \
+        -D platforms=surfaceless \
+        -D gallium-drivers=$DRIVERS \
+        -D vulkan-drivers= \
+        $@

@@ -5,8 +5,10 @@ if [ ! -f meson.build ]; then
 	exit
 fi
 
-rm -rf builddir
-meson builddir \
+OUT="out"
+
+rm -rf $OUT
+meson $OUT \
 	-D gbm=false \
 	-D dri-drivers= \
 	-D gallium-xa=false \
@@ -24,8 +26,8 @@ meson builddir \
 	-D vulkan-drivers= \
 	$@
 
-mkdir -p builddir/lib
-cd builddir/lib
+mkdir -p $OUT/lib
+cd $OUT/lib
 ln -sf ../src/mapi/shared-glapi/libglapi.so.0
 ln -sf ../src/mapi/es2api/libGLESv2.so.2
 ln -sf ../src/glx/libGL.so.1
