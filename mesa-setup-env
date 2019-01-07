@@ -1,12 +1,10 @@
-MESA_VARIANT=mesa
-MESA_TOP="$HOME/fdo/mesa/$MESA_VARIANT"
+MESA_BUILDDIR="$HOME/projects/mesa/builddir"
 
-export LD_LIBRARY_PATH="$MESA_TOP/lib"
-export EGL_DRIVERS_PATH="$MESA_TOP/lib/egl"
-export LIBGL_DRIVERS_PATH="$MESA_TOP/lib/gallium:$MESA_TOP/lib"
+export LD_LIBRARY_PATH="$MESA_BUILDDIR/lib"
+export LIBGL_DRIVERS_PATH="$MESA_BUILDDIR/lib"
 
 if [ -z "$MESA_PS1" ]; then
 	MESA_PS1=$PS1
 fi
 
-PS1="[$MESA_VARIANT] $MESA_PS1"
+PS1="[mesa] $MESA_PS1"

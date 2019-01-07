@@ -1,24 +1,36 @@
 #!/bin/sh
 
-APIS="--enable-opengl
-      --enable-gles1
-      --enable-gles2
-      --enable-egl
-      --enable-dri
-      --enable-glx"
+if [ ! -f meson.build ]; then
+	echo "not a Mesa directory"
+	exit
+fi
 
-#APIS="$APIS --enable-opencl"
+rm -rf builddir
+meson builddir \
+	-D gbm=false \
+	-D dri-drivers= \
+	-D gallium-xa=false \
+	-D buildtype=debug \
+	-D warning_level=1 \
+	-D shared-glapi=true \
+	-D opengl=true \
+	-D gles1=false \
+	-D gles2=true \
+	-D egl=true \
+	-D platforms=x11,wayland,surfaceless \
+	-D glx=dri \
+	-D dri3=true \
+	-D gallium-drivers=freedreno,nouveau \
+	-D vulkan-drivers= \
+	$@
 
-FEATURES="--enable-glx-tls
-          --enable-texture-float"
+mkdir -p builddir/lib
+cd builddir/lib
+ln -sf ../src/mapi/shared-glapi/libglapi.so.0
+ln -sf ../src/mapi/es2api/libGLESv2.so.2
+ln -sf ../src/glx/libGL.so.1
+ln -sf ../src/egl/libEGL.so.1
 
-FEATURES="$FEATURES --disable-gallium-llvm"
-#FEATURES="$FEATURES --enable-gallium-tests"
-
-DRIVERS="--with-dri-drivers=i965
-         --with-gallium-drivers=ilo"
-
-FLAGS="--enable-debug"
-
-./configure $APIS $DRIVERS $FEATURES $FLAGS $MISC $@ \
-	CC="ccache gcc" CXX="ccache g++" CFLAGS="-g3 -O0" CXXFLAGS="-g3 -O0"
+mkdir dri
+ln -sf ../../src/gallium/targets/dri/libgallium_dri.so dri/msm_dri.so
+ln -sf ../../src/gallium/targets/dri/libgallium_dri.so dri/nouveau_dri.so
