@@ -1,0 +1,18 @@
+#!/bin/sh
+
+SYSROOT="/build/cheza"
+# src/overlays/chipset-qc845/profiles/base/make.defaults
+BOARD_COMPILER_FLAGS="-march=armv8-a+crc -mtune=cortex-a57.cortex-a53 -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard"
+# src/third_party/chromiumos-overlay/profiles/targets/chromeos/make.defaults
+CXXEXCEPTIONS_FLAGS="-fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables"
+
+# src/third_party/chromiumos-overlay/profiles/features/llvm/arm/make.defaults
+# src/third_party/chromiumos-overlay/chromeos/config/make.conf.generic-target
+# src/third_party/chromiumos-overlay/chromeos/config/make.conf.common
+CC="armv7a-cros-linux-gnueabihf-clang" \
+CXX="armv7a-cros-linux-gnueabihf-clang++" \
+CFLAGS="--sysroot=$SYSROOT -O2 -pipe $BOARD_COMPILER_FLAGS $CXXEXCEPTIONS_FLAGS -g" \
+CXXFLAGS="$CFLAGS" \
+LDFLAGS="-Wl,-O2 -Wl,--as-needed" \
+PKG_CONFIG="$SYSROOT/build/bin/pkg-config" \
+make $@

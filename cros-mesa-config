@@ -52,6 +52,10 @@ generate_install_script() {
 	DEBUG_DST="$SYSROOT/usr/lib/debug/usr/lib"
 
 	cat <<EOF
+set -e
+
+ninja
+
 sudo $HOST-objcopy --only-keep-debug $SRC/dri/$DRI $DEBUG_DST/dri/$DRI.debug
 sudo $HOST-objcopy --strip-debug --add-gnu-debuglink=$DEBUG_DST/dri/$DRI.debug $SRC/dri/$DRI $DST/dri/$DRI
 scp $DST/dri/$DRI $DUT:/usr/lib/dri

@@ -17,6 +17,3 @@
 
 [push]
 	default = simple
-
-[url "ssh://olv@git.freedesktop.org/"]
-	insteadOf = ssh://git.freedesktop.org/
