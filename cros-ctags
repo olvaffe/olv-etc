@@ -1,6 +1,6 @@
 #!/bin/sh
 
-CROS="$HOME/chromiumos"
+CROS="$HOME/cros"
 if [ -z "$CROS" ]; then
 	CROS="$PWD"
 fi

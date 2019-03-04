@@ -10,7 +10,7 @@ OUT="out"
 rm -rf $OUT
 meson $OUT \
 	-D gbm=false \
-	-D dri-drivers= \
+	-D dri-drivers=i965 \
 	-D gallium-xa=false \
 	-D buildtype=debug \
 	-D warning_level=1 \
@@ -22,8 +22,8 @@ meson $OUT \
 	-D platforms=x11,wayland,surfaceless \
 	-D glx=dri \
 	-D dri3=true \
-	-D gallium-drivers=freedreno,nouveau \
-	-D vulkan-drivers= \
+	-D gallium-drivers=freedreno \
+	-D vulkan-drivers=intel \
 	$@
 
 mkdir -p $OUT/lib
@@ -35,4 +35,3 @@ ln -sf ../src/egl/libEGL.so.1
 
 mkdir dri
 ln -sf ../../src/gallium/targets/dri/libgallium_dri.so dri/msm_dri.so
-ln -sf ../../src/gallium/targets/dri/libgallium_dri.so dri/nouveau_dri.so
