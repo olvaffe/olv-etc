@@ -28,7 +28,21 @@ cros_setup_env_cheza() {
 	cros_setup_env_common
 }
 
+cros_setup_env_nami() {
+	SYSROOT="/build/nami"
+
+	# src/overlays/chipset-kbl/toolchain.conf
+	# src/third_party/chromiumos-overlay/profiles/features/llvm/amd64/make.defaults
+	HOST="x86_64-cros-linux-gnu"
+
+	# src/overlays/chipset-qc845/profiles/base/make.defaults
+	BOARD_COMPILER_FLAGS="-march=corei7"
+
+	cros_setup_env_common
+}
+
 cros_setup_env_cheza
+#cros_setup_env_nami
 
 ./configure $@ \
 	--host=$HOST \
