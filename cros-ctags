@@ -9,7 +9,8 @@ PROJECTS="src/platform/drm-tests
 	  src/platform/minigbm
 	  src/third_party/kernel/v4.19/include/uapi
 	  src/third_party/libdrm
-	  src/third_party/mesa"
+	  src/third_party/mesa
+	  src/third_party/virglrenderer"
 (cd "$CROS" && ctags -R $PROJECTS)
 
 LOCAL_PROJECTS="src/third_party/kernel/v4.19"

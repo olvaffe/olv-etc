@@ -30,7 +30,8 @@ cros_setup_env_cheza() {
 
 cros_setup_env_cheza
 
-make $@ \
+./configure $@ \
+	--host=$HOST \
 	CC="${CROSS_COMPILE}clang" \
 	CXX="${CROSS_COMPILE}clang++" \
 	CFLAGS="--sysroot=$SYSROOT $COMMON_COMPILER_FLAGS" \

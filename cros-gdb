@@ -9,7 +9,8 @@ SYSROOT="/build/$BOARD"
 PROJECTS="src/platform/drm-tests
 	  src/platform/minigbm
 	  src/third_party/libdrm
-	  src/third_party/mesa"
+	  src/third_party/mesa
+	  src/third_party/virglrenderer"
 SRC_DIRS="."
 for project in $PROJECTS; do
 	SRC_DIRS="$SRC_DIRS:$HOME/trunk/$project"
