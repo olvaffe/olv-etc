@@ -79,6 +79,7 @@ meson $OUT --cross-file $OUT/cross_file.txt \
         -D llvm=false \
         -D dri3=false \
         -D buildtype=debug \
+        -D shader-cache=false \
         -D warning_level=1 \
         -D shared-glapi=true \
         -D opengl=true \
