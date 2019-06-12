@@ -32,11 +32,12 @@ setup_inputs() {
 	if grep -q Carbon "$dmi_id/product_version"; then
 		input_device="SynPS/2 Synaptics TouchPad"
 	elif grep -q "XPS 13" "$dmi_id/product_name"; then
-		input_device="DLL0665:01 06CB:76AD UNKNOWN"
+		input_device="DLL0665:01 06CB:76AD Touchpad"
 	fi
 
 	if [ -n "$input_device" ]; then
 		xinput set-prop "$input_device" "libinput Tapping Enabled" 1
+		xinput set-prop "$input_device" "libinput Tapping Button Mapping Enabled" 0 1
 		xinput set-prop "$input_device" "libinput Horizontal Scroll Enabled" 0
 	fi
 }

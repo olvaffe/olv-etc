@@ -49,5 +49,7 @@ fun! ApplyCStyles()
   " Android
   elseif path =~ "/android"
     setl sw=4 sts=4 et
+  elseif path =~ "/virglrenderer"
+    setl sw=3 sts=3 et
   endif
 endfun
