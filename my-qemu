@@ -1,0 +1,50 @@
+#!/bin/sh
+
+GENERAL_OPTS="
+	-name my-vm,debug-threads=on
+	-mon my-serial"
+
+MACHINE_OPTS="
+	-enable-kvm
+	-machine q35
+	-cpu Broadwell
+	-smp 2
+	-m 2G
+	-nodefaults"
+
+DISPLAY_OPTS="
+	-device virtio-vga
+	-display sdl,gl=on"
+
+INPUT_OPTS="
+	-device virtio-keyboard
+	-device virtio-mouse"
+
+SERIAL_OPTS="
+	-device virtio-serial
+	-device virtserialport,chardev=my-serial
+	-chardev stdio,id=my-serial,mux=on"
+
+# also ttyS0
+SERIAL_OPTS="$SERIAL_OPTS -device pci-serial,chardev=my-serial"
+
+NETWORK_OPTS="
+	-device virtio-net,netdev=my-net
+	-netdev user,id=my-net,hostfwd=tcp::2222-:22"
+
+BLOCK_OPTS="
+	-device ide-hd,drive=my-drive
+	-blockdev driver=file,node-name=my-image,filename=arch.qcow2
+	-blockdev driver=qcow2,node-name=my-drive,file=my-image"
+
+export SDL_VIDEO_ALLOW_SCREENSAVER=1
+
+./x86_64-softmmu/qemu-system-x86_64 \
+	$GENERAL_OPTS \
+	$MACHINE_OPTS \
+	$DISPLAY_OPTS \
+	$INPUT_OPTS \
+	$SERIAL_OPTS \
+	$NETWORK_OPTS \
+	$BLOCK_OPTS \
+	"$@"

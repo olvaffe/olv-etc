@@ -32,7 +32,7 @@ setup_inputs() {
 	if grep -q Carbon "$dmi_id/product_version"; then
 		input_device="SynPS/2 Synaptics TouchPad"
 	elif grep -q "XPS 13" "$dmi_id/product_name"; then
-		input_device="SynPS/2 Synaptics TouchPad"
+		input_device="DLL0665:01 06CB:76AD Touchpad"
 	fi
 
 	if [ -n "$input_device" ]; then
