@@ -12,6 +12,12 @@ MACHINE_OPTS="
 	-m 2G
 	-nodefaults"
 
+EFI_OPTS="
+	-blockdev driver=file,node-name=efi,filename=pc-bios/edk2-x86_64-code.fd
+	-blockdev driver=file,node-name=efivars,filename=arch-efivars.fd
+	-machine pflash0=efi,pflash1=efivars
+"
+
 DISPLAY_OPTS="
 	-device virtio-vga
 	-display sdl,gl=on"
@@ -42,6 +48,7 @@ export SDL_VIDEO_ALLOW_SCREENSAVER=1
 ./x86_64-softmmu/qemu-system-x86_64 \
 	$GENERAL_OPTS \
 	$MACHINE_OPTS \
+	$EFI_OPTS \
 	$DISPLAY_OPTS \
 	$INPUT_OPTS \
 	$SERIAL_OPTS \
