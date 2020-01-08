@@ -5,9 +5,9 @@ GENERAL_OPTS="
 	-mon my-serial"
 
 MACHINE_OPTS="
-	-enable-kvm
 	-machine q35,pflash0=my-efi,pflash1=my-efivars
 	-cpu Broadwell
+	-accel kvm
 	-smp 2
 	-m 2G
 	-nodefaults"
