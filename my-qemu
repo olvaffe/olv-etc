@@ -6,15 +6,15 @@ GENERAL_OPTS="
 
 MACHINE_OPTS="
 	-enable-kvm
-	-machine q35,pflash0=efi,pflash1=efivars
+	-machine q35,pflash0=my-efi,pflash1=my-efivars
 	-cpu Broadwell
 	-smp 2
 	-m 2G
 	-nodefaults"
 
 EFI_OPTS="
-	-blockdev driver=file,node-name=efi,filename=pc-bios/edk2-x86_64-code.fd
-	-blockdev driver=file,node-name=efivars,filename=arch-efivars.fd"
+	-blockdev driver=file,node-name=my-efi,read-only=on,filename=pc-bios/edk2-x86_64-code.fd
+	-blockdev driver=file,node-name=my-efivars,filename=arch-efivars.fd"
 
 DISPLAY_OPTS="
 	-device virtio-vga
