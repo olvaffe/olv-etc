@@ -10,7 +10,9 @@ export PATH
 
 shopt -s checkwinsize
 
-HISTCONTROL=ignoredups
+HISTSIZE=50000
+HISTFILESIZE=50000
+HISTCONTROL=ignoredups:erasedups
 shopt -s histappend
 
 PS1='\u@\h:\w\$ '

@@ -9,9 +9,11 @@ font pango:sans serif 11
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
 
+floating_maximum_size 1920x1080
+
 # start a terminal/browser
 bindsym $mod+Return exec xterm
-bindsym $mod+Shift+Return exec google-chrome
+bindsym $mod+Shift+Return exec chromium
 
 # kill focused window
 bindsym $mod+Shift+q kill
