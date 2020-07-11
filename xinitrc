@@ -45,9 +45,14 @@ setup_inputs() {
 }
 
 setup_outputs() {
-	DPI=144
-	xrandr --dpi $DPI
-	echo "Xft.dpi: $DPI" | xrdb -merge
+	dpi=72
+	xres=`xrandr | grep Screen | cut -d' ' -f 8`
+	if [ $xres -ge 3840 ]; then
+		dpi=288
+	elif [ $xres -ge 1920 ]; then
+		dpi=144
+	fi
+	echo "Xft.dpi: $dpi" | xrdb -merge
 }
 
 setup_xresources() {
