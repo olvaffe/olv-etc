@@ -104,8 +104,8 @@ bindsym XF86AudioMute exec pactl set-sink-mute 0 toggle # mute sound
 bindsym XF86AudioMicMute exec pactl set-source-mute 1 toggle # mute mic
 
 # Sreen brightness controls
-bindsym XF86MonBrightnessUp exec xbacklight -inc 20
-bindsym XF86MonBrightnessDown exec xbacklight -dec 20
+bindsym XF86MonBrightnessUp exec light -A 10
+bindsym XF86MonBrightnessDown exec light -U 10
 
 # Screenshots
 bindsym Print exec gnome-screenshot --interactive
