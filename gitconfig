@@ -5,6 +5,18 @@
 	name = Chia-I Wu
 	email = olvaffe@gmail.com
 
+[credential]
+	helper = store
+
+[http]
+	cookiefile = ~/.gitcookies
+
+[pull]
+	ff = only
+
+[push]
+	default = simple
+
 [sendemail]
 	smtpencryption = tls
 	smtpserver = smtp.gmail.com
@@ -14,10 +26,3 @@
 	suppresscc = sob
 	suppresscc = self
 	from = Chia-I Wu <olvaffe@gmail.com>
-
-[push]
-	default = simple
-[credential]
-	helper = store
-[pull]
-	ff = only
