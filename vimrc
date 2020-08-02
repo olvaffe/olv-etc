@@ -9,8 +9,11 @@ colorscheme desert
 set nowrap
 set ruler
 set encoding=utf8
+set scrolloff=2
 
 " search settings
+set ignorecase
+set smartcase
 set nohls
 
 " edit settings
