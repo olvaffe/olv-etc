@@ -28,7 +28,8 @@ set tags=./tags;
 set cino=:0,l1,t0,W1
 let c_space_errors=1
 
-nmap <F5> :make<CR>
+let mapleader=","
+nnoremap <Leader>m :make<CR>
 
 augroup filetype_fix
   au!
@@ -42,24 +43,20 @@ augroup filetype_indent
   au FileType gitcommit setl tw=72
   au FileType python,cmake,groovy,java setl sw=4 sts=4 et
   au FileType vim setl sw=2 sts=2
-  au FileType c,cpp call ApplyCStyles()
 augroup END
 
-fun! ApplyCStyles()
-  let path = expand("%:p")
-
-  " Mesa
-  if path =~ "projects/mesa"
-    setl sw=3 sts=3 et
-  elseif path =~ "projects/virglrenderer"
-    setl sw=3 sts=3 et
-  elseif path =~ "projects/venus-protocol"
-    setl sw=4 sts=4 et
-  " Vulkan
-  elseif path =~ "olv/vulkan"
-    setl sw=4 sts=4 et
-  " Android
-  elseif path =~ "/android"
-    setl sw=4 sts=4 et
+fun! InitializeProject()
+  let dot_git = finddir(".git", ";")
+  if empty(dot_git)
+    return
   endif
-endfun
+
+  let g:project_path = fnamemodify(dot_git, ":p:h:h")
+
+  let project_vimrc = findfile("project_vimrc", dot_git)
+  if !empty(project_vimrc)
+    exec "source " . project_vimrc
+  endif
+endfunc
+
+call InitializeProject()
