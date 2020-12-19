@@ -18,11 +18,11 @@
 	default = simple
 
 [sendemail]
-	smtpencryption = tls
-	smtpserver = smtp.gmail.com
-	smtpuser = olvaffe@gmail.com
-	chainreplayto = no
+	smtpEncryption = tls
+	smtpServer = smtp.gmail.com
+	smtpServerPort = 587
+	smtpUser = olvaffe@gmail.com
+	chainReplyTo = no
 	confirm = auto
-	suppresscc = sob
-	suppresscc = self
 	from = Chia-I Wu <olvaffe@gmail.com>
+	suppresscc = self

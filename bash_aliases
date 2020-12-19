@@ -3,6 +3,7 @@ alias g='grep'
 alias l='less'
 
 alias vi=vim
+alias sh=bash
 
 # source control
 alias gg='git grep --color'
