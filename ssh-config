@@ -1,8 +1,19 @@
+ControlMaster auto
+ControlPath ~/.ssh/control-%r@%h:%p
+ControlPersist 15
+
 Host cros-dut
 	HostName cros-dut
 	User root
 	IdentityFile ~/.ssh/cros-testing_rsa
-	ControlMaster auto
-	ControlPath ~/.ssh/control-%r@%h:%p
-	ControlPersist yes
-	LocalForward 1234 localhost:1234
+	UserKnownHostsFile /dev/null
+	StrictHostKeyChecking no
+	#LocalForward 1234 localhost:1234
+
+Host cros-crostini
+	HostName cros-crostini
+	User chronos
+	IdentityFile ~/.ssh/cros-testing_rsa
+	UserKnownHostsFile /dev/null
+	StrictHostKeyChecking no
+	ProxyJump cros-dut
