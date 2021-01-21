@@ -31,6 +31,8 @@ setup_inputs() {
 	dmi_id="/sys/devices/virtual/dmi/id"
 	if grep -q Carbon "$dmi_id/product_version"; then
 		input_device="SynPS/2 Synaptics TouchPad"
+	elif grep -q IdeaPad "$dmi_id/product_version"; then
+		input_device="MSFT0001:00 06CB:CE2D Touchpad"
 	elif grep -q "XPS 13" "$dmi_id/product_name"; then
 		input_device="DLL0665:01 06CB:76AD Touchpad"
 	elif grep -q "Precision 5520" "$dmi_id/product_name"; then
