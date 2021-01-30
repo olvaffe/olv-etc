@@ -26,9 +26,9 @@ battery 0 {
 }
 
 volume master {
-	device = "hw:1"
-	mixer = "Master"
+	device = "pulse"
 	format = "♪: %volume"
+	format_muted = "♪: muted (%volume)"
 }
 
 path_exists VPN {
