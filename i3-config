@@ -9,7 +9,7 @@ font pango:sans serif 11
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
 
-floating_maximum_size 1920x1080
+floating_maximum_size 1920 x 1080
 
 # start a terminal/browser
 bindsym $mod+Return exec xterm
@@ -95,7 +95,7 @@ bar {
         mode hide
 }
 
-new_window pixel 2
+default_border pixel 2
 
 # Pulse Audio controls
 bindsym XF86AudioRaiseVolume exec pactl set-sink-volume 0 +5%
