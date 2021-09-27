@@ -19,7 +19,7 @@ PS1='\u@\h:\w\$ '
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
-xterm*|rxvt*)
+xterm*|rxvt*|alacritty*)
     PS1="\[\e]0;\u@\h: \w\a\]$PS1"
     ;;
 *)
@@ -28,7 +28,7 @@ esac
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
-    eval "$(dircolors -b)"
+    eval "$(TERM=xterm dircolors -b)"
     alias ls='ls --color=auto'
     alias grep='grep --color=auto'
 fi
