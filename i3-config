@@ -13,7 +13,7 @@ floating_maximum_size 1920 x 1080
 
 # start a terminal/browser
 bindsym $mod+Return exec xterm
-bindsym $mod+Shift+Return exec chromium
+bindsym $mod+Shift+Return exec google-chrome-stable
 
 # kill focused window
 bindsym $mod+Shift+q kill

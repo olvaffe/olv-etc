@@ -26,3 +26,5 @@
 	confirm = auto
 	from = Chia-I Wu <olvaffe@gmail.com>
 	suppresscc = self
+[alias]
+	fixes = show -s --pretty='format:Fixes: %h (\"%s\")'
