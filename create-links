@@ -28,6 +28,7 @@ install "$ETC/xinitrc" "$DST/.xinitrc"
 install "$ETC/xinitrc" "$DST/.Xsession"
 install "$ETC/Xresources" "$DST/.Xresources"
 install "$ETC/alacritty.yml" "$DST/.config/alacritty/alacritty.yml"
+install "$ETC/sway-session" "$DST/.local/bin/sway-session"
 
 #install "$ETC/msmtprc" "$DST/.msmtprc"
 #install "$ETC/offlineimaprc" "$DST/.offlineimaprc"

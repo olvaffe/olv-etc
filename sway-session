@@ -1,0 +1,7 @@
+#!/bin/sh
+
+export NO_AT_BRIDGE=1
+
+gsettings set org.gnome.desktop.interface text-scaling-factor 1.5
+
+exec sway
