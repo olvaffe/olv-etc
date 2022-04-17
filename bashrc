@@ -2,6 +2,7 @@
 [ -z "$PS1" ] && return
 
 [[ -z "$DISPLAY$WAYLAND_DISPLAY" && -n $XDG_VTNR && $XDG_VTNR -le 1 ]] && exec startx
+#[[ -z "$DISPLAY$WAYLAND_DISPLAY" && -n $XDG_VTNR && $XDG_VTNR -le 1 ]] && exec ~/.local/bin/sway-session
 
 PATH="$HOME/.local/bin"
 PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"

@@ -13,7 +13,7 @@ set $right l
 set $term alacritty
 set $browser google-chrome-stable --ozone-platform=wayland
 
-xwayland disable
+#xwayland disable
 
 ### Output configuration
 

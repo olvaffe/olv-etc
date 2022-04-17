@@ -1,12 +1,14 @@
 [core]
 	editor = vim
 
-[user]
-	name = Chia-I Wu
-	email = olvaffe@gmail.com
+[alias]
+	fixes = show -s --pretty='format:Fixes: %h (\"%s\")'
 
 [credential]
 	helper = store
+
+[init]
+	defaultBranch = main
 
 [http]
 	cookiefile = ~/.gitcookies
@@ -26,5 +28,7 @@
 	confirm = auto
 	from = Chia-I Wu <olvaffe@gmail.com>
 	suppresscc = self
-[alias]
-	fixes = show -s --pretty='format:Fixes: %h (\"%s\")'
+
+[user]
+	name = Chia-I Wu
+	email = olvaffe@gmail.com
