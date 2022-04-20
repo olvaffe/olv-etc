@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -e
+
+FILES="
+/vendor/etc/init/vulkan.rc
+/vendor/etc/permissions/android.hardware.vulkan.level-1.xml
+/vendor/etc/permissions/android.hardware.vulkan.version-1_1.xml
+/vendor/lib/hw/vulkan.cheets.so
+/vendor/lib64/hw/vulkan.cheets.so
+"
+
+if [ $# -eq 0 ]; then
+	echo "$0 <sysroot>"
+	exit 1
+fi
+sysroot="$1"
+
+for i in $FILES; do
+        adb push --sync "$sysroot/opt/google/vms/android/$i" "$i"
+        #adb shell rm -f "$i"
+done
+
+if [ -z "$(adb shell getprop ro.hardware.vulkan)" ]; then
+	adb shell setprop ro.hardware.vulkan cheets
+fi
+
+#adb shell setprop mesa.vn.debug all
+
+adb shell stop zygote surfaceflinger gpu
+sleep 1
+adb shell start gpu surfaceflinger zygote
