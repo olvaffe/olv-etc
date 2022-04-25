@@ -15,9 +15,15 @@ if [ $# -eq 0 ]; then
 	exit 1
 fi
 sysroot="$1"
+src_base="$sysroot/opt/google/vms/android"
+
+hw="$(adb shell getprop ro.hardware)"
+if [ "$hw" == "cheets" ]; then
+	src_base="$sysroot/opt/google/containers/android"
+fi
 
 for i in $FILES; do
-        adb push --sync "$sysroot/opt/google/vms/android/$i" "$i"
+        adb push --sync "$src_base$i" "$i"
         #adb shell rm -f "$i"
 done
 
@@ -27,6 +33,5 @@ fi
 
 #adb shell setprop mesa.vn.debug all
 
-adb shell stop zygote surfaceflinger gpu
-sleep 1
-adb shell start gpu surfaceflinger zygote
+echo "restarting services"
+adb shell "stop; stop gpu; sleep 1; start gpu; start"
