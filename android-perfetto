@@ -15,6 +15,24 @@ data_sources: {
     }
 }
 
+data_sources {
+  config {
+    name: "track_event"
+    track_event_config {
+      #enabled_tags: "slow"
+    }
+  }
+}
+
+#data_sources {
+#  config {
+#    name: "gpu.counters.msm"
+#    gpu_counter_config {
+#      counter_period_ns: 100000
+#    }
+#  }
+#}
+
 data_sources: {
     config {
         name: "linux.ftrace"
@@ -48,6 +66,12 @@ data_sources: {
             ftrace_events: "dma_fence/dma_fence_signaled"
             ftrace_events: "dma_fence/dma_fence_wait_start"
             ftrace_events: "dma_fence/dma_fence_wait_end"
+
+            #atrace_categories: "irq"
+            #ftrace_events: "raw_syscalls/sys_enter"
+            #ftrace_events: "raw_syscalls/sys_exit"
+            #ftrace_events: "syscalls/sys_enter_ioctl"
+            #ftrace_events: "syscalls/sys_exit_ioctl"
         }
     }
 }
