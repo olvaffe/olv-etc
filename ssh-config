@@ -2,24 +2,30 @@ ControlMaster auto
 ControlPath ~/.ssh/control-%r@%h:%p
 ControlPersist 10
 
+Host blah
+	Hostname blah
+	#RemoteForward 2230 192.168.86.30:22
+	#RemoteForward 2237 192.168.86.37:22
+	#LocalForward 5900 localhost:5900
+
+Host dut-crosvm
+	Hostname 192.168.0.2
+
+Host dut-1
+        ProxyCommand blah
+        User olv
+
 Host dut-*
 	Hostname %h
 	User root
 	IdentityFile ~/.ssh/cros-testing_rsa
 	UserKnownHostsFile /dev/null
 	StrictHostKeyChecking no
-	#LocalForward 1234 localhost:1234
 
-Host crostini-*
-	Hostname somewhere
+Host borealis-*
+	Hostname 100.115.92.26
 	User chronos
 	IdentityFile ~/.ssh/cros-testing_rsa
 	UserKnownHostsFile /dev/null
 	StrictHostKeyChecking no
 	ProxyJump dut-%h
-
-Host crosvm
-	Hostname 192.168.0.2
-	IdentityFile ~/.ssh/cros-testing_rsa
-	UserKnownHostsFile /dev/null
-	StrictHostKeyChecking no
