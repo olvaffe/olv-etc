@@ -29,8 +29,3 @@ install "$ETC/xinitrc" "$DST/.Xsession"
 install "$ETC/Xresources" "$DST/.Xresources"
 install "$ETC/alacritty.yml" "$DST/.config/alacritty/alacritty.yml"
 install "$ETC/sway-session" "$DST/.local/bin/sway-session"
-
-#install "$ETC/msmtprc" "$DST/.msmtprc"
-#install "$ETC/offlineimaprc" "$DST/.offlineimaprc"
-#install "$ETC/mesa-config" "$DST/fdo/mesa/mesa/mesa-config"
-#install "$ETC/mesa-setup-env" "$DST/fdo/mesa/mesa/mesa-setup-env"
