@@ -7,7 +7,6 @@ order += "cpu_temperature 1"
 order += "battery 0"
 order += "volume master"
 #order += "path_exists VPN"
-order += "tztime BLD"
 order += "tztime TPE"
 order += "time"
 
@@ -35,16 +34,11 @@ path_exists VPN {
 	path = "/proc/sys/net/ipv4/conf/tun0"
 }
 
-tztime BLD {
-	timezone = Europe/Paris
-	format = "PAR: %H:%M"
-}
-
 tztime TPE {
 	timezone = Asia/Taipei
 	format = "TPE: %H:%M"
 }
 
 time {
-	format = "%m-%d-%Y %H:%M"
+	format = "Date: %m-%d %H:%M"
 }
