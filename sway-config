@@ -13,7 +13,7 @@ set $right l
 set $term alacritty
 set $browser google-chrome-stable --ozone-platform=wayland
 
-#xwayland disable
+xwayland enable
 
 ### Output configuration
 
@@ -23,7 +23,9 @@ output "*" {
 
 ### Idle configuration
 
-exec swayidle -w timeout 300 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
+exec swayidle -w \
+    timeout 300 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
+    timeout 330 'swaylock -c 000000'
 
 ### Input configuration
 
