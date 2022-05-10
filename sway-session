@@ -5,4 +5,4 @@ export NO_AT_BRIDGE=1
 #gsettings set org.gnome.desktop.interface text-scaling-factor 1.5
 #gsettings set org.gnome.desktop.interface cursor-size 36
 
-exec sway
+exec sway > "$HOME/.sway-errors" 2>&1
