@@ -1,6 +1,7 @@
 ControlMaster auto
 ControlPath ~/.ssh/control-%r@%h:%p
 ControlPersist 10
+ExitOnForwardFailure yes
 
 Host blah
 	Hostname blah
@@ -12,8 +13,14 @@ Host dut-crosvm
 	Hostname 192.168.0.2
 
 Host dut-1
-        ProxyCommand blah
-        User olv
+	ProxyCommand blah
+	User olv
+	#LocalForward 2201 localhost:22
+
+Host dut-2
+	ProxyCommand blah
+	#User olv
+	LocalForward 2202 localhost:22
 
 Host dut-*
 	Hostname %h
