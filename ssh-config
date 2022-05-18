@@ -14,12 +14,11 @@ Host dut-crosvm
 
 Host dut-1
 	ProxyCommand blah
-	User olv
 	#LocalForward 2201 localhost:22
+	User olv
 
 Host dut-2
 	ProxyCommand blah
-	#User olv
 	LocalForward 2202 localhost:22
 
 Host dut-*
