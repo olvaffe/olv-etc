@@ -11,7 +11,7 @@ set $right l
 
 # preferred terminal/browser
 set $term alacritty
-set $browser google-chrome-stable --ozone-platform=wayland
+set $browser google-chrome-stable --ozone-platform=wayland --gtk-version=4
 
 xwayland enable
 
