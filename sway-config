@@ -15,6 +15,9 @@ set $browser google-chrome-stable --ozone-platform=wayland --gtk-version=4
 
 xwayland enable
 
+exec nm-applet --indicator
+exec fcitx5
+
 ### Output configuration
 
 output "*" {

@@ -16,6 +16,8 @@ Host dut-1
 	ProxyCommand blah
 	#LocalForward 2201 localhost:22
 	User olv
+	# renderdoc
+	LocalForward 39920 localhost:39920
 
 Host dut-2
 	ProxyCommand blah
