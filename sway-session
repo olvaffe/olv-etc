@@ -1,16 +1,18 @@
 #!/bin/sh
 
-export NO_AT_BRIDGE=1
+set_envs() {
+	export NO_AT_BRIDGE=1
 
-export GTK_IM_MODULE=fcitx
-export QT_IM_MODULE=fcitx
-export XMODIFIERS=@im=fcitx
+	export GTK_IM_MODULE=fcitx
+	export QT_IM_MODULE=fcitx
+	export XMODIFIERS=@im=fcitx
 
-export GDK_BACKEND=wayland
-export QT_QPA_PLATFORM=wayland
-export SDL_VIDEODRIVER=wayland
+	export GDK_BACKEND=wayland
+	export QT_QPA_PLATFORM=wayland
+	export SDL_VIDEODRIVER=wayland
+}
 
-#gsettings set org.gnome.desktop.interface text-scaling-factor 1.5
-#gsettings set org.gnome.desktop.interface cursor-size 36
+# set envs, mainly for apps started by sway
+set_envs
 
 exec sway > "$HOME/.sway-errors" 2>&1

@@ -1,12 +1,12 @@
+# ~/.bashrc
+
 # If not running interactively, don't do anything
-[ -z "$PS1" ] && return
+[[ $- != *i* ]] && return
 
 PATH="$HOME/.local/bin"
 PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 PATH="$PATH:/usr/local/games:/usr/games"
 export PATH
-
-[[ -z "$DISPLAY$WAYLAND_DISPLAY" && -n $XDG_VTNR && $XDG_VTNR -le 1 ]] && exec ~/.local/bin/sway-session
 
 shopt -s checkwinsize
 

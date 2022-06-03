@@ -1,0 +1,13 @@
+#!/bin/sh
+
+#gsettings set org.gnome.desktop.interface text-scaling-factor 1.5
+#gsettings set org.gnome.desktop.interface cursor-size 36
+
+nm-applet --indicator &
+fcitx5 &
+
+swayidle -w \
+    timeout 300 'swaylock -f -c 000000' \
+    timeout 330 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
+    before-sleep 'swaylock -f -c 000000' \
+    after-resume 'swaymsg "output * enable"' &

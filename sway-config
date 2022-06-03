@@ -15,22 +15,11 @@ set $browser google-chrome-stable --ozone-platform=wayland --gtk-version=4
 
 xwayland enable
 
-exec nm-applet --indicator
-exec fcitx5
-
 ### Output configuration
 
 output "*" {
     scale 2
 }
-
-### Idle configuration
-
-exec swayidle -w \
-    timeout 300 'swaylock -f -c 000000' \
-    timeout 330 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
-    before-sleep 'swaylock -f -c 000000' \
-    after-resume 'swaymsg "output * enable"'
 
 ### Input configuration
 
@@ -151,3 +140,4 @@ bindsym XF86MonBrightnessUp exec light -A 10
 bindsym XF86MonBrightnessDown exec light -U 10
 
 include /etc/sway/config.d/*
+exec sway-session-autostart

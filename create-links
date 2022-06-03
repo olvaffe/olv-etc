@@ -16,6 +16,7 @@ install() {
 	fi
 }
 
+install "$ETC/bash_profile" "$DST/.bash_profile"
 install "$ETC/bash_aliases" "$DST/.bash_aliases"
 install "$ETC/bashrc" "$DST/.bashrc"
 install "$ETC/gitconfig" "$DST/.config/git/config"
@@ -25,3 +26,4 @@ install "$ETC/ssh-config" "$DST/.ssh/config"
 install "$ETC/vimrc" "$DST/.vimrc"
 install "$ETC/alacritty.yml" "$DST/.config/alacritty/alacritty.yml"
 install "$ETC/sway-session" "$DST/.local/bin/sway-session"
+install "$ETC/sway-session-autostart" "$DST/.local/bin/sway-session-autostart"
