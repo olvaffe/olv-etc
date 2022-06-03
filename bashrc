@@ -3,9 +3,21 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-PATH="$HOME/.local/bin"
-PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-PATH="$PATH:/usr/local/games:/usr/games"
+paths="
+	$HOME/.local/bin
+	/usr/local/sbin
+	/usr/local/bin
+	/usr/sbin
+	/usr/bin
+"
+
+# set PATH
+PATH=""
+for path in $paths; do
+	PATH="$PATH:$path"
+done
+unset paths
+PATH=${PATH#:}
 export PATH
 
 shopt -s checkwinsize
