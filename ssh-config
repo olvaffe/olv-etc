@@ -23,17 +23,13 @@ Host dut-2
 	ProxyCommand blah
 	LocalForward 2202 localhost:22
 
-Host dut-coachz
-	User olv
-	# renderdoc
-	LocalForward 39920 localhost:39920
-
 Host dut-*
 	Hostname %h
 	User root
 	IdentityFile ~/.ssh/cros-testing_rsa
 	UserKnownHostsFile /dev/null
 	StrictHostKeyChecking no
+	SetEnv TERM=xterm
 
 Host borealis-*
 	Hostname 100.115.92.26
