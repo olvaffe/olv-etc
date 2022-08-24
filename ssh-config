@@ -29,7 +29,7 @@ Host dut-*
 	IdentityFile ~/.ssh/cros-testing_rsa
 	UserKnownHostsFile /dev/null
 	StrictHostKeyChecking no
-	SetEnv TERM=xterm
+	SetEnv TERM=xterm-256color
 
 Host borealis-*
 	Hostname 100.115.92.26
