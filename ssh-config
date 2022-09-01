@@ -9,19 +9,27 @@ Host blah
 	#RemoteForward 2237 192.168.86.37:22
 	#LocalForward 5900 localhost:5900
 
-Host dut-crosvm
-	Hostname 192.168.0.2
-
-Host dut-1
+Host coachz
 	ProxyCommand blah
-	#LocalForward 2201 localhost:22
+	Hostname dut-1
 	User olv
 	# renderdoc
 	LocalForward 39920 localhost:39920
 
+Host dut-1
+	ProxyCommand blah
+	LocalForward 2201 localhost:22
+
 Host dut-2
 	ProxyCommand blah
 	LocalForward 2202 localhost:22
+
+Host dut-3
+	ProxyCommand blah
+	LocalForward 2203 localhost:22
+
+Host dut-crosvm
+	Hostname 192.168.0.2
 
 Host dut-*
 	Hostname %h
@@ -30,11 +38,3 @@ Host dut-*
 	UserKnownHostsFile /dev/null
 	StrictHostKeyChecking no
 	SetEnv TERM=xterm-256color
-
-Host borealis-*
-	Hostname 100.115.92.26
-	User chronos
-	IdentityFile ~/.ssh/cros-testing_rsa
-	UserKnownHostsFile /dev/null
-	StrictHostKeyChecking no
-	ProxyJump dut-%h
