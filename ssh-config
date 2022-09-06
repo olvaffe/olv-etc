@@ -12,17 +12,14 @@ Host coachz
 
 Host dut-1
 	Hostname blah:fe36:5f94
-	CanonicalizeHostname yes
 	LocalForward 2201 localhost:22
 
 Host dut-2
 	Hostname blah:fe3a:b1d4
-	CanonicalizeHostname yes
 	LocalForward 2202 localhost:22
 
 Host dut-3
 	Hostname blah:fe3b:8382
-	CanonicalizeHostname yes
 	LocalForward 2203 localhost:22
 
 Host dut-crosvm
@@ -30,13 +27,14 @@ Host dut-crosvm
 
 Host dut-*
 	User root
+	CanonicalizeHostname yes
 	IdentityFile ~/.ssh/cros-testing_rsa
 	UserKnownHostsFile /dev/null
 	StrictHostKeyChecking no
 	SetEnv TERM=xterm-256color
 
 Host blah:*
-	ProxyCommand blah
+	ProxyCommand /usr/bin/blah %h %p
 
 Host *
 	ControlMaster auto
