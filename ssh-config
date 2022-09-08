@@ -7,6 +7,7 @@ Host ct
 Host coachz
 	Hostname blah:fe36:5f94
 	CanonicalizeHostname yes
+	IdentityFile ~/.ssh/cros-testing_rsa
 	# renderdoc
 	LocalForward 39920 localhost:39920
 
