@@ -2,12 +2,28 @@
 
 set -e
 
-FILES="
+VK_FILES="
 /vendor/etc/init/vulkan.rc
+/vendor/etc/permissions/android.hardware.vulkan.compute-0.xml
 /vendor/etc/permissions/android.hardware.vulkan.level-1.xml
 /vendor/etc/permissions/android.hardware.vulkan.version-1_1.xml
 /vendor/lib/hw/vulkan.cheets.so
 /vendor/lib64/hw/vulkan.cheets.so
+"
+
+GL_FILES="
+/vendor/etc/init/gles32.rc
+/vendor/etc/permissions/android.hardware.opengles.aep.xml
+/vendor/lib/dri/virtio_gpu_dri.so
+/vendor/lib/egl/libEGL_mesa.so
+/vendor/lib/egl/libGLESv1_CM_mesa.so
+/vendor/lib/egl/libGLESv2_mesa.so
+/vendor/lib/libglapi.so.0
+/vendor/lib64/dri/virtio_gpu_dri.so
+/vendor/lib64/egl/libEGL_mesa.so
+/vendor/lib64/egl/libGLESv1_CM_mesa.so
+/vendor/lib64/egl/libGLESv2_mesa.so
+/vendor/lib64/libglapi.so.0
 "
 
 if [ $# -eq 0 ]; then
@@ -22,7 +38,7 @@ if [ "$hw" == "cheets" ]; then
 	src_base="$sysroot/opt/google/containers/android"
 fi
 
-for i in $FILES; do
+for i in $VK_FILES $GL_FILES; do
         adb push --sync "$src_base$i" "$i"
         #adb shell rm -f "$i"
 done
