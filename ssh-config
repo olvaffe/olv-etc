@@ -26,6 +26,13 @@ Host dut-3
 Host dut-crosvm
 	Hostname 192.168.0.2
 
+Host dut-priv
+	Hostname 192.168.0.12
+
+Host dut-fwd
+	Hostname localhost
+	Port 2212
+
 Host dut-*
 	User root
 	CanonicalizeHostname yes
