@@ -18,6 +18,7 @@ xwayland enable
 ### Output configuration
 
 output "*" {
+    # use 2 for HiDPI
     scale 1
 }
 
