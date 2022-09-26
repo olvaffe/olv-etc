@@ -1,6 +1,6 @@
 Host ct
 	Hostname blah
-	#RemoteForward 2212 192.168.0.12:22
+	#RemoteForward 2202 192.168.0.2:22
 	#RemoteForward 2230 192.168.86.30:22
 	#RemoteForward 2237 192.168.86.37:22
 	#LocalForward 5900 localhost:5900
@@ -28,11 +28,11 @@ Host dut-crosvm
 	Hostname 192.168.0.2
 
 Host dut-priv
-	Hostname 192.168.0.12
+	Hostname 192.168.0.2
 
 Host dut-fwd
 	Hostname localhost
-	Port 2212
+	Port 2202
 
 Host dut-*
 	User root
