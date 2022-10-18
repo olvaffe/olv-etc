@@ -1,38 +1,37 @@
 Host ct
 	Hostname blah
-	#RemoteForward 2202 192.168.0.2:22
+	# VNC
+	LocalForward 5900 localhost:5900
+	RemoteForward 2200 localhost:22
 	#RemoteForward 2230 192.168.86.30:22
 	#RemoteForward 2237 192.168.86.37:22
-	#LocalForward 5900 localhost:5900
 
 Host coachz
-	Hostname blah:fe36:5f94
+	Hostname test:network::fe36:5f94
 	CanonicalizeHostname yes
 	IdentityFile ~/.ssh/cros-testing_rsa
 	# renderdoc
 	LocalForward 39920 localhost:39920
 
 Host dut-1
-	Hostname blah:fe36:5f94
+	Hostname test:network::fe36:5f94
 	LocalForward 2201 localhost:22
 
 Host dut-2
-	Hostname blah:fe3a:b1d4
+	Hostname test:network::fe3a:b1d4
 	LocalForward 2202 localhost:22
 
 Host dut-3
-	Hostname blah:fe3b:8382
+	Hostname test:network::fe3b:8382
 	LocalForward 2203 localhost:22
 
-Host dut-crosvm
-	Hostname 192.168.0.2
+Host dut-borealis
+	Hostname 100.115.92.26
+	User chronos
+	ProxyJump dut-3
 
 Host dut-priv
 	Hostname 192.168.0.2
-
-Host dut-fwd
-	Hostname localhost
-	Port 2202
 
 Host dut-*
 	User root
@@ -42,7 +41,7 @@ Host dut-*
 	StrictHostKeyChecking no
 	SetEnv TERM=xterm-256color
 
-Host blah:*
+Host test:network::*
 	ProxyCommand /usr/bin/blah %h %p
 
 Host *
