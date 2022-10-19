@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# before adb remount works..
+
+OV_TMPFS="/data/overlay-remount"
+OV_REMOUNTS="/system/bin /system/lib64 /vendor"
+
+if ! adb shell whoami | grep -q root; then
+	echo 'please adb root first'
+	exit 1
+fi
+
+if ! adb shell mountpoint -q "$OV_TMPFS" 2>/dev/null; then
+	echo "mounting $OV_TMPFS"
+	adb shell mkdir -p "$OV_TMPFS"
+	adb shell mount -t tmpfs none "$OV_TMPFS"
+fi
+
+for remount in $OV_REMOUNTS; do
+	if ! adb shell mount | grep -q "none on $remount type overlay"; then
+		echo "preparing $OV_TMPFS for $remount"
+		adb shell mkdir -p "$OV_TMPFS/$remount-upper"
+		adb shell mkdir -p "$OV_TMPFS/$remount-work"
+
+		echo "mounting $remount"
+		opts="lowerdir=$remount,upperdir=$OV_TMPFS/$remount-upper,workdir=$OV_TMPFS/$remount-work"
+		adb shell mount -t overlay -o "$opts" none $remount
+	fi
+done
+
+adb shell setenforce 0
+
+echo "done"
