@@ -1,13 +1,31 @@
 #!/bin/sh
 
-set_governor=""
-if [ "$#" -gt 0 ]; then
-	set_governor="$1"
+cpu_governor="$1"
+gpu_governor="$2"
+
+if [ -z "$gpu_governor" -a -n "$cpu_governor" ]; then
+	case "$cpu_governor" in
+	ondemand|schedutil)
+		gpu_governor="simple_ondemand"
+		;;
+	userspace|powersave|performance|*)
+		gpu_governor="$cpu_governor"
+		;;
+	esac
 fi
 
 for i in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
-	if [ -n "$set_governor" ]; then
-		echo "$set_governor" > "$i"
+	if [ -n "$cpu_governor" ]; then
+		echo "$cpu_governor" > "$i"
+	fi
+
+	echo -n "$i: "
+	cat "$i"
+done
+
+for i in /sys/class/devfreq/*.gpu/governor; do
+	if [ -n "$gpu_governor" ]; then
+		echo "$gpu_governor" > "$i"
 	fi
 
 	echo -n "$i: "
