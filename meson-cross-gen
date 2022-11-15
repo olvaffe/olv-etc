@@ -1,0 +1,128 @@
+#!/bin/sh
+
+android_api="28"
+
+if [ $# -ne 4 ]; then
+	echo "$0 <arm|x86> <32|64> <linux|android> <sysroot|ndk_root>"
+	exit 1
+fi
+
+arch="$1"
+bits="$2"
+system="$3"
+sysroot="$4"
+
+init_vars() {
+	# https://mesonbuild.com/Reference-tables.html#cpu-families
+	# https://wiki.debian.org/Multiarch/Tuples
+	case "$arch-$bits" in
+	x86-64)
+		cpu_family="x86_64"
+		cpu="x86_64"
+		triplet="x86_64-linux-gnu"
+		;;
+	x86-32)
+		cpu_family="x86"
+		cpu="i686"
+		triplet="i386-linux-gnu"
+		;;
+	arm-64)
+		cpu_family="aarch64"
+		cpu="aarch64"
+		triplet="aarch64-linux-gnu"
+		;;
+	arm-32)
+		cpu_family="arm"
+		cpu="armv7a"
+		triplet="arm-linux-gnueabihf"
+		;;
+	*)
+		echo "unknown $arch-$bits"
+		exit 1
+		;;
+	esac
+
+	if [ "$system" = "linux" ]; then
+		args="'--sysroot', '$sysroot'"
+		if [ "$arch-$bits" = "x86-32" ]; then
+			args="'-m32', $args"
+		fi
+	else
+		ndk_root="$sysroot"
+		ndk_bin="$sysroot/toolchains/llvm/prebuilt/linux-x86_64/bin"
+		sysroot="/not-exist"
+		args="'-target', '$cpu-linux-android$android_api'"
+	fi
+
+	local basedirs="/usr/lib /usr/lib/$triplet /usr/share"
+	pkgconfigdirs=""
+	for b in $basedirs; do
+		pkgconfigdirs="$pkgconfigdirs:$sysroot$b/pkgconfig"
+	done
+	pkgconfigdirs="${pkgconfigdirs#:}"
+}
+
+init_vars
+
+gen_binaries() {
+	cat <<EOF
+[binaries]
+ar = '$triplet-ar'
+c = '$triplet-gcc'
+cpp = '$triplet-g++'
+strip = '$triplet-strip'
+pkgconfig = '/usr/bin/pkg-config'
+EOF
+}
+
+gen_binaries_ndk() {
+	cat <<EOF
+[binaries]
+ar = '$ndk_bin/llvm-ar'
+c = '$ndk_bin/clang'
+cpp = '$ndk_bin/clang++'
+strip = '$ndk_bin/llvm-strip'
+pkgconfig = '/usr/bin/pkg-config'
+EOF
+}
+
+gen_builtin_options() {
+	cat <<EOF
+[built-in options]
+c_args = [$args]
+c_link_args = [$args]
+cpp_args = [$args]
+cpp_link_args = [$args]
+EOF
+}
+
+gen_properties() {
+	# only for PKG_CONFIG_SYSROOT_DIR and PKG_CONFIG_LIBDIR
+	cat <<EOF
+[properties]
+sys_root = '$sysroot'
+pkg_config_libdir = '$pkgconfigdirs'
+EOF
+}
+
+gen_host_machine() {
+	cat <<EOF
+[host_machine]
+system = '$system'
+cpu_family = '$cpu_family'
+cpu = '$cpu'
+endian = 'little'
+EOF
+}
+
+if [ "$system" = "linux" ]; then
+	gen_binaries
+else
+	gen_binaries_ndk
+fi
+echo
+gen_builtin_options
+echo
+gen_properties
+echo
+gen_host_machine
