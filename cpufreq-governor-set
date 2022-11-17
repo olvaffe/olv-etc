@@ -2,6 +2,7 @@
 
 cpu_governor="$1"
 gpu_governor="$2"
+suspend_delay="$3"
 
 if [ -z "$gpu_governor" -a -n "$cpu_governor" ]; then
 	case "$cpu_governor" in
@@ -14,6 +15,14 @@ if [ -z "$gpu_governor" -a -n "$cpu_governor" ]; then
 	esac
 fi
 
+if [ -n "$gpu_governor" ]; then
+	if [ "$gpu_governor" = "performance" ]; then
+		suspend_delay="-1"
+	else
+		suspend_delay="66"
+	fi
+fi
+
 for i in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
 	if [ -n "$cpu_governor" ]; then
 		echo "$cpu_governor" > "$i"
@@ -23,11 +32,21 @@ for i in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
 	cat "$i"
 done
 
-for i in /sys/class/devfreq/*.gpu/governor; do
+for i in /sys/class/devfreq/*.gpu; do
+	sysfs_gov="$i/governor"
+	sysfs_sus="$i/device/power/autosuspend_delay_ms"
+
 	if [ -n "$gpu_governor" ]; then
-		echo "$gpu_governor" > "$i"
+		echo "$gpu_governor" > "$sysfs_gov"
 	fi
 
-	echo -n "$i: "
-	cat "$i"
+	echo -n "$sysfs_gov: "
+	cat "$sysfs_gov"
+
+	if [ -n "$suspend_delay" ]; then
+		echo "$suspend_delay" > "$sysfs_sus"
+	fi
+
+	echo -n "$sysfs_sus: "
+	cat "$sysfs_sus"
 done
