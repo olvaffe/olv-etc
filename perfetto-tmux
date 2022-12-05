@@ -1,0 +1,12 @@
+#!/bin/sh
+
+TRACEBOX="$HOME/tools/tracebox"
+PPS_PRODUCER="$HOME/tools/pps-producer"
+
+SESS="perfetto"
+
+tmux new-session -s "$SESS" -d
+tmux new-window -t "$SESS" -d -n traced "$TRACEBOX" traced
+tmux new-window -t "$SESS" -d -n traced_probes sudo "$TRACEBOX" traced_probes --reset-ftrace
+tmux new-window -t "$SESS" -d -n pps-producer sudo "$PPS_PRODUCER"
+tmux attach-session -t "$SESS"
