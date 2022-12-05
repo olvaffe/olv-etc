@@ -3,35 +3,26 @@ Host ct
 	# VNC
 	LocalForward 5900 localhost:5900
 	RemoteForward 2200 localhost:22
-	#RemoteForward 2230 192.168.86.30:22
-	#RemoteForward 2237 192.168.86.37:22
 
-Host coachz
-	Hostname test:network::fe36:5f94
-	CanonicalizeHostname yes
-	IdentityFile ~/.ssh/cros-testing_rsa
-	# renderdoc
-	LocalForward 39920 localhost:39920
+Host dut-priv
+	Hostname 192.168.0.2
 
-Host dut-1
-	Hostname test:network::fe36:5f94
+Host dut-1 lnx-1
+	Hostname my:test:net:work:7288:6bff:fe89:43dd
 	LocalForward 2201 localhost:22
 
-Host dut-2
-	Hostname test:network::fe3a:b1d4
+Host dut-2 lnx-2
+	Hostname my:test:net:work:5e85:7eff:fe3a:b1d4
 	LocalForward 2202 localhost:22
 
-Host dut-3
-	Hostname test:network::fe3b:8382
+Host dut-3 lnx-3
+	Hostname my:test:net:work:5e85:7eff:fe3b:8382
 	LocalForward 2203 localhost:22
 
 Host dut-borealis
 	Hostname 100.115.92.26
 	User chronos
 	ProxyJump dut-3
-
-Host dut-priv
-	Hostname 192.168.0.2
 
 Host dut-*
 	User root
@@ -41,8 +32,17 @@ Host dut-*
 	StrictHostKeyChecking no
 	SetEnv TERM=xterm-256color
 
-Host test:network::*
-	ProxyCommand /usr/bin/blah %h %p
+Host lnx-*
+	User olv
+	CanonicalizeHostname yes
+	IdentityFile ~/.ssh/cros-testing_rsa
+	UserKnownHostsFile /dev/null
+	StrictHostKeyChecking no
+	# renderdoc
+	LocalForward 39920 localhost:39920
+
+Host my:test:net:work:*
+	ProxyCommand /usr/bin/ssh-helper %h %p
 
 Host *
 	ControlMaster auto
