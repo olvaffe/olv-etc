@@ -1,0 +1,155 @@
+#!/bin/sh
+
+set -e
+
+setup() {
+	common_options="
+		-Dprefix=$PREFIX
+		-Dlibdir=$LIBDIR
+		-Dstrip=true
+		-Dbuildtype=release
+		-Dvulkan-drivers=freedreno
+		-Dgallium-drivers=freedreno
+		-Dperfetto=false
+		-Dglvnd=false
+		-Dglx=disabled
+		-Dgbm=disabled
+		-Dgallium-xa=disabled
+		-Dexecmem=false
+		-Dshader-cache=disabled
+		-Dllvm=disabled
+	"
+
+	if [ "$SYSTEM" = "linux" ]; then
+		system_options="
+			-Dplatforms=
+			-Degl-native-platform=surfaceless
+			-Dgles1=disabled
+		"
+	else
+		system_options="
+			-Dfreedreno-virtio=true
+			-Dplatforms=android
+			-Dplatform-sdk-version=$API_LEVEL
+			-Degl-lib-suffix=_mesa
+			-Dgles-lib-suffix=_mesa
+		"
+	fi
+
+	meson setup "$OUT" --cross-file "$CROSS_FILE" \
+		$common_options $system_options $@
+}
+
+build() {
+	meson compile -C "$OUT"
+
+	destdir="$(realpath "$OUT")/install"
+	meson install -C "$OUT" --destdir "$destdir"
+}
+
+deploy() {
+	dut="$1"
+
+	src="$OUT/install$PREFIX/$LIBDIR"
+	dst="$PREFIX/$LIBDIR"
+	files="
+		dri/msm_dri.so
+		libEGL.so.1.0.0
+		libglapi.so.0.0.0
+		libGLESv2.so.2.0.0
+		libvulkan_freedreno.so
+		"
+
+	for f in $files; do
+		if [ -r "$src/$f" ]; then
+			echo scp -C "$src/$f" "$dut:$dst/$f"
+		fi
+	done
+}
+
+CROSS_FILE=""
+ACTION=""
+if [ $# -ge 2 ]; then
+	CROSS_FILE="$1"
+	ACTION="$2"
+	shift 2
+fi
+
+if [ -r "$CROSS_FILE" ]; then
+	OUT="$(basename "$CROSS_FILE")"
+	OUT="out-${CROSS_FILE%.*}"
+
+	CPP="$(grep '^cpp = ' "$CROSS_FILE" | cut -d\' -f2)"
+	SYSROOT="$(grep '^sys_root = ' "$CROSS_FILE" | cut -d\' -f2)"
+	SYSTEM="$(grep '^system = ' "$CROSS_FILE" | cut -d\' -f2)"
+	CPU_FAMILY="$(grep '^cpu_family = ' "$CROSS_FILE" | cut -d\' -f2)"
+
+	if [[ "$CPP" = "/opt/android-"* ]]; then
+		SYSTEM="android"
+
+		if [[ "$CPP" = "/opt/android-p"* ]]; then
+			API_LEVEL="28"
+		elif [[ "$CPP" = "/opt/android-r"* ]]; then
+			API_LEVEL="30"
+		elif [[ "$CPP" = "/opt/android-t"* ]]; then
+			API_LEVEL="33"
+		else
+			API_LEVEL="30"
+		fi
+	fi
+
+	LIBDIR="lib"
+	ABI="$CPU_FAMILY"
+	case "$CPU_FAMILY" in
+		aarch64)
+			LIBDIR="lib64"
+			ABI="arm64"
+			;;
+		x86_64)
+			LIBDIR="lib64"
+			ABI="amd64"
+			;;
+		*)
+			;;
+	esac
+
+	if [ "$SYSTEM" = "linux" ]; then
+		PREFIX="/usr"
+		export SYSROOT
+	else
+		PREFIX="/vendor"
+
+		if [ -d "$SYSROOT/opt/google/vms" ]; then
+			ARC_SYSROOT="$SYSROOT/opt/google/vms/android"
+		else
+			ARC_SYSROOT="$SYSROOT/opt/google/containers/android"
+		fi
+		export SYSROOT
+		export ARC_SYSROOT
+		export ABI
+	fi
+
+	echo "OUT=$OUT"
+	echo "SYSTEM=$SYSTEM"
+	echo "PREFIX=$PREFIX"
+	echo "LIBDIR=$LIBDIR"
+	echo
+	echo "--------"
+	echo
+fi
+
+case "$ACTION" in
+	setup)
+		setup $@
+		;;
+	build)
+		build $@
+		;;
+	deploy)
+		deploy $@
+		;;
+	*)
+		echo "$0 <cross-file> <setup|build|deploy>"
+		exit 1
+		;;
+esac
