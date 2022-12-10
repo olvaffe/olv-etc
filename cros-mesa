@@ -49,22 +49,53 @@ build() {
 
 deploy() {
 	dut="$1"
+	if [ "$SYSTEM" = "linux" ]; then
+		cp="scp -C"
+		if [ -z "$dut" ]; then
+			echo 'DUT must be specified'
+			exit 1
+		fi
+	else
+		adb="adb"
+		if [ -n "$dut" ]; then
+			adb="$adb -s $dut"
+			dut=""
+		fi
+		cp="$adb push --sync"
+	fi
 
 	src="$OUT/install$PREFIX/$LIBDIR"
 	dst="$PREFIX/$LIBDIR"
 	files="
 		dri/msm_dri.so
-		libEGL.so.1.0.0
-		libglapi.so.0.0.0
-		libGLESv2.so.2.0.0
+		libEGL.so.1
+		libEGL_mesa.so.1
+		libglapi.so.0
+		libGLESv1_CM.so.1
+		libGLESv1_CM_mesa.so.1
+		libGLESv2.so.2
+		libGLESv2_mesa.so.2
 		libvulkan_freedreno.so
 		"
 
 	for f in $files; do
-		if [ -r "$src/$f" ]; then
-			echo scp -C "$src/$f" "$dut:$dst/$f"
+		s="$src/$f"
+		if [ -r "$s" ]; then
+			d="$dst/$f"
+			if [ -n "$dut" ]; then
+				d="$dut:$d"
+			fi
+
+			echo $cp "$s" "$d"
 		fi
 	done
+
+	if [ "$SYSTEM" = "android" ]; then
+		echo $adb shell ln -sf "../libEGL_mesa.so.1" "$dst/egl/libEGL_mesa.so"
+		echo $adb shell ln -sf "../libGLESv1_CM_mesa.so.1" "$dst/egl/libGLESv1_CM_mesa.so"
+		echo $adb shell ln -sf "../libGLESv2_mesa.so.2" "$dst/egl/libGLESv2_mesa.so"
+		echo $adb shell ln -sf "msm_dri.so" "$dst/dri/virtio_gpu_dri.so"
+	fi
 }
 
 CROSS_FILE=""
