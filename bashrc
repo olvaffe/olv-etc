@@ -16,4 +16,7 @@ HISTCONTROL=ignoredups:erasedups
 shopt -s histappend
 
 # for cros chroot
-unset LESS
+if [ -n "$CROS_WORKON_SRCROOT" ]; then
+	PS1="\u@cros-sdk:\w\$ "
+	unset LESS
+fi
