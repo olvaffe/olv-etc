@@ -4,7 +4,11 @@
 [[ $- != *i* ]] && return
 
 PATH="/usr/bin"
-[ -f "/etc/arch-release" ] || PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:$PATH"
+[ -f "/etc/arch-release" ] || PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:$PATH:/sbin:/bin"
+
+if [ -n "$CROS_WORKON_SRCROOT" ]; then
+	PATH="/opt/bin:$CROS_WORKON_SRCROOT/chromite/bin:$CROS_WORKON_SRCROOT/src/chromium/depot_tools:$PATH"
+fi
 
 [ -d "$HOME/.local/bin" ] && PATH="$HOME/.local/bin:$PATH"
 [ -d "$HOME/projects/depot_tools" ] && PATH="$HOME/projects/depot_tools:$PATH"
