@@ -3,7 +3,14 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-PATH="$HOME/.local/bin:/usr/bin"
+PATH="/usr/bin"
+[ -f "/etc/arch-release" ] || PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:$PATH"
+
+[ -d "$HOME/.local/bin" ] && PATH="$HOME/.local/bin:$PATH"
+[ -d "$HOME/projects/depot_tools" ] && PATH="$HOME/projects/depot_tools:$PATH"
+[ -d "$HOME/android/sdk/build-tools/30.0.3" ] && PATH="$HOME/android/sdk/build-tools/30.0.3:$PATH"
+[ -d "$HOME/android/sdk/platform-tools" ] && PATH="$HOME/android/sdk/platform-tools:$PATH"
+
 export PATH
 
 shopt -s checkwinsize
