@@ -1,3 +1,5 @@
+# ~/.bash_aliases
+
 # enable color support of ls and also add handy aliases
 if command -v dircolors > /dev/null; then
     eval "$(TERM=xterm dircolors -b)"

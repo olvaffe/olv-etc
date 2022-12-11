@@ -16,9 +16,10 @@ install() {
 	fi
 }
 
+install "$ETC/bashrc" "$DST/.bashrc"
+install "$ETC/bash_paths" "$DST/.bash_paths"
 install "$ETC/bash_aliases" "$DST/.bash_aliases"
 install "$ETC/bash_profile" "$DST/.bash_profile"
-install "$ETC/bashrc" "$DST/.bashrc"
 
 install "$ETC/gitconfig" "$DST/.config/git/config"
 install "$ETC/ssh-config" "$DST/.ssh/config"
