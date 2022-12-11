@@ -14,3 +14,6 @@ HISTSIZE=64000
 HISTFILESIZE=64000
 HISTCONTROL=ignoredups:erasedups
 shopt -s histappend
+
+# for cros chroot
+unset LESS
