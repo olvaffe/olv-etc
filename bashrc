@@ -46,6 +46,10 @@ if [ -x /usr/bin/dircolors ]; then
 fi
 
 # Alias definitions.
-if [ -f $HOME/.bash_aliases ]; then
-    . $HOME/.bash_aliases
+if [ -f "$HOME/.bash_aliases" ]; then
+    . "$HOME/.bash_aliases"
+fi
+
+if [ -f "$HOME/.cargo/env" ]; then
+	. "$HOME/.cargo/env"
 fi
