@@ -1,0 +1,104 @@
+#!/bin/sh
+
+set -e
+
+GL_FLAVORS="system angle"
+TRACE_IDS="among_us asphalt_9 brawl_stars candy_crush_soda_saga clash_of_clans free_fire_max google_maps minecraft mobile_legends pubg_mobile_battle_royale temple_run_300"
+
+DUT_PKG="com.android.angle.test"
+DUT_DATA="/sdcard/chromium_tests_root"
+HOST_OUT="out"
+
+ADB="adb"
+SERIAL="$1"
+if [ -n "$SERIAL" ]; then
+	ADB="$ADB -s $SERIAL"
+	HOST_OUT="$HOST_OUT-$SERIAL"
+fi
+
+install() {
+	trace_dir="src/tests/restricted_traces"
+	host_apk="out/Android/angle_trace_tests_apk/angle_trace_tests-debug.apk"
+
+	echo "This script assumes angle traces have been installed:"
+	echo
+	echo "  $ $ADB install -r -d $host_apk"
+	echo "  $ for trace in $TRACE_IDS; do"
+	echo "      $ADB shell mkdir -p $DUT_DATA/$trace_dir/\$trace"
+	echo "      $ADB push $trace_dir/\$trace/*.{json,gz} $DUT_DATA/$trace_dir/\$trace"
+	echo "    done"
+	echo "  $ $ADB push $trace_dir/restricted_traces.json $DUT_DATA/$trace_dir"
+	echo
+
+	if ! $ADB shell "test -f $DUT_DATA/$trace_dir/restricted_traces.json"; then
+		echo "could not find angle traces"
+		exit 1
+	fi
+}
+
+prepare() {
+	echo "Preparing angle traces..."
+
+	$ADB shell rm -f "$DUT_DATA/stdout-*.txt"
+}
+
+run() {
+	gl="$1"
+	echo "Running angle traces with $gl GLES driver..."
+
+	runner_class="org.chromium.build.gtest_apk.NativeTestInstrumentationTestRunner"
+	runner_param="org.chromium.native_test.NativeTestInstrumentationTestRunner"
+	test_activity="com.android.angle.test.AngleUnitTestActivity"
+	test_param="org.chromium.native_test.NativeTest"
+
+	filter=""
+	for trace in $TRACE_IDS; do
+		filter="$filter:TraceTest.$trace"
+	done
+	filter="--gtest_filter=${filter#:}"
+
+	flags="--use-gl=$gl\ --use-angle=vulkan\ -v\ --offscreen\ $filter"
+
+	$ADB shell am instrument -w \
+		-e "$runner_param.StdoutFile" "$DUT_DATA/stdout-$gl.txt" \
+		-e "$runner_param.ShardNanoTimeout" 1000000000000000000 \
+		-e "$runner_param.NativeTestActivity" "$test_activity" \
+		-e "$test_param.CommandLineFlags" "$flags" \
+		"$DUT_PKG/$runner_class"
+}
+
+cleanup() {
+	echo "Cleaning up angle traces..."
+
+	$ADB shell am force-stop "$DUT_PKG"
+}
+
+collect() {
+	echo "Pulling test results..."
+
+	mkdir -p "$HOST_OUT"
+	files="$($ADB shell ls "$DUT_DATA/stdout-*.txt")"
+	$ADB pull $files "$HOST_OUT"
+}
+
+show() {
+	for gl in $GL_FLAVORS; do
+		txt="$HOST_OUT/stdout-$gl.txt"
+		if [ ! -r "$txt" ]; then
+			continue
+		fi
+
+		echo "$gl"
+		awk '/RUN/{test = $4}
+		     /Mean result time/{ms = $4; fps = 1000 / ms; print test "," ms "," fps}' "$txt"
+	done
+}
+
+install
+prepare
+for gl in $GL_FLAVORS; do
+	run "$gl"
+done
+cleanup
+collect
+show

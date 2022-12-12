@@ -1,0 +1,87 @@
+#!/bin/sh
+
+set -e
+
+TEST_IDS="gl_5_high_off,gl_5_normal_off,gl_4_off,gl_manhattan31_off,gl_manhattan311_wqhd_off,gl_manhattan_off,gl_trex_off,gl_driver2_off,gl_trex,vulkan_5_high_off,vulkan_5_normal_off"
+
+DUT_PKG="net.kishonti.gfxbench.vulkan.v50005.corporate"
+DUT_ACTIVITY="net.kishonti.app.MainActivity"
+DUT_DATA="/sdcard/Android/data/$DUT_PKG/files"
+HOST_OUT="out"
+
+ADB="adb"
+SERIAL="$1"
+if [ -n "$SERIAL" ]; then
+	ADB="$ADB -s $SERIAL"
+	HOST_OUT="$HOST_OUT-$SERIAL"
+fi
+
+install() {
+	host_apk="gfxbench_vulkan-5.0.5+corporate.apk"
+
+	echo "This script assumes gfxbench has been installed and initialized:"
+	echo
+	echo "  $ $ADB install -r -g $host_apk"
+	echo "  $ $ADB shell am start-activity -n $DUT_PKG/$DUT_ACTIVITY"
+	echo "  (Click Yes to initialize benchmark data)"
+	echo
+}
+
+prepare() {
+	echo "Preparing gfxbench..."
+
+	$ADB shell am force-stop "$DUT_PKG"
+	$ADB shell rm -rf "$DUT_DATA/results"
+}
+
+run() {
+	echo "Running gfxbench..."
+
+	test_action="net.kishonti.testfw.ACTION_RUN_TESTS"
+	test_activity="net.kishonti.benchui.corporate.CommandLineSession"
+
+	$ADB shell am start-activity -n "$DUT_PKG/$DUT_ACTIVITY"
+	$ADB shell am broadcast \
+		-a "$test_action" \
+		-n "$DUT_PKG/$test_activity" \
+		-e "test_ids" "$TEST_IDS"
+
+	read -p "Press Enter 3 times when the test is done"
+	read -p "Press Enter 2 times when the test is done"
+	read -p "Press Enter 1 time when the test is done"
+}
+
+cleanup() {
+	echo "Cleaning up gfxbench..."
+
+	$ADB shell am force-stop "$DUT_PKG"
+}
+
+collect() {
+	echo "Collecting results..."
+
+	mkdir -p "$HOST_OUT"
+	$ADB pull "$DUT_DATA/results" "$HOST_OUT"
+}
+
+show() {
+	timestamp="$(ls "$HOST_OUT/results" | tail -n 1)"
+	if [ -z "$timestamp" ]; then
+		echo "no results"
+		return
+	fi
+
+	for json in "$HOST_OUT/results/$timestamp/"*.json; do
+		awk '/result_id/{result_id = $2}
+		     /frame_count/{frame_count = $2}
+		     /fps/{fps = $2}
+		     END{print result_id frame_count fps}' "$json"
+	done
+}
+
+install
+prepare
+run
+cleanup
+collect
+show
