@@ -3,9 +3,8 @@ selection:
   save_to_clipboard: true
 
 font:
-  # I would like 10pt, but alacritty assumes 96dpi and I usually have 160dpi.
-  # Scale it up.
-  size: 16.6
+  # 11pt * 1.6 (text-scaling-factor)
+  size: 17.6
 
 colors:
   # Default colors

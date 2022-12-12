@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# I like 10pt which is 22.2px on 160dpi.  gnome and most softwares/libraries
-# default to 11pt and assume 96dpi, which is 14.6px.  Scale it.
-gsettings set org.gnome.desktop.interface text-scaling-factor 1.5
+# gnome defaults to 11pt.  But it assumes 96dpi while my displays are 160dpi.
+gsettings set org.gnome.desktop.interface text-scaling-factor 1.6
+
 #gsettings set org.gnome.desktop.interface cursor-size 36
 
 nm-applet --indicator &
