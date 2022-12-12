@@ -15,13 +15,6 @@ set $browser google-chrome-stable --ozone-platform=wayland --gtk-version=4
 
 xwayland disable
 
-### Output configuration
-
-output "*" {
-    # use 2 for HiDPI
-    scale 1
-}
-
 ### Input configuration
 
 input "type:touchpad" {

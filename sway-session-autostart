@@ -1,5 +1,25 @@
 #!/bin/sh
 
+is_hidpi() {
+	command -v wayland-info > /dev/null || return 1
+
+	physical_width=$(wayland-info | grep "physical_width" | cut -d' ' -f 2)
+	logical_width=$(wayland-info | grep "logical_width" | cut -d' ' -f 2)
+	logical_width=${logical_width%,}
+
+	[ -n "$logical_width" -a -n "$physical_width" ] || return 1
+
+	dpi="$(($logical_width * 254 / 10 / $physical_width))"
+	echo "dpi $dpi, logical_width $logical_width, physical_width $physical_width"
+
+	# 160 is the baseline; consider 150% density as hidpi
+	test "$dpi" -ge "240"
+}
+
+if is_hidpi; then
+	swaymsg output '*' scale 2
+fi
+
 # I like 10pt which is 22.2px on 160dpi.  gnome and most softwares/libraries
 # default to 11pt and assume 96dpi, which is 14.6px.  Scale it.
 gsettings set org.gnome.desktop.interface text-scaling-factor 1.5
