@@ -45,6 +45,7 @@ install "alacritty.yml" ".config/alacritty/alacritty.yml"
 install "vimrc" ".vim/vimrc"
 install "vim-pack" ".vim/pack"
 install "gitconfig" ".config/git/config"
+touch "$DST/.config/git/credentials"
 
 install "ssh-config" ".ssh/config"
 install "tmux.conf" ".tmux.conf"
