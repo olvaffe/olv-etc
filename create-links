@@ -3,6 +3,16 @@
 SRC="$(dirname "$(realpath "$0")")"
 DST="$HOME"
 
+create_xdg_base_dirs() {
+	for dir in .cache .config .local; do
+		mkdir -p -m 0700 "$DST/$dir"
+	done
+
+	for dir in bin share state; do
+		mkdir -p "$DST/.local/$dir"
+	done
+}
+
 install() {
 	orig="$1"
 	src="$SRC/$1"
@@ -18,6 +28,8 @@ install() {
 		echo "$orig installed"
 	fi
 }
+
+create_xdg_base_dirs
 
 install "bashrc" ".bashrc"
 install "bash_paths" ".bash_paths"
