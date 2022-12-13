@@ -30,7 +30,6 @@ Host dut-*
 	IdentityFile ~/.ssh/cros-testing_rsa
 	UserKnownHostsFile /dev/null
 	StrictHostKeyChecking no
-	SetEnv TERM=xterm-256color
 
 Host lnx-*
 	User olv

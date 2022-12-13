@@ -20,3 +20,13 @@ if [ -n "$CROS_WORKON_SRCROOT" ]; then
 	PS1="\u@cros-sdk:\w\$ "
 	unset LESS
 fi
+
+if command -v infocmp > /dev/null; then
+	if ! infocmp "$TERM" > /dev/null 2>&1; then
+		TERM="xterm-256color"
+	fi
+
+	if [ -z "$COLORTERM" ]; then
+		export COLORTERM="truecolor"
+	fi
+fi
