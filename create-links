@@ -1,33 +1,37 @@
 #!/bin/sh
 
-ETC=$HOME/olv-etc
-DST=$HOME
+SRC="$(dirname "$(realpath "$0")")"
+DST="$HOME"
 
 install() {
-	if [ -h "$2" -a "$1" = "`readlink $2`" ]; then
-		return
-	elif [ -f "$2" ]; then
-		echo "$2 already exists"
+	orig="$1"
+	src="$SRC/$1"
+	dst="$DST/$2"
+
+	if [ -e "$dst" ]; then
+		[ "$(realpath "$dst")" = "$src" ] || echo "$dst already exists"
 		return
 	fi
 
-	if mkdir -p "`dirname $2`" && ln -s "$1" "$2"; then
-		echo "`basename $1` installed"
+	dst_dir="$(dirname "$dst")"
+	if mkdir -p "$dst_dir" && ln -s "$src" "$dst"; then
+		echo "$orig installed"
 	fi
 }
 
-install "$ETC/bashrc" "$DST/.bashrc"
-install "$ETC/bash_paths" "$DST/.bash_paths"
-install "$ETC/bash_aliases" "$DST/.bash_aliases"
-install "$ETC/bash_profile" "$DST/.bash_profile"
+install "bashrc" ".bashrc"
+install "bash_paths" ".bash_paths"
+install "bash_aliases" ".bash_aliases"
+install "bash_profile" ".bash_profile"
 
-install "$ETC/gitconfig" "$DST/.config/git/config"
-install "$ETC/ssh-config" "$DST/.ssh/config"
-install "$ETC/vimrc" "$DST/.vim/vimrc"
-install "$ETC/tmux.conf" "$DST/.tmux.conf"
+install "sway-session" ".local/bin/sway-session"
+install "sway-session-autostart" ".local/bin/sway-session-autostart"
+install "sway-config" ".config/sway/config"
+install "i3status-config" ".config/i3status/config"
+install "alacritty.yml" ".config/alacritty/alacritty.yml"
 
-install "$ETC/sway-session" "$DST/.local/bin/sway-session"
-install "$ETC/sway-session-autostart" "$DST/.local/bin/sway-session-autostart"
-install "$ETC/sway-config" "$DST/.config/sway/config"
-install "$ETC/i3status-config" "$DST/.config/i3status/config"
-install "$ETC/alacritty.yml" "$DST/.config/alacritty/alacritty.yml"
+install "vimrc" ".vim/vimrc"
+install "gitconfig" ".config/git/config"
+
+install "ssh-config" ".ssh/config"
+install "tmux.conf" ".tmux.conf"
