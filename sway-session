@@ -15,4 +15,4 @@ set_envs() {
 # set envs, mainly for apps started by sway
 set_envs
 
-exec sway > "$HOME/.sway-errors" 2>&1
+exec sway > "$HOME/.local/state/sway-log" 2>&1
