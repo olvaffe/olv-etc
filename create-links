@@ -9,7 +9,7 @@ create_xdg_base_dirs() {
 	done
 
 	for dir in bin share state; do
-		mkdir -p "$DST/.local/$dir"
+		mkdir -p -m 0700 "$DST/.local/$dir"
 	done
 }
 
@@ -24,7 +24,7 @@ install() {
 	fi
 
 	dst_dir="$(dirname "$dst")"
-	if mkdir -p "$dst_dir" && ln -s "$src" "$dst"; then
+	if mkdir -p -m 0700 "$dst_dir" && ln -s "$src" "$dst"; then
 		echo "$orig installed"
 	fi
 }
