@@ -31,6 +31,7 @@ install "i3status-config" ".config/i3status/config"
 install "alacritty.yml" ".config/alacritty/alacritty.yml"
 
 install "vimrc" ".vim/vimrc"
+install "vim-pack" ".vim/pack"
 install "gitconfig" ".config/git/config"
 
 install "ssh-config" ".ssh/config"
