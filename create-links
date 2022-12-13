@@ -23,7 +23,7 @@ install "$ETC/bash_profile" "$DST/.bash_profile"
 
 install "$ETC/gitconfig" "$DST/.config/git/config"
 install "$ETC/ssh-config" "$DST/.ssh/config"
-install "$ETC/vimrc" "$DST/.vimrc"
+install "$ETC/vimrc" "$DST/.vim/vimrc"
 install "$ETC/tmux.conf" "$DST/.tmux.conf"
 
 install "$ETC/sway-session" "$DST/.local/bin/sway-session"

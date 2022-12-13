@@ -3,6 +3,9 @@ filetype on
 filetype plugin on
 filetype indent on
 
+set viminfofile=~/.vim/viminfo
+set directory=~/.vim
+
 " view settings
 syntax on
 colorscheme desert
