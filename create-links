@@ -35,3 +35,8 @@ install "gitconfig" ".config/git/config"
 
 install "ssh-config" ".ssh/config"
 install "tmux.conf" ".tmux.conf"
+
+for script in "$SRC/scripts/"*; do
+	name="${script#$SRC/scripts/}"
+	install "scripts/$name" ".local/bin/$name"
+done
