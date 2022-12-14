@@ -47,46 +47,46 @@ ORIGINAL_SOLARIZED_PALETTE = {
 }
 
 MODIFIED_SOLARIZED_PALETTE = {
-    # reduce lumi by 15 for bg; use grayscale
+    # decrease lumi for bg; use grayscale
     'base03':   LabColor(  0,   0,   0),
     'base02':   LabColor(  5,   0,   0),
-    'base01':   LabColor( 30,   0,   0),
-    # keep lumi for secondary fg; use grayscale
-    'base00':   LabColor( 50,   0,   0),
-    # increase lumi by 10 for fg; use grayscale
-    'base0':    LabColor( 70,   0,   0),
+    'base01':   LabColor( 20,   0,   0),
+    # decrease lumi for secondary fg
+    'base00':   LabColor( 45,   0,   0),
+    # increase lumi for fg
+    'base0':    LabColor( 65,   0,   0),
     'base1':    LabColor( 75,   0,   0),
-    'base2':    LabColor(100,   0,   0),
+    'base2':    LabColor( 95,   0,   0),
     'base3':    LabColor(100,   0,   0),
-    # target the same lumi as base1 for colors
-    'yellow':   LabColor( 75,  10,  65),
-    'orange':   LabColor( 74,  50,  55),
-    'red':      LabColor( 68,  65,  45),
-    'magenta':  LabColor( 72,  65,  -5),
-    'violet':   LabColor( 75,  15, -45),
-    'blue':     LabColor( 75, -10, -45),
-    'cyan':     LabColor( 75, -35,  -5),
+    # target base1 lumi minus 15 for colors
+    'yellow':   LabColor( 60,  10,  65),
+    'orange':   LabColor( 60,  50,  55),
+    'red':      LabColor( 60,  65,  45),
+    'magenta':  LabColor( 60,  65,  -5),
+    'violet':   LabColor( 60,  15, -45),
+    'blue':     LabColor( 60, -10, -45),
+    'cyan':     LabColor( 60, -35,  -5),
     # use new green value
-    'green':    LabColor( 75, -35,  60),
+    'green':    LabColor( 60, -35,  60),
 }
 
 BASE16_MAP = {
-    'base00': 'base03',  # bg (ANSI black)
-    'base01': 'base02',  # bg highlight
-    'base02': 'base01',  # ui bg
-    'base03': 'base00',  # secondary fg (ANSI bright black)
-    'base04': 'base0',   # ui fg
-    'base05': 'base1',   # fg (ANSI white)
-    'base06': 'base2',   # unused
-    'base07': 'base3',   # fg highlight (ANSI bright white)
+    'base00': 'base03',  # bg: text (ANSI black)
+    'base01': 'base02',  # bg: ui
+    'base02': 'base01',  # bg: selection
+    'base03': 'base00',  # fg: comment and ui (ANSI bright black)
+    'base04': 'base0',   # fg: ui highlight
+    'base05': 'base1',   # fg: text (ANSI white)
+    'base06': 'base2',   # fg: rarely unused
+    'base07': 'base3',   # fg: rarely unused (ANSI bright white)
 
-    'base08': 'red',     # ANSI normal and brigt red
+    'base08': 'red',     # (ANSI normal and brigt red)
     'base09': 'orange',
-    'base0A': 'yellow',  # ANSI normal and brigt yellow
-    'base0B': 'green',   # ANSI normal and brigt green
-    'base0C': 'cyan',    # ANSI normal and brigt cyan
-    'base0D': 'blue',    # ANSI normal and brigt blue
-    'base0E': 'magenta', # ANSI normal and brigt magenta
+    'base0A': 'yellow',  # (ANSI normal and brigt yellow)
+    'base0B': 'green',   # (ANSI normal and brigt green)
+    'base0C': 'cyan',    # (ANSI normal and brigt cyan)
+    'base0D': 'blue',    # (ANSI normal and brigt blue)
+    'base0E': 'magenta', # (ANSI normal and brigt magenta)
     'base0F': 'violet',
 }
 
