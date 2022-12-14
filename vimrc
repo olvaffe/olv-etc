@@ -6,9 +6,14 @@ filetype indent on
 set viminfofile=~/.vim/viminfo
 set directory=~/.vim
 
-" view settings
+" color settings
 syntax on
-colorscheme desert
+colorscheme base16-solarized
+set termguicolors
+let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+
+" view settings
 set nowrap
 set ruler
 set encoding=utf8
