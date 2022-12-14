@@ -3,8 +3,8 @@ selection:
   save_to_clipboard: true
 
 font:
-  # 11pt * 1.6 (text-scaling-factor)
-  size: 17.6
+  # 11pt * 1.7 (text-scaling-factor)
+  size: 19.25
 
 colors:
   bright:
