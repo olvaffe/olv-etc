@@ -41,6 +41,7 @@ install "sway-session-autostart" ".local/bin/sway-session-autostart"
 install "sway-config" ".config/sway/config"
 install "i3status-config" ".config/i3status/config"
 install "alacritty.yml" ".config/alacritty/alacritty.yml"
+install "fontconfig-fonts.conf" ".config/fontconfig/fonts.conf"
 
 install "vimrc" ".vim/vimrc"
 install "vim-pack" ".vim/pack"
@@ -51,6 +52,8 @@ install "ssh-config" ".ssh/config"
 install "tmux.conf" ".tmux.conf"
 
 for script in "$SRC/scripts/"*; do
-	name="${script#$SRC/scripts/}"
-	install "scripts/$name" ".local/bin/$name"
+	if [ -x "$script" ]; then
+		name="${script#$SRC/scripts/}"
+		install "scripts/$name" ".local/bin/$name"
+	fi
 done
