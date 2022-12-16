@@ -9,7 +9,7 @@ esac
 [ -f "$HOME/.config/sh/paths.sh" ] && . "$HOME/.config/sh/paths.sh"
 [ -f "$HOME/.config/sh/aliases.sh" ] && . "$HOME/.config/sh/aliases.sh"
 
-[ -z "$DISPLAY$WAYLAND_DISPLAY" -a -n "$XDG_VTNR" -a "$XDG_VTNR" -le 1 ] && exec sway-session
+[ -z "$DISPLAY$WAYLAND_DISPLAY" -a -n "$XDG_VTNR" -a "0$XDG_VTNR" -le 1 ] && exec sway-session
 
 HISTFILE="$HOME/.local/state/sh_history"
 HISTSIZE=64000
