@@ -1,4 +1,4 @@
-# ~/.bash_paths
+# paths.sh
 
 PATH="/usr/bin"
 [ -f "/etc/arch-release" ] || PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:$PATH:/sbin:/bin"

@@ -14,7 +14,7 @@ create_xdg_base_dirs() {
 }
 
 install() {
-	orig="$1"
+	orig="$2"
 	src="$SRC/$1"
 	dst="$DST/$2"
 
@@ -31,10 +31,11 @@ install() {
 
 create_xdg_base_dirs
 
-install "bashrc" ".bashrc"
-install "bash_paths" ".bash_paths"
-install "bash_aliases" ".bash_aliases"
-install "bash_profile" ".bash_profile"
+install "sh-aliases.sh" ".config/sh/aliases.sh"
+install "sh-paths.sh" ".config/sh/paths.sh"
+install "sh-rc.sh" ".config/sh/rc.sh"
+install "sh-rc.sh" ".bashrc"
+install "sh-rc.sh" ".bash_profile"
 
 install "sway-session" ".local/bin/sway-session"
 install "sway-session-autostart" ".local/bin/sway-session-autostart"
@@ -45,6 +46,7 @@ install "fontconfig-fonts.conf" ".config/fontconfig/fonts.conf"
 
 install "vimrc" ".vim/vimrc"
 install "vim-pack" ".vim/pack"
+
 install "gitconfig" ".config/git/config"
 touch "$DST/.config/git/credentials"
 
