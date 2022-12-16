@@ -1,7 +1,7 @@
 #!/bin/env python
 
-from colormath.color_objects import LabColor, XYZColor, sRGBColor
-from colormath.color_conversions import convert_color
+import colour
+import numpy as np
 from yaml import dump
 
 """
@@ -25,49 +25,49 @@ violet    #6c71c4 13/5 brmagenta 61 #5f5faf 50  15 -45 108 113 196 237  45  77
 blue      #268bd2  4/4 blue      33 #0087ff 55 -10 -45  38 139 210 205  82  82
 cyan      #2aa198  6/6 cyan      37 #00afaf 60 -35 -05  42 161 152 175  74  63
 green     #859900  2/2 green     64 #5f8700 60 -20  65 133 153   0  68 100  60
-green (in solarized.vim)                    60 -35  60
+green     #719e07 (used in solarized.vim)   60 -30  60 113 158   7
 """
 ORIGINAL_SOLARIZED_PALETTE = {
-    'base03':   LabColor(15, -12, -12), # bg
-    'base02':   LabColor(20, -12, -12), # bg highlight, ui bg
-    'base01':   LabColor(45,  -7,  -7), # secondary fg
-    'base00':   LabColor(50,  -7,  -7), # ui fg
-    'base0':    LabColor(60,  -6,  -3), # fg
-    'base1':    LabColor(65,  -5,  -2), # fg highlight
-    'base2':    LabColor(92,   0,  10), # unused in dark mode
-    'base3':    LabColor(97,   0,  10), # unused in dark mode
-    'yellow':   LabColor(60,  10,  65),
-    'orange':   LabColor(50,  50,  55),
-    'red':      LabColor(50,  65,  45),
-    'magenta':  LabColor(50,  65,  -5),
-    'violet':   LabColor(50,  15, -45),
-    'blue':     LabColor(55, -10, -45),
-    'cyan':     LabColor(60, -35,  -5),
-    'green':    LabColor(60, -20,  65),
+    'base03':   np.array([15, -12, -12]), # bg
+    'base02':   np.array([20, -12, -12]), # bg highlight, ui bg
+    'base01':   np.array([45,  -7,  -7]), # secondary fg
+    'base00':   np.array([50,  -7,  -7]), # ui fg
+    'base0':    np.array([60,  -6,  -3]), # fg
+    'base1':    np.array([65,  -5,  -2]), # fg highlight
+    'base2':    np.array([92,   0,  10]), # unused in dark mode
+    'base3':    np.array([97,   0,  10]), # unused in dark mode
+    'yellow':   np.array([60,  10,  65]),
+    'orange':   np.array([50,  50,  55]),
+    'red':      np.array([50,  65,  45]),
+    'magenta':  np.array([50,  65,  -5]),
+    'violet':   np.array([50,  15, -45]),
+    'blue':     np.array([55, -10, -45]),
+    'cyan':     np.array([60, -35,  -5]),
+    'green':    np.array([60, -20,  65]),
 }
 
 MODIFIED_SOLARIZED_PALETTE = {
     # decrease lumi for bg; use grayscale
-    'base03':   LabColor(  0,   0,   0),
-    'base02':   LabColor(  5,   0,   0),
-    'base01':   LabColor( 20,   0,   0),
+    'base03':   np.array([  0,   0,   0]),
+    'base02':   np.array([  5,   0,   0]),
+    'base01':   np.array([ 20,   0,   0]),
     # decrease lumi for secondary fg
-    'base00':   LabColor( 45,   0,   0),
+    'base00':   np.array([ 45,   0,   0]),
     # increase lumi for fg
-    'base0':    LabColor( 65,   0,   0),
-    'base1':    LabColor( 75,   0,   0),
-    'base2':    LabColor( 95,   0,   0),
-    'base3':    LabColor(100,   0,   0),
+    'base0':    np.array([ 65,   0,   0]),
+    'base1':    np.array([ 75,   0,   0]),
+    'base2':    np.array([ 95,   0,   0]),
+    'base3':    np.array([100,   0,   0]),
     # target base1 lumi minus 15 for colors
-    'yellow':   LabColor( 60,  10,  65),
-    'orange':   LabColor( 60,  50,  55),
-    'red':      LabColor( 60,  65,  45),
-    'magenta':  LabColor( 60,  65,  -5),
-    'violet':   LabColor( 60,  15, -45),
-    'blue':     LabColor( 60, -10, -45),
-    'cyan':     LabColor( 60, -35,  -5),
+    'yellow':   np.array([ 60,  10,  65]),
+    'orange':   np.array([ 60,  50,  55]),
+    'red':      np.array([ 60,  65,  45]),
+    'magenta':  np.array([ 60,  65,  -5]),
+    'violet':   np.array([ 60,  15, -45]),
+    'blue':     np.array([ 60, -10, -45]),
+    'cyan':     np.array([ 60, -35,  -5]),
     # use new green value
-    'green':    LabColor( 60, -35,  60),
+    'green':    np.array([ 60, -30,  60]),
 }
 
 BASE16_MAP = {
@@ -109,19 +109,38 @@ ANSI_MAP = {
     'bright-white': 'base07',
 }
 
+class LabRGB:
+    def __init__(self):
+        self.d50 = colour.CCS_ILLUMINANTS['CIE 1931 2 Degree Standard Observer']['D50']
+
+    def lab_to_rgb(self, lab):
+        xyz = colour.Lab_to_XYZ(lab, illuminant=self.d50)
+        rgb = colour.XYZ_to_sRGB(xyz, illuminant=self.d50,
+                                 chromatic_adaptation_transform='Bradford')
+        if rgb.max() > 1.05 or rgb.min() < -0.05:
+            raise Exception(f'{lab} is converted to {rgb}')
+
+        return (rgb.clip(0.0, 1.0) * 255.0).round()
+
+    def rgb_to_lab(self, rgb):
+        rgb = rgb / 255.0
+        xyz = colour.sRGB_to_XYZ(rgb, illuminant=self.d50,
+                                 chromatic_adaptation_transform='Bradford')
+        return colour.XYZ_to_Lab(xyz, illuminant=self.d50)
+
+    def hex(self, val):
+        return val.astype('B').tobytes().hex()
+
+conv = LabRGB()
+
 base16_palette = {}
 for base16, solarized in BASE16_MAP.items():
     lab = MODIFIED_SOLARIZED_PALETTE[solarized]
-    xyz = convert_color(lab, XYZColor)
-    rgb = convert_color(xyz, sRGBColor)
+    rgb = conv.lab_to_rgb(lab)
+    val = '#' + conv.hex(rgb)
+    #print(f'solarized {solarized}: "{val}"')
 
-    vals = rgb.get_value_tuple()
-    if max(vals) > 1.1 or min(vals) < -0.1:
-        raise Exception(f'solarized {solarized} is {vals}')
-
-    clamped = sRGBColor(rgb.clamped_rgb_r, rgb.clamped_rgb_g,
-                        rgb.clamped_rgb_b)
-    base16_palette[base16] = clamped.get_rgb_hex()
+    base16_palette[base16] = val
 
 ansi_palette = {}
 for ansi, base16 in ANSI_MAP.items():
