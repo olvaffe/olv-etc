@@ -32,3 +32,6 @@
 [user]
 	name = Chia-I Wu
 	email = olvaffe@gmail.com
+
+[remote "origin"]
+	pushurl = DISABLED
