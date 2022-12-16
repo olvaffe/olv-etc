@@ -1,18 +1,35 @@
 #!/bin/sh
 
-set_envs() {
-	export NO_AT_BRIDGE=1
+exec </dev/null >"$HOME/.local/state/sway-log" 2>&1
 
-	export GTK_IM_MODULE=fcitx
-	export QT_IM_MODULE=fcitx
-	export XMODIFIERS=@im=fcitx
+# init GUI envs so that they are inherited by sway and apps directly started
+# by sway (terminal, browser, and autostart)
+init_gui_envs() {
+	export GDK_BACKEND="wayland"
+	export QT_QPA_PLATFORM="wayland"
+	export SDL_VIDEODRIVER="wayland"
 
-	export GDK_BACKEND=wayland
-	export QT_QPA_PLATFORM=wayland
-	export SDL_VIDEODRIVER=wayland
+	export GTK_IM_MODULE="fcitx"
+	export QT_IM_MODULE="fcitx"
+
+	export NO_AT_BRIDGE="1"
 }
 
-# set envs, mainly for apps started by sway
-set_envs
+# init SSH_AUTO_SOCK explicitly for sway, but start ssh-agent later in
+# autostart because ssh-agent might depend on sway to display prompts
+#
+# It would be better to init WAYLAND_DISPLAY explicitly for ssh-agent and
+# to start it right away, but sway does not support explicit WAYLAND_DISPLAY.
+init_ssh_envs() {
+	# kill pre-existing ssh-agent that was started before sway
+	if [ -n "$SSH_AGENT_PID" ]; then
+		eval $(ssh-agent -k)
+	fi
 
-exec sway > "$HOME/.local/state/sway-log" 2>&1
+	export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/sway-ssh-agent.socket"
+}
+
+init_gui_envs
+init_ssh_envs
+
+exec sway
