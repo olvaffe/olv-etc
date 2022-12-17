@@ -153,18 +153,20 @@ base16_yaml = {
 base16_yaml.update(base16_palette)
 
 alacritty_yaml = {
-    'colors': {
-        'primary': {
-        },
-        'normal': {
-        },
-        'bright': {
+    'color-schemes': {
+        'solarized': {
+            'primary': {
+            },
+            'normal': {
+            },
+            'bright': {
+            },
         },
     },
 }
 
-alacritty_yaml['colors']['primary']['background'] = ansi_palette['black']
-alacritty_yaml['colors']['primary']['foreground'] = ansi_palette['white']
+alacritty_yaml['color-schemes']['solarized']['primary']['background'] = ansi_palette['black']
+alacritty_yaml['color-schemes']['solarized']['primary']['foreground'] = ansi_palette['white']
 
 for name, color in ansi_palette.items():
     if name.startswith('bright-'):
@@ -173,7 +175,7 @@ for name, color in ansi_palette.items():
     else:
         intensity = 'normal'
 
-    alacritty_yaml['colors'][intensity][name] = color
+    alacritty_yaml['color-schemes']['solarized'][intensity][name] = color
 
 print('base16 color scheme:')
 print(dump(base16_yaml))

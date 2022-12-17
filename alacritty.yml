@@ -6,25 +6,51 @@ font:
   # 11pt * 1.75 (text-scaling-factor)
   size: 19.25
 
-colors:
-  bright:
-    black: '#6a6a6a'
-    blue: '#3b98e0'
-    cyan: '#2aa198'
-    green: '#719e07'
-    magenta: '#f1559c'
-    red: '#fc5246'
-    white: '#ffffff'
-    yellow: '#b58900'
-  normal:
-    black: '#000000'
-    blue: '#3b98e0'
-    cyan: '#2aa198'
-    green: '#719e07'
-    magenta: '#f1559c'
-    red: '#fc5246'
-    white: '#b9b9b9'
-    yellow: '#b58900'
-  primary:
-    background: '#000000'
-    foreground: '#b9b9b9'
+color-schemes:
+  solarized: &color-scheme-solarized
+    bright:
+      black: '#6a6a6a'
+      blue: '#3b98e0'
+      cyan: '#2aa198'
+      green: '#719e07'
+      magenta: '#f1559c'
+      red: '#fc5246'
+      white: '#ffffff'
+      yellow: '#b58900'
+    normal:
+      black: '#000000'
+      blue: '#3b98e0'
+      cyan: '#2aa198'
+      green: '#719e07'
+      magenta: '#f1559c'
+      red: '#fc5246'
+      white: '#b9b9b9'
+      yellow: '#b58900'
+    primary:
+      background: '#000000'
+      foreground: '#b9b9b9'
+
+  old: &color-scheme-old
+    primary:
+      background: '#000000'
+      foreground: '#dddddd'
+    normal:
+      black:   '#000000'
+      red:     '#cc0403'
+      green:   '#19cb00'
+      yellow:  '#cecb00'
+      blue:    '#0d73cc'
+      magenta: '#cb1ed1'
+      cyan:    '#0dcdcd'
+      white:   '#dddddd'
+    bright:
+      black:   '#767676'
+      red:     '#f2201f'
+      green:   '#23fd00'
+      yellow:  '#fffd00'
+      blue:    '#1a8fff'
+      magenta: '#fd28ff'
+      cyan:    '#14ffff'
+      white:   '#ffffff'
+
+colors: *color-scheme-solarized
