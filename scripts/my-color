@@ -1,0 +1,218 @@
+#!/usr/bin/env python
+
+import colour
+import numpy as np
+from yaml import dump
+
+'''
+We want to define a 16-color palette for editors and terminals.  The palette
+consists of 8 monotones and 8 colors.
+
+For editors, the 8 monotones are for background and text.  From the darkest to
+the brightest, they are
+
+ - bg0, text bg
+ - bg1, ui bg (e.g., status bar bg)
+ - bg2, highlight bg (e.g., current selection)
+ - fg0, ui text / comment
+ - fg1, ui text highlight
+ - fg2, text
+ - fg3, unused
+ - fg4, text highlight
+
+The 8 colors are for syntax highlighting.  The hues are exactly 45 degrees
+apart from each other on the color wheel for better contrast.
+
+Different colors have different perceived brightness (e.g., r:g:b is roughly
+3:10:1).  Our eyes are used to that and terminal programs may be designed
+around that.  We target 2 luminances depending on how "green" a color is.
+That gives us
+
+ - red,     #ff0000, 0   degree,  low  lumi
+ - orange,  #ff7f00, 45  degrees, high lumi
+ - yellow,  #ffff00, 90  degrees, high lumi
+ - green,   #00ff00, 135 degrees, high lumi
+ - cyan,    #00ffff, 180 degrees, high lumi
+ - blue,    #0000ff, 225 degrees, low  lumi
+ - violet,  #7f00ff, 270 degrees, low  lumi
+ - magenta, #ff00ff, 315 degrees, low  lumi
+
+Both luminances are slightly lower than the luminance of fg2, to make fg2 pop
+out a little bit.  With the hues and the luminances known, we just pick the
+highest representable chroma for each color.
+
+For terminals, we map ANSI colors to editor colors.  For blacks/whites,
+
+ - black:        bg0
+ - bright black: fg0
+ - white:        fg2
+ - bright white: fg4
+
+For others, we map normal and bright ANSI colors to editor colors of the same
+names.
+
+Editors use colors as foreground colors for synatax hightlighting.  Terminal
+programs can use colors as background colors for ui and hightlight however.
+Picking the right luminances for the colors can be tricky.
+'''
+
+class Palette:
+    GRAYSCALE_NAMES = [
+        'bg0',
+        'bg1',
+        'bg2',
+        'fg0',
+        'fg1',
+        'fg2',
+        'fg3',
+        'fg4',
+    ]
+
+    COLOR_NAMES = [
+        'red',
+        'orange',
+        'yellow',
+        'green',
+        'cyan',
+        'blue',
+        'violet',
+        'magenta',
+    ]
+
+    def __init__(self, hue_base, chroma_base, luminance_base):
+        self.hue_base = hue_base
+        self.chroma_base = chroma_base
+        self.luminance_base = luminance_base
+
+        self.grayscale = {}
+        self.colors = {}
+
+        self.init_grayscale()
+        self.init_colors()
+
+    def init_grayscale(self):
+        luminances = {
+            'bg0': 0,
+            'bg1': 5,
+            'bg2': 20,
+            'fg0': 45,
+            'fg1': 65,
+            'fg2': 75,
+            'fg3': 95,
+            'fg4': 100,
+        }
+        for name, lumi in luminances.items():
+            rgb = self.hcl_to_rgb(0, 0, lumi)
+            code = self.rgb_to_hex(rgb)
+            self.grayscale[name] = code
+
+    def init_colors(self):
+        greenish = ['orange', 'yellow', 'green', 'cyan']
+        distance = 360 / len(self.COLOR_NAMES)
+        for i, name in enumerate(self.COLOR_NAMES):
+            hue = self.hue_base + distance * i
+            lumi = self.luminance_base
+            if name not in greenish:
+                lumi -= 10
+            chroma = self.find_chroma(lumi, hue)
+            print(f'{name}: HCL({hue}, {chroma}, {lumi})')
+            rgb = self.hcl_to_rgb(hue, chroma, lumi)
+            code = self.rgb_to_hex(rgb)
+            self.colors[name] = code
+
+    def find_chroma(self, lumi, hue):
+        for chroma in range(self.chroma_base, -1, -1):
+            rgb = self.hcl_to_rgb(hue, chroma, lumi)
+            if rgb.max() <= 1.0 and rgb.min() >= 0.0:
+                return chroma
+
+    def hcl_to_rgb(self, hue, chroma, lumi):
+        hcl = np.array([hue, chroma, lumi])
+        lch = np.flip(hcl)
+        luv = colour.LCHuv_to_Luv(lch)
+        xyz = colour.Luv_to_XYZ(luv)
+        rgb = colour.XYZ_to_sRGB(xyz)
+        return rgb
+
+    def rgb_to_hcl(self, rgb):
+        xyz = colour.sRGB_to_XYZ(rgb)
+        luv = colour.XYZ_to_Luv(xyz)
+        lch = colour.Luv_to_LCHuv(luv)
+        hcl = np.flip(lch)
+        return hcl
+
+    def rgb_to_hex(self, rgb):
+        rgb = rgb.clip(0.0, 1.0)
+        val = (rgb * 255.0).round().astype('B')
+        code = val.tobytes().hex()
+        return code
+
+    def hex_to_rgb(self, code):
+        val = np.frombuffer(bytes.fromhex(code), dtype='B')
+        rgb = val.astype(float) / 255.0
+        return rgb
+
+def export_alacritty(pal):
+    scheme = {
+        'primary': {
+        },
+        'normal': {
+        },
+        'bright': {
+        },
+    }
+
+    scheme['primary']['background'] = '#' + pal.grayscale['bg0']
+    scheme['normal']['black'] = '#' + pal.grayscale['bg0']
+    scheme['bright']['black'] = '#' + pal.grayscale['fg0']
+
+    scheme['primary']['foreground'] = '#' + pal.grayscale['fg2']
+    scheme['normal']['white'] = '#' + pal.grayscale['fg2']
+    scheme['bright']['white'] = '#' + pal.grayscale['fg4']
+
+    for name, rgb in pal.colors.items():
+        if name in ['orange', 'violet']:
+            continue
+        scheme['normal'][name] = '#' + rgb
+        scheme['bright'][name] = '#' + rgb
+
+    alacritty_yaml = {
+        'color-schemes': {
+            f'hcl{pal.luminance_base:2}': scheme
+        },
+    }
+    print(dump(alacritty_yaml))
+
+def export_vim(pal):
+    # basead on how base16-shell maps ANSI colors
+    base16_map = {
+        'base00': 'bg0',     # ANSI black
+        'base01': 'bg1',
+        'base02': 'bg2',
+        'base03': 'fg0',     # ANSI bright black
+        'base04': 'fg1',
+        'base05': 'fg2',     # ANSI white
+        'base06': 'fg3',
+        'base07': 'fg4',     # ANSI bright white
+
+        'base08': 'red',     # ANSI normal and brigt red
+        'base09': 'orange',
+        'base0A': 'yellow',  # ANSI normal and brigt yellow
+        'base0B': 'green',   # ANSI normal and brigt green
+        'base0C': 'cyan',    # ANSI normal and brigt cyan
+        'base0D': 'blue',    # ANSI normal and brigt blue
+        'base0E': 'magenta', # ANSI normal and brigt magenta
+        'base0F': 'violet',
+    }
+
+    for base16, name in base16_map.items():
+        if name in pal.grayscale:
+            rgb = pal.grayscale[name]
+        else:
+            rgb = pal.colors[name]
+
+        print(f'let s:gui{base16[4:]}        = "{rgb}"')
+
+pal = Palette(0, 110, 60)
+export_alacritty(pal)
+export_vim(pal)

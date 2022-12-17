@@ -2,7 +2,6 @@
 
 " base16-vim (https://github.com/chriskempson/base16-vim)
 " by Chris Kempson (http://chriskempson.com)
-" Solarized Dark scheme by Ethan Schoonover (modified by aramisgithub)
 " modified for my preference
 
 " GUI color definitions
@@ -14,14 +13,14 @@ let s:gui04        = "9e9e9e"
 let s:gui05        = "b9b9b9"
 let s:gui06        = "f1f1f1"
 let s:gui07        = "ffffff"
-let s:gui08        = "fc5246"
-let s:gui09        = "ea6630"
-let s:gui0A        = "b58900"
-let s:gui0B        = "719e07"
-let s:gui0C        = "2aa198"
-let s:gui0D        = "3b98e0"
-let s:gui0E        = "f1559c"
-let s:gui0F        = "878ae0"
+let s:gui08        = "d93668"
+let s:gui09        = "c88109"
+let s:gui0A        = "909707"
+let s:gui0B        = "0aa74b"
+let s:gui0C        = "0ca296"
+let s:gui0D        = "0d81a0"
+let s:gui0E        = "d607c4"
+let s:gui0F        = "785fef"
 
 " Terminal color definitions
 let s:cterm00        = "00"
@@ -53,7 +52,7 @@ endif
 " Theme setup
 hi clear
 syntax reset
-let g:colors_name = "base16-solarized"
+let g:colors_name = "base16-hcl60"
 
 " Highlighting function
 " Optional variables are attributes and guisp

@@ -7,25 +7,25 @@ font:
   size: 19.25
 
 color-schemes:
-  solarized: &color-scheme-solarized
+  hcl60: &color-scheme-hcl60
     bright:
       black: '#6a6a6a'
-      blue: '#3b98e0'
-      cyan: '#2aa198'
-      green: '#719e07'
-      magenta: '#f1559c'
-      red: '#fc5246'
+      blue: '#0d81a0'
+      cyan: '#0ca296'
+      green: '#0aa74b'
+      magenta: '#d607c4'
+      red: '#d93668'
       white: '#ffffff'
-      yellow: '#b58900'
+      yellow: '#909707'
     normal:
       black: '#000000'
-      blue: '#3b98e0'
-      cyan: '#2aa198'
-      green: '#719e07'
-      magenta: '#f1559c'
-      red: '#fc5246'
+      blue: '#0d81a0'
+      cyan: '#0ca296'
+      green: '#0aa74b'
+      magenta: '#d607c4'
+      red: '#d93668'
       white: '#b9b9b9'
-      yellow: '#b58900'
+      yellow: '#909707'
     primary:
       background: '#000000'
       foreground: '#b9b9b9'
@@ -53,4 +53,4 @@ color-schemes:
       cyan:    '#14ffff'
       white:   '#ffffff'
 
-colors: *color-scheme-solarized
+colors: *color-scheme-hcl60
