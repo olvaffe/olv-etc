@@ -117,19 +117,27 @@ class LabRGB:
         xyz = colour.Lab_to_XYZ(lab, illuminant=self.d50)
         rgb = colour.XYZ_to_sRGB(xyz, illuminant=self.d50,
                                  chromatic_adaptation_transform='Bradford')
-        if rgb.max() > 1.05 or rgb.min() < -0.05:
+        if rgb.max() > 1.10 or rgb.min() < -0.10:
             raise Exception(f'{lab} is converted to {rgb}')
 
-        return (rgb.clip(0.0, 1.0) * 255.0).round()
+        return rgb.clip(0.0, 1.0)
 
     def rgb_to_lab(self, rgb):
-        rgb = rgb / 255.0
         xyz = colour.sRGB_to_XYZ(rgb, illuminant=self.d50,
                                  chromatic_adaptation_transform='Bradford')
         return colour.XYZ_to_Lab(xyz, illuminant=self.d50)
 
-    def hex(self, val):
-        return val.astype('B').tobytes().hex()
+    def rgb_to_hsv(self, rgb):
+        return colour.RGB_to_HSV(rgb)
+
+    def rgb_to_hex(self, val):
+        val = (val * 255.0).round().astype('B')
+        return val.tobytes().hex()
+
+    def hsv_print(self, val):
+        val = np.array([val[0] * 360, val[1] * 100, val[2] * 100])
+        val = val.round().astype(int)
+        print(val)
 
 conv = LabRGB()
 
@@ -137,7 +145,7 @@ base16_palette = {}
 for base16, solarized in BASE16_MAP.items():
     lab = MODIFIED_SOLARIZED_PALETTE[solarized]
     rgb = conv.lab_to_rgb(lab)
-    val = '#' + conv.hex(rgb)
+    val = '#' + conv.rgb_to_hex(rgb)
     #print(f'solarized {solarized}: "{val}"')
 
     base16_palette[base16] = val
