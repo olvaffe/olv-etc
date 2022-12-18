@@ -6,21 +6,21 @@
 
 " GUI color definitions
 let s:gui00        = "000000"
-let s:gui01        = "111111"
-let s:gui02        = "303030"
-let s:gui03        = "6a6a6a"
-let s:gui04        = "9e9e9e"
-let s:gui05        = "b9b9b9"
-let s:gui06        = "f1f1f1"
+let s:gui01        = "1b1b1b"
+let s:gui02        = "474747"
+let s:gui03        = "777777"
+let s:gui04        = "ababab"
+let s:gui05        = "c6c6c6"
+let s:gui06        = "e2e2e2"
 let s:gui07        = "ffffff"
-let s:gui08        = "d93668"
-let s:gui09        = "c88109"
-let s:gui0A        = "909707"
-let s:gui0B        = "0aa74b"
-let s:gui0C        = "0ca296"
-let s:gui0D        = "0d81a0"
-let s:gui0E        = "d607c4"
-let s:gui0F        = "785fef"
+let s:gui08        = "ef3e74"
+let s:gui09        = "da8d0a"
+let s:gui0A        = "9da501"
+let s:gui0B        = "05b652"
+let s:gui0C        = "0db1a4"
+let s:gui0D        = "0e8fb1"
+let s:gui0E        = "eb10d7"
+let s:gui0F        = "856cff"
 
 " Terminal color definitions
 let s:cterm00        = "00"
@@ -52,7 +52,7 @@ endif
 " Theme setup
 hi clear
 syntax reset
-let g:colors_name = "base16-hcl60"
+let g:colors_name = "base16-hcl65"
 
 " Highlighting function
 " Optional variables are attributes and guisp

@@ -93,12 +93,12 @@ class Palette:
     def init_grayscale(self):
         luminances = {
             'bg0': 0,
-            'bg1': 5,
-            'bg2': 20,
-            'fg0': 45,
-            'fg1': 65,
-            'fg2': 75,
-            'fg3': 95,
+            'bg1': 10,
+            'bg2': 30,
+            'fg0': 50,
+            'fg1': 70,
+            'fg2': 80,
+            'fg3': 90,
             'fg4': 100,
         }
         for name, lumi in luminances.items():
@@ -213,6 +213,6 @@ def export_vim(pal):
 
         print(f'let s:gui{base16[4:]}        = "{rgb}"')
 
-pal = Palette(0, 110, 60)
+pal = Palette(0, 120, 65)
 export_alacritty(pal)
 export_vim(pal)
