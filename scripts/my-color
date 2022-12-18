@@ -11,49 +11,55 @@ consists of 8 monotones and 8 colors.
 For editors, the 8 monotones are for background and text.  From the darkest to
 the brightest, they are
 
- - bg0, text bg
- - bg1, ui bg (e.g., status bar bg)
- - bg2, highlight bg (e.g., current selection)
- - fg0, ui text / comment
- - fg1, ui text highlight
- - fg2, text
- - fg3, unused
- - fg4, text highlight
+ - bg0: text bg
+ - bg1: ui bg (e.g., status bar bg)
+ - bg2: highlight bg (e.g., current selection)
+ - fg0: ui text / comment
+ - fg1: ui text highlight
+ - fg2: text
+ - fg3: unused
+ - fg4: text highlight
 
-The 8 colors are for syntax highlighting.  The hues are exactly 45 degrees
-apart from each other on the color wheel for better contrast.
+The 8 colors are for syntax highlighting.  Ideally, we want them to differ
+only in hues.  The hues are exactly 45 degrees apart from each other on the
+color wheel for better contrast
 
-Different colors have different perceived brightness (e.g., r:g:b is roughly
-3:10:1).  Our eyes are used to that and terminal programs may be designed
-around that.  We target 2 luminances depending on how "green" a color is.
-That gives us
+ - red:     0 degrees
+ - orange:  45 degrees
+ - yellow:  90 degrees
+ - green:   135 degrees
+ - cyan:    180 degrees
+ - blue:    225 degrees
+ - violet:  270 degrees
+ - magenta: 315 degrees
 
- - red,     #ff0000, 0   degree,  low  lumi
- - orange,  #ff7f00, 45  degrees, high lumi
- - yellow,  #ffff00, 90  degrees, high lumi
- - green,   #00ff00, 135 degrees, high lumi
- - cyan,    #00ffff, 180 degrees, high lumi
- - blue,    #0000ff, 225 degrees, low  lumi
- - violet,  #7f00ff, 270 degrees, low  lumi
- - magenta, #ff00ff, 315 degrees, low  lumi
+The luminance is slightly lower than the luminance of fg2, to make fg2 pop out
+a little bit.
 
-Both luminances are slightly lower than the luminance of fg2, to make fg2 pop
-out a little bit.  With the hues and the luminances known, we just pick the
-highest representable chroma for each color.
+For terminals, we map ANSI colors to editor colors as follows
 
-For terminals, we map ANSI colors to editor colors.  For blacks/whites,
+ - black:   bg0 / fg0
+ - red:     red / red
+ - green:   green / green
+ - yellow:  yellow / yellow
+ - blue:    blue / blue
+ - magenta: magenta / magenta
+ - cyan:    cyan / cyan
+ - white:   fg2 / fg4
 
- - black:        bg0
- - bright black: fg0
- - white:        fg2
- - bright white: fg4
+Unlike editors, terminals can use colors as background colors for ui or
+highlight.  Different colors have different perceived brightness (e.g., r:g:b
+is roughly 3:10:1) and terminals make use of that.  XTerm by default uses
 
-For others, we map normal and bright ANSI colors to editor colors of the same
-names.
+ - red:     RGB(205,   0,   0), HCL( 12, 144, 43)
+ - green:   RGB(  0, 205,   0), HCL(128, 111, 60)
+ - yellow:  RGB(205, 205,   0), HCL( 86,  88, 60)
+ - blue:    RGB(  0,   0, 205), HCL(266, 101, 25)
+ - magenta: RGB(205,   0, 205), HCL(308, 111, 49)
+ - cyan:    RGB(  0, 205, 205), HCL(192,  59, 60)
 
-Editors use colors as foreground colors for synatax hightlighting.  Terminal
-programs can use colors as background colors for ui and hightlight however.
-Picking the right luminances for the colors can be tricky.
+The takeaway is red and blue should target a lower luminance, and red should
+target a higher chroma.
 '''
 
 class Palette:
@@ -79,16 +85,19 @@ class Palette:
         'magenta',
     ]
 
-    def __init__(self, hue_base, chroma_base, luminance_base):
-        self.hue_base = hue_base
-        self.chroma_base = chroma_base
-        self.luminance_base = luminance_base
+    def __init__(self, hue_offset, chroma, luminance):
+        self.hue_offset = hue_offset
+        self.chroma = chroma
+        self.luminance = luminance
 
         self.grayscale = {}
         self.colors = {}
 
         self.init_grayscale()
         self.init_colors()
+
+        self.palette = self.grayscale.copy()
+        self.palette.update(self.colors)
 
     def init_grayscale(self):
         luminances = {
@@ -107,21 +116,27 @@ class Palette:
             self.grayscale[name] = code
 
     def init_colors(self):
-        greenish = ['orange', 'yellow', 'green', 'cyan']
         distance = 360 / len(self.COLOR_NAMES)
         for i, name in enumerate(self.COLOR_NAMES):
-            hue = self.hue_base + distance * i
-            lumi = self.luminance_base
-            if name not in greenish:
-                lumi -= 10
-            chroma = self.find_chroma(lumi, hue)
+            hue = self.hue_offset + distance * i
+            chroma = self.chroma
+            lumi = self.luminance
+
+            if name == 'red':
+                lumi -= 15
+                chroma += 50
+            elif name == 'blue':
+                lumi -= 15
+
+            chroma = self.fix_chroma(hue, chroma, lumi)
             print(f'{name}: HCL({hue}, {chroma}, {lumi})')
+
             rgb = self.hcl_to_rgb(hue, chroma, lumi)
             code = self.rgb_to_hex(rgb)
             self.colors[name] = code
 
-    def find_chroma(self, lumi, hue):
-        for chroma in range(self.chroma_base, -1, -1):
+    def fix_chroma(self, hue, chroma, lumi):
+        for chroma in range(chroma, -1, -1):
             rgb = self.hcl_to_rgb(hue, chroma, lumi)
             if rgb.max() <= 1.0 and rgb.min() >= 0.0:
                 return chroma
@@ -152,6 +167,34 @@ class Palette:
         rgb = val.astype(float) / 255.0
         return rgb
 
+def export_xresources(pal):
+    ansi_map = [
+        # normal
+        'bg0',
+        'red',
+        'green',
+        'yellow',
+        'cyan',
+        'blue',
+        'magenta',
+        'fg2',
+        # bright
+        'fg0',
+        'red',
+        'green',
+        'yellow',
+        'cyan',
+        'blue',
+        'magenta',
+        'fg4',
+    ]
+
+    print(f'*.background: #{pal.palette[ansi_map[0]]}')
+    print(f'*.foreground: #{pal.palette[ansi_map[7]]}')
+    for i, name in enumerate(ansi_map):
+        print(f'*.color{i}: #{pal.palette[name]}')
+    print()
+
 def export_alacritty(pal):
     scheme = {
         'primary': {
@@ -170,15 +213,16 @@ def export_alacritty(pal):
     scheme['normal']['white'] = '#' + pal.grayscale['fg2']
     scheme['bright']['white'] = '#' + pal.grayscale['fg4']
 
-    for name, rgb in pal.colors.items():
+    for name, code in pal.colors.items():
         if name in ['orange', 'violet']:
             continue
-        scheme['normal'][name] = '#' + rgb
-        scheme['bright'][name] = '#' + rgb
+        scheme['normal'][name] = '#' + code
+        scheme['bright'][name] = '#' + code
 
+    scheme_name = f'hcl{pal.hue_offset:02}{pal.chroma:02}{pal.luminance:02}'
     alacritty_yaml = {
         'color-schemes': {
-            f'hcl{pal.luminance_base:2}': scheme
+            scheme_name: scheme
         },
     }
     print(dump(alacritty_yaml))
@@ -206,13 +250,9 @@ def export_vim(pal):
     }
 
     for base16, name in base16_map.items():
-        if name in pal.grayscale:
-            rgb = pal.grayscale[name]
-        else:
-            rgb = pal.colors[name]
+        print(f'let s:gui{base16[4:]}        = "{pal.palette[name]}"')
 
-        print(f'let s:gui{base16[4:]}        = "{rgb}"')
-
-pal = Palette(0, 120, 65)
+pal = Palette(12, 60, 70)
+export_xresources(pal)
 export_alacritty(pal)
 export_vim(pal)

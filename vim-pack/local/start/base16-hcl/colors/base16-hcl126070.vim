@@ -13,14 +13,14 @@ let s:gui04        = "ababab"
 let s:gui05        = "c6c6c6"
 let s:gui06        = "e2e2e2"
 let s:gui07        = "ffffff"
-let s:gui08        = "ef3e74"
-let s:gui09        = "da8d0a"
-let s:gui0A        = "9da501"
-let s:gui0B        = "05b652"
-let s:gui0C        = "0db1a4"
-let s:gui0D        = "0e8fb1"
-let s:gui0E        = "eb10d7"
-let s:gui0F        = "856cff"
+let s:gui08        = "e25354"
+let s:gui09        = "cea55d"
+let s:gui0A        = "9ab557"
+let s:gui0B        = "47c089"
+let s:gui0C        = "09bebe"
+let s:gui0D        = "308cbd"
+let s:gui0E        = "e88eca"
+let s:gui0F        = "be9cea"
 
 " Terminal color definitions
 let s:cterm00        = "00"
@@ -52,7 +52,7 @@ endif
 " Theme setup
 hi clear
 syntax reset
-let g:colors_name = "base16-hcl65"
+let g:colors_name = "base16-hcl126070"
 
 " Highlighting function
 " Optional variables are attributes and guisp
