@@ -20,9 +20,9 @@ the brightest, they are
  - fg3: unused
  - fg4: text highlight
 
-The 8 colors are for syntax highlighting.  Ideally, we want them to differ
-only in hues.  The hues are exactly 45 degrees apart from each other on the
-color wheel for better contrast
+The 8 colors are mainly for syntax highlighting.  We want them to differ only
+in hues.  The hues are exactly 45 degrees apart from each other on the color
+wheel for better contrast
 
  - red:     0 degrees
  - orange:  45 degrees
@@ -35,6 +35,8 @@ color wheel for better contrast
 
 The luminance is slightly lower than the luminance of fg2, to make fg2 pop out
 a little bit.
+
+Red can indicate errors/deletions and is treated specially.
 
 For terminals, we map ANSI colors to editor colors as follows
 
@@ -57,8 +59,8 @@ Different colors have different perceived brightness (e.g., r:g:b is roughly
  - magenta: RGB(205,   0, 205), HCL(308, 111, 49)
  - cyan:    RGB(  0, 205, 205), HCL(192,  59, 75)
 
-The average chroma is 102 and the average luminance 57.  We instead target
-70/70, and handle red and blue specially.
+Red has the same special meaning as in editors.  Blue is often used for
+highlight and is treated specially as well.
 '''
 
 class Palette:
@@ -89,17 +91,14 @@ class Palette:
         self.chroma = chroma
         self.luminance = luminance
 
-        self.grayscale = {}
-        self.colors = {}
-
-        self.init_grayscale()
-        self.init_colors()
+        self.grayscale = self.generate_grayscale()
+        self.colors, self.terminal_blue = self.generate_colors()
 
         self.palette = self.grayscale.copy()
         self.palette.update(self.colors)
 
-    def init_grayscale(self):
-        luminances = {
+    def generate_grayscale(self):
+        lumi_map = {
             'bg0': 0,
             'bg1': 10,
             'bg2': 30,
@@ -109,30 +108,45 @@ class Palette:
             'fg3': 90,
             'fg4': 100,
         }
-        for name, lumi in luminances.items():
+
+        grayscale = {}
+        for name in self.GRAYSCALE_NAMES:
+            lumi = lumi_map[name]
             rgb = self.hcl_to_rgb(0, 0, lumi)
             code = self.rgb_to_hex(rgb)
-            self.grayscale[name] = code
+            grayscale[name] = code
 
-    def init_colors(self):
-        distance = 360 / len(self.COLOR_NAMES)
+        return grayscale
+
+    def generate_colors(self):
+        hue_dist = 360 / len(self.COLOR_NAMES)
+        colors = {}
         for i, name in enumerate(self.COLOR_NAMES):
-            hue = self.hue_offset + distance * i
+            hue = self.hue_offset + hue_dist * i
             chroma = self.chroma
             lumi = self.luminance
 
             if name == 'red':
-                lumi -= 15
+                # red is also used for errors/deletions
+                hue += 12
                 chroma += 50
-            elif name == 'blue':
                 lumi -= 15
+            elif name == 'blue':
+                # blue is often used for highlight on terminals
+                hcl = [hue, chroma, lumi - 20]
+                hcl[1] = self.fix_chroma(*hcl)
+                print(f'terminal-blue: HCL({hcl[0]}, {hcl[1]}, {hcl[2]})')
+                rgb = self.hcl_to_rgb(*hcl)
+                terminal_blue = self.rgb_to_hex(rgb)
 
             chroma = self.fix_chroma(hue, chroma, lumi)
             print(f'{name}: HCL({hue}, {chroma}, {lumi})')
 
             rgb = self.hcl_to_rgb(hue, chroma, lumi)
             code = self.rgb_to_hex(rgb)
-            self.colors[name] = code
+            colors[name] = code
+
+        return (colors, terminal_blue)
 
     def fix_chroma(self, hue, chroma, lumi):
         for chroma in range(chroma, -1, -1):
@@ -191,7 +205,8 @@ def export_xresources(pal):
     print(f'*.background: #{pal.palette[ansi_map[0]]}')
     print(f'*.foreground: #{pal.palette[ansi_map[7]]}')
     for i, name in enumerate(ansi_map):
-        print(f'*.color{i}: #{pal.palette[name]}')
+        code = pal.palette[name] if name != 'blue' else pal.terminal_blue
+        print(f'*.color{i}: #{code}')
     print()
 
 def export_alacritty(pal):
@@ -215,6 +230,8 @@ def export_alacritty(pal):
     for name, code in pal.colors.items():
         if name in ['orange', 'violet']:
             continue
+        elif name == 'blue':
+            code = pal.terminal_blue
         scheme['normal'][name] = '#' + code
         scheme['bright'][name] = '#' + code
 
@@ -251,7 +268,7 @@ def export_vim(pal):
     for base16, name in base16_map.items():
         print(f'let s:gui{base16[4:]}        = "{pal.palette[name]}"')
 
-pal = Palette(12, 70, 70)
+pal = Palette(0, 70, 70)
 export_xresources(pal)
 export_alacritty(pal)
 export_vim(pal)

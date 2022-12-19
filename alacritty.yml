@@ -7,25 +7,25 @@ font:
   size: 19.25
 
 color-schemes:
-  hcl127070: &color-scheme-hcl127070
+  hcl007070: &color-scheme-hcl007070
     bright:
       black: '#777777'
-      blue: '#048dc4'
-      cyan: '#09bebe'
-      green: '#1bc382'
-      magenta: '#f188cf'
+      blue: '#0d81a0'
+      cyan: '#0ebfb2'
+      green: '#50c070'
+      magenta: '#ea8adc'
       red: '#e74d4e'
       white: '#ffffff'
-      yellow: '#98b73f'
+      yellow: '#abb234'
     normal:
       black: '#000000'
-      blue: '#048dc4'
-      cyan: '#09bebe'
-      green: '#1bc382'
-      magenta: '#f188cf'
+      blue: '#0d81a0'
+      cyan: '#0ebfb2'
+      green: '#50c070'
+      magenta: '#ea8adc'
       red: '#e74d4e'
       white: '#c6c6c6'
-      yellow: '#98b73f'
+      yellow: '#abb234'
     primary:
       background: '#000000'
       foreground: '#c6c6c6'
@@ -53,4 +53,4 @@ color-schemes:
       cyan:    '#14ffff'
       white:   '#ffffff'
 
-colors: *color-scheme-hcl127070
+colors: *color-scheme-hcl007070
