@@ -47,19 +47,18 @@ For terminals, we map ANSI colors to editor colors as follows
  - cyan:    cyan / cyan
  - white:   fg2 / fg4
 
-Unlike editors, terminals can use colors as background colors for ui or
-highlight.  Different colors have different perceived brightness (e.g., r:g:b
-is roughly 3:10:1) and terminals make use of that.  XTerm by default uses
+Different colors have different perceived brightness (e.g., r:g:b is roughly
+3:10:1) and terminals make use of that.  XTerm by default uses
 
  - red:     RGB(205,   0,   0), HCL( 12, 144, 43)
- - green:   RGB(  0, 205,   0), HCL(128, 111, 60)
- - yellow:  RGB(205, 205,   0), HCL( 86,  88, 60)
+ - green:   RGB(  0, 205,   0), HCL(128, 111, 72)
+ - yellow:  RGB(205, 205,   0), HCL( 86,  88, 80)
  - blue:    RGB(  0,   0, 205), HCL(266, 101, 25)
  - magenta: RGB(205,   0, 205), HCL(308, 111, 49)
- - cyan:    RGB(  0, 205, 205), HCL(192,  59, 60)
+ - cyan:    RGB(  0, 205, 205), HCL(192,  59, 75)
 
-The takeaway is red and blue should target a lower luminance, and red should
-target a higher chroma.
+The average chroma is 102 and the average luminance 57.  We instead target
+70/70, and handle red and blue specially.
 '''
 
 class Palette:
@@ -252,7 +251,7 @@ def export_vim(pal):
     for base16, name in base16_map.items():
         print(f'let s:gui{base16[4:]}        = "{pal.palette[name]}"')
 
-pal = Palette(12, 60, 70)
+pal = Palette(12, 70, 70)
 export_xresources(pal)
 export_alacritty(pal)
 export_vim(pal)
