@@ -9,19 +9,22 @@ Host dut-priv
 
 Host dut-1 lnx-1
 	Hostname my:test:net:work:7288:6bff:fe89:43dd
-	LocalForward 2201 localhost:22     # sslh
-	LocalForward 12341 localhost:1234  # gdbserver
-	LocalForward 39920 localhost:39920 # renderdoc
+	# sslh
+	LocalForward 2201 localhost:22
+	# gdbserver
+	LocalForward 12341 localhost:1234
+	# renderdoc
+	LocalForward 39920 localhost:39920
 
 Host dut-2 lnx-2
 	Hostname my:test:net:work:5e85:7eff:fe3a:b1d4
-	LocalForward 2202 localhost:22     # sslh
-	LocalForward 12342 localhost:1234  # gdbserver
+	LocalForward 2202 localhost:22
+	LocalForward 12342 localhost:1234
 
 Host dut-3 lnx-3
 	Hostname my:test:net:work:5e85:7eff:fe3b:8382
-	LocalForward 2203 localhost:22     # sslh
-	LocalForward 12343 localhost:1234  # gdbserver
+	LocalForward 2203 localhost:22
+	LocalForward 12343 localhost:1234
 
 Host dut-borealis
 	Hostname 100.115.92.26
