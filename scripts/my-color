@@ -36,8 +36,6 @@ wheel for better contrast
 The luminance is slightly lower than the luminance of fg2, to make fg2 pop out
 a little bit.
 
-Red can indicate errors/deletions and is treated specially.
-
 For terminals, we map ANSI colors to editor colors as follows
 
  - black:   bg0 / fg0
@@ -59,8 +57,8 @@ Different colors have different perceived brightness (e.g., r:g:b is roughly
  - magenta: RGB(205,   0, 205), HCL(308, 111, 49)
  - cyan:    RGB(  0, 205, 205), HCL(192,  59, 75)
 
-Red has the same special meaning as in editors.  Blue is often used for
-highlight and is treated specially as well.
+Red can indicate errors/deletions and is treated specially.  Blue is often
+used for highlight and is treated specially as well.
 '''
 
 class Palette:
@@ -86,16 +84,24 @@ class Palette:
         'magenta',
     ]
 
+    TERMINAL_OVERRIDES = [
+        'red',
+        'blue',
+    ]
+
     def __init__(self, hue_offset, chroma, luminance):
         self.hue_offset = hue_offset
         self.chroma = chroma
         self.luminance = luminance
 
         self.grayscale = self.generate_grayscale()
-        self.colors, self.terminal_blue = self.generate_colors()
+        self.colors = self.generate_colors()
 
         self.palette = self.grayscale.copy()
         self.palette.update(self.colors)
+
+    def name(self):
+        return f'hcl{self.hue_offset:02}{self.chroma:02}{self.luminance:02}'
 
     def generate_grayscale(self):
         lumi_map = {
@@ -121,23 +127,24 @@ class Palette:
     def generate_colors(self):
         hue_dist = 360 / len(self.COLOR_NAMES)
         colors = {}
-        for i, name in enumerate(self.COLOR_NAMES):
+        for i, name in enumerate(self.COLOR_NAMES + self.TERMINAL_OVERRIDES):
+            if i >= len(self.COLOR_NAMES):
+                i = self.COLOR_NAMES.index(name)
+                name = 'terminal-' + name
+
             hue = self.hue_offset + hue_dist * i
             chroma = self.chroma
             lumi = self.luminance
 
-            if name == 'red':
-                # red is also used for errors/deletions
+            # overrides for terminals
+            if name == 'terminal-red':
+                # red is often used for errors/deletions
                 hue += 12
                 chroma += 50
                 lumi -= 15
-            elif name == 'blue':
-                # blue is often used for highlight on terminals
-                hcl = [hue, chroma, lumi - 20]
-                hcl[1] = self.fix_chroma(*hcl)
-                print(f'terminal-blue: HCL({hcl[0]}, {hcl[1]}, {hcl[2]})')
-                rgb = self.hcl_to_rgb(*hcl)
-                terminal_blue = self.rgb_to_hex(rgb)
+            elif name == 'terminal-blue':
+                # blue is often used for highlight
+                lumi -= 20
 
             chroma = self.fix_chroma(hue, chroma, lumi)
             print(f'{name}: HCL({hue}, {chroma}, {lumi})')
@@ -146,7 +153,7 @@ class Palette:
             code = self.rgb_to_hex(rgb)
             colors[name] = code
 
-        return (colors, terminal_blue)
+        return colors
 
     def fix_chroma(self, hue, chroma, lumi):
         for chroma in range(chroma, -1, -1):
@@ -184,32 +191,44 @@ def export_xresources(pal):
     ansi_map = [
         # normal
         'bg0',
-        'red',
+        'terminal-red',
         'green',
         'yellow',
         'cyan',
-        'blue',
+        'terminal-blue',
         'magenta',
         'fg2',
         # bright
         'fg0',
-        'red',
+        'terminal-red',
         'green',
         'yellow',
         'cyan',
-        'blue',
+        'terminal-blue',
         'magenta',
         'fg4',
     ]
 
+    for i, name in enumerate(ansi_map):
+        code = pal.palette[name]
+        print(f'*.color{i}: #{code}')
+
     print(f'*.background: #{pal.palette[ansi_map[0]]}')
     print(f'*.foreground: #{pal.palette[ansi_map[7]]}')
-    for i, name in enumerate(ansi_map):
-        code = pal.palette[name] if name != 'blue' else pal.terminal_blue
-        print(f'*.color{i}: #{code}')
     print()
 
 def export_alacritty(pal):
+    ansi_map = {
+        'black':   'bg0',
+        'red':     'terminal-red',
+        'green':   'green',
+        'yellow':  'yellow',
+        'cyan':    'cyan',
+        'blue':    'terminal-blue',
+        'magenta': 'magenta',
+        'white':   'fg2',
+    }
+
     scheme = {
         'primary': {
         },
@@ -219,26 +238,22 @@ def export_alacritty(pal):
         },
     }
 
-    scheme['primary']['background'] = '#' + pal.grayscale['bg0']
-    scheme['normal']['black'] = '#' + pal.grayscale['bg0']
-    scheme['bright']['black'] = '#' + pal.grayscale['fg0']
+    for ansi, name in ansi_map.items():
+        code = '#' + pal.palette[name]
+        scheme['normal'][ansi] = code
+        scheme['bright'][ansi] = code
 
-    scheme['primary']['foreground'] = '#' + pal.grayscale['fg2']
-    scheme['normal']['white'] = '#' + pal.grayscale['fg2']
-    scheme['bright']['white'] = '#' + pal.grayscale['fg4']
+    # fix bright black/white
+    scheme['bright']['black'] = '#' + pal.palette['fg0']
+    scheme['bright']['white'] = '#' + pal.palette['fg4']
 
-    for name, code in pal.colors.items():
-        if name in ['orange', 'violet']:
-            continue
-        elif name == 'blue':
-            code = pal.terminal_blue
-        scheme['normal'][name] = '#' + code
-        scheme['bright'][name] = '#' + code
+    # set background/foreground
+    scheme['primary']['background'] = scheme['normal']['black']
+    scheme['primary']['foreground'] = scheme['normal']['white']
 
-    scheme_name = f'hcl{pal.hue_offset:02}{pal.chroma:02}{pal.luminance:02}'
     alacritty_yaml = {
         'color-schemes': {
-            scheme_name: scheme
+            pal.name(): scheme
         },
     }
     print(dump(alacritty_yaml))
@@ -266,7 +281,8 @@ def export_vim(pal):
     }
 
     for base16, name in base16_map.items():
-        print(f'let s:gui{base16[4:]}        = "{pal.palette[name]}"')
+        code = pal.palette[name]
+        print(f'let s:gui{base16[4:]}        = "{code}"')
 
 pal = Palette(0, 70, 70)
 export_xresources(pal)
