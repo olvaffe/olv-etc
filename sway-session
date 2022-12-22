@@ -1,6 +1,6 @@
 #!/bin/sh
 
-exec </dev/null >"$HOME/.local/state/sway-log" 2>&1
+exec </dev/null >"$HOME/.local/state/sway.log" 2>&1
 
 # init GUI envs so that they are inherited by sway and apps directly started
 # by sway (terminal, browser, and autostart)

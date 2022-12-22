@@ -50,6 +50,9 @@ install "vim-pack" ".vim/pack"
 install "gitconfig" ".config/git/config"
 touch "$DST/.config/git/credentials"
 
+install "gdbearlyinit" ".config/gdb/gdbearlyinit"
+install "gdbinit" ".config/gdb/gdbinit"
+
 install "ssh-config" ".ssh/config"
 install "tmux.conf" ".config/tmux/tmux.conf"
 
