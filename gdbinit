@@ -1,6 +1,6 @@
-set logging enabled on
 set logging file ~/.local/state/gdb.log
 set logging overwrite on
+set logging enabled on
 
 set print array on
 set print array-indexes on
@@ -12,8 +12,8 @@ set index-cache enabled on
 
 set history filename ~/.local/state/gdb.history
 set history remove-duplicates unlimited
-set history save on
 set history size 640
+set history save on
 
 set pagination off
 set confirm off
