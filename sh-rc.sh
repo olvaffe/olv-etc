@@ -11,7 +11,7 @@ esac
 
 [ -z "$DISPLAY$WAYLAND_DISPLAY" -a -n "$XDG_VTNR" -a "0$XDG_VTNR" -le 1 ] && exec sway-session
 
-HISTFILE="$HOME/.local/state/sh_history"
+HISTFILE="$HOME/.local/state/sh.history"
 HISTSIZE=64000
 HISTFILESIZE=64000
 HISTCONTROL=ignoredups:erasedups
