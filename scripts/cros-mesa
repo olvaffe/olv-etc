@@ -2,6 +2,69 @@
 
 set -e
 
+parse() {
+	OUT="$(basename "$CROSS_FILE")"
+	OUT="out-${CROSS_FILE%.*}"
+
+	CPP="$(grep '^cpp = ' "$CROSS_FILE" | cut -d\' -f2)"
+	SYSROOT="$(grep '^sys_root = ' "$CROSS_FILE" | cut -d\' -f2)"
+	SYSTEM="$(grep '^system = ' "$CROSS_FILE" | cut -d\' -f2)"
+	CPU_FAMILY="$(grep '^cpu_family = ' "$CROSS_FILE" | cut -d\' -f2)"
+
+	if [[ "$CPP" = "/opt/android-"* ]]; then
+		SYSTEM="android"
+
+		if [[ "$CPP" = "/opt/android-p"* ]]; then
+			API_LEVEL="28"
+		elif [[ "$CPP" = "/opt/android-r"* ]]; then
+			API_LEVEL="30"
+		elif [[ "$CPP" = "/opt/android-t"* ]]; then
+			API_LEVEL="33"
+		else
+			API_LEVEL="30"
+		fi
+	fi
+
+	LIBDIR="lib"
+	ABI="$CPU_FAMILY"
+	case "$CPU_FAMILY" in
+		aarch64)
+			LIBDIR="lib64"
+			ABI="arm64"
+			;;
+		x86_64)
+			LIBDIR="lib64"
+			ABI="amd64"
+			;;
+		*)
+			;;
+	esac
+
+	if [ "$SYSTEM" = "linux" ]; then
+		PREFIX="/usr"
+		export SYSROOT
+	else
+		PREFIX="/vendor"
+
+		if [ -d "$SYSROOT/opt/google/vms" ]; then
+			ARC_SYSROOT="$SYSROOT/opt/google/vms/android"
+		else
+			ARC_SYSROOT="$SYSROOT/opt/google/containers/android"
+		fi
+		export SYSROOT
+		export ARC_SYSROOT
+		export ABI
+	fi
+
+	echo "OUT=$OUT"
+	echo "SYSTEM=$SYSTEM"
+	echo "PREFIX=$PREFIX"
+	echo "LIBDIR=$LIBDIR"
+	echo
+	echo "--------"
+	echo
+}
+
 setup() {
 	common_options="
 		-Dprefix=$PREFIX
@@ -107,66 +170,7 @@ if [ $# -ge 2 ]; then
 fi
 
 if [ -r "$CROSS_FILE" ]; then
-	OUT="$(basename "$CROSS_FILE")"
-	OUT="out-${CROSS_FILE%.*}"
-
-	CPP="$(grep '^cpp = ' "$CROSS_FILE" | cut -d\' -f2)"
-	SYSROOT="$(grep '^sys_root = ' "$CROSS_FILE" | cut -d\' -f2)"
-	SYSTEM="$(grep '^system = ' "$CROSS_FILE" | cut -d\' -f2)"
-	CPU_FAMILY="$(grep '^cpu_family = ' "$CROSS_FILE" | cut -d\' -f2)"
-
-	if [[ "$CPP" = "/opt/android-"* ]]; then
-		SYSTEM="android"
-
-		if [[ "$CPP" = "/opt/android-p"* ]]; then
-			API_LEVEL="28"
-		elif [[ "$CPP" = "/opt/android-r"* ]]; then
-			API_LEVEL="30"
-		elif [[ "$CPP" = "/opt/android-t"* ]]; then
-			API_LEVEL="33"
-		else
-			API_LEVEL="30"
-		fi
-	fi
-
-	LIBDIR="lib"
-	ABI="$CPU_FAMILY"
-	case "$CPU_FAMILY" in
-		aarch64)
-			LIBDIR="lib64"
-			ABI="arm64"
-			;;
-		x86_64)
-			LIBDIR="lib64"
-			ABI="amd64"
-			;;
-		*)
-			;;
-	esac
-
-	if [ "$SYSTEM" = "linux" ]; then
-		PREFIX="/usr"
-		export SYSROOT
-	else
-		PREFIX="/vendor"
-
-		if [ -d "$SYSROOT/opt/google/vms" ]; then
-			ARC_SYSROOT="$SYSROOT/opt/google/vms/android"
-		else
-			ARC_SYSROOT="$SYSROOT/opt/google/containers/android"
-		fi
-		export SYSROOT
-		export ARC_SYSROOT
-		export ABI
-	fi
-
-	echo "OUT=$OUT"
-	echo "SYSTEM=$SYSTEM"
-	echo "PREFIX=$PREFIX"
-	echo "LIBDIR=$LIBDIR"
-	echo
-	echo "--------"
-	echo
+	parse
 fi
 
 case "$ACTION" in

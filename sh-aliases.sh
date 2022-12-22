@@ -20,7 +20,7 @@ alias fixssh='eval $(tmux showenv -s SSH_AUTH_SOCK)'
 if command -v apt > /dev/null; then
 	alias aS='apt search'
 	alias aP='apt purge'
-	alias dl='dpkg -l'
+	alias dG='dpkg -l | grep'
 	alias dL='dpkg -L'
 	alias dS='dpkg -S'
 fi
