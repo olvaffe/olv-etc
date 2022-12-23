@@ -4,8 +4,10 @@
 [alias]
 	b = branch
 	ba = branch -a
-	bd = branch -D
+	bD = branch -D
 	c = checkout
+	cb = checkout -b
+	ct = checkout -t
 	cm = checkout origin/main
 	c- = checkout @{-1}
 	cp = cherry-pick
