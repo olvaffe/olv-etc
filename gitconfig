@@ -18,7 +18,7 @@
 	r = rebase -i
 	fixes = show -s --pretty='format:Fixes: %h (\"%s\")'
 	me = config sendemail.from
-	topic = checkout --track origin/main -b
+	topic = checkout origin/main -b
 
 [credential]
 	helper = store
