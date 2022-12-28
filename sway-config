@@ -16,8 +16,9 @@ set $browser google-chrome-stable --ozone-platform=wayland --gtk-version=4
 xwayland disable
 
 for_window [shell="xwayland"] {
-    floating enable
     title_format %title (%shell)
+    floating enable
+    inhibit_idle open
 }
 
 ### Input configuration
