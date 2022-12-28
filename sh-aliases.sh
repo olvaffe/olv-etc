@@ -19,7 +19,8 @@ alias fixssh='eval $(tmux showenv -s SSH_AUTH_SOCK)'
 # debian
 if command -v apt > /dev/null; then
 	alias aS='apt search'
-	alias aP='apt purge'
+	alias aI='sudo apt install'
+	alias aP='sudo apt purge'
 	alias dG='dpkg -l | grep'
 	alias dL='dpkg -L'
 	alias dS='dpkg -S'

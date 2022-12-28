@@ -4,7 +4,7 @@
 [alias]
 	b = branch
 	ba = branch -a
-	bD = branch -D
+	bd = branch -D
 	c = checkout
 	cb = checkout -b
 	ct = checkout -t
