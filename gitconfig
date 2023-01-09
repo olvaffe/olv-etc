@@ -2,23 +2,34 @@
 	editor = vim
 
 [alias]
+	# work with remotes
+	f = fetch --prune
+	fa = fetch --prune --all
+	pr = pull --rebase
+	pf = push --force
+	ro = !"git remote set-url --push $1 DISABLED #"
+
+	# work with branches
 	b = branch
 	ba = branch -a
 	bd = branch -D
 	c = checkout
 	cb = checkout -b
-	ct = checkout -t
-	cm = checkout origin/main
+	ch = checkout origin/HEAD
 	c- = checkout @{-1}
+	topic = checkout --no-track origin/HEAD -b
+
+	# work with commits
 	cp = cherry-pick
-	f = fetch --prune
-	fa = fetch --prune --all
-	p = push
-	pf = push --force
-	r = rebase -i
+	ri = rebase --interactive
+
+	# work with logs
+	l = log
+	lo = log --oneline
+	lf = log --pretty=fuller
+
 	fixes = show -s --pretty='format:Fixes: %h (\"%s\")'
 	me = config sendemail.from
-	topic = checkout origin/main -b
 
 [credential]
 	helper = store
