@@ -30,6 +30,7 @@
 
 	fixes = show -s --pretty='format:Fixes: %h (\"%s\")'
 	me = config sendemail.from
+	alias = !"git config --get-regexp '^alias.'"
 
 [credential]
 	helper = store
