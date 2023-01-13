@@ -22,6 +22,7 @@
 	# work with commits
 	cp = cherry-pick
 	ri = rebase --interactive
+	rh = rebase --interactive origin/HEAD
 
 	# work with logs
 	l = log
