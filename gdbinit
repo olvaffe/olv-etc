@@ -17,5 +17,6 @@ set history save on
 
 set pagination off
 set confirm off
+set breakpoint pending on
 
 set debuginfod enabled on
