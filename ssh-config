@@ -4,8 +4,8 @@ Host ct
 	LocalForward 5900 localhost:5900
 	RemoteForward 2200 localhost:22
 
-Host dut-priv
-	Hostname 192.168.0.2
+Host dut-priv lnx-priv
+	Hostname 192.168.0.5
 
 Host dut-1 lnx-1
 	Hostname my:test:net:work:7288:6bff:fe89:43dd
