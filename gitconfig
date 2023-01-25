@@ -3,14 +3,11 @@
 
 [alias]
 	# work with remotes
-	f = fetch --prune
 	fa = fetch --prune --all
 	pr = pull --rebase
-	pf = push --force
 	ro = !"git remote set-url --push $1 DISABLED #"
 
 	# work with branches
-	b = branch
 	ba = branch -a
 	bd = branch -D
 	c = checkout
