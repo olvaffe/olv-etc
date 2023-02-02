@@ -8,11 +8,13 @@
 	ro = !"git remote set-url --push $1 DISABLED #"
 
 	# work with branches
+	b = branch
 	ba = branch -a
 	bd = branch -D
 	c = checkout
 	cb = checkout -b
 	ch = checkout origin/HEAD
+	ct = checkout -t
 	c- = checkout @{-1}
 	topic = checkout --no-track origin/HEAD -b
 
