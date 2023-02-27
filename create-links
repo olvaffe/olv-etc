@@ -55,10 +55,3 @@ install "gdbinit" ".config/gdb/gdbinit"
 
 install "ssh-config" ".ssh/config"
 install "tmux.conf" ".config/tmux/tmux.conf"
-
-for script in "$SRC/scripts/"*; do
-	if [ -x "$script" ]; then
-		name="${script#$SRC/scripts/}"
-		install "scripts/$name" ".local/bin/$name"
-	fi
-done
