@@ -19,7 +19,7 @@
 	topic = checkout --no-track origin/HEAD -b
 
 	# work with commits
-	cp = cherry-pick -x
+	cp = cherry-pick
 	ri = rebase --interactive
 	rh = rebase --interactive origin/HEAD
 
