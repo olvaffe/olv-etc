@@ -23,30 +23,67 @@ if [ -n "$gpu_governor" ]; then
 	fi
 fi
 
-for i in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
-	if [ -n "$cpu_governor" ]; then
-		echo "$cpu_governor" > "$i"
-	fi
+cpufreq_set_governor() {
+	sysfs_cpufreq="/sys/devices/system/cpu/cpufreq"
+	gov="$1"
 
-	echo -n "$i: "
-	cat "$i"
-done
+	for sysfs_gov in $sysfs_cpufreq/policy*/scaling_governor; do
+		if [ -n "$gov" ]; then
+			echo "$gov" > "$sysfs_gov"
+		fi
 
-for i in /sys/class/devfreq/*.gpu; do
-	sysfs_gov="$i/governor"
-	sysfs_sus="$i/device/power/autosuspend_delay_ms"
+		echo "$sysfs_gov: $(cat $sysfs_gov)"
+	done
+}
 
-	if [ -n "$gpu_governor" ]; then
-		echo "$gpu_governor" > "$sysfs_gov"
-	fi
+devfreq_set_governor_and_pm() {
+	sysfs_devfreq="/sys/class/devfreq"
+	gov="$1"
+	sus="$2"
 
-	echo -n "$sysfs_gov: "
-	cat "$sysfs_gov"
+	for sysfs_gpu in $sysfs_devfreq/*.gpu; do
+		[ -d "$sysfs_gpu" ] || continue
 
-	if [ -n "$suspend_delay" ]; then
-		echo "$suspend_delay" > "$sysfs_sus"
-	fi
+		sysfs_gov="$sysfs_gpu/governor"
+		sysfs_sus="$sysfs_gpu/device/power/autosuspend_delay_ms"
 
-	echo -n "$sysfs_sus: "
-	cat "$sysfs_sus"
-done
+		if [ -n "$gov" ]; then
+			echo "$gov" > "$sysfs_gov"
+		fi
+
+		echo "$sysfs_gov: $(cat $sysfs_gov)"
+
+		if [ -n "$sus" ]; then
+			echo "$sus" > "$sysfs_sus"
+		fi
+
+		echo "$sysfs_sus: $(cat $sysfs_sus)"
+	done
+}
+
+i915_set_min_freq() {
+	sysfs_drm="/sys/class/drm"
+	gov="$1"
+
+	for sysfs_card in $sysfs_drm/card*; do
+		[ -d "$sysfs_card" ] || continue
+
+		sysfs_min="$sysfs_card/gt_min_freq_mhz"
+		[ -f "$sysfs_min" ] || continue
+
+		sysfs_rp0="$sysfs_card/gt_RP0_freq_mhz"
+		sysfs_rp1="$sysfs_card/gt_RP1_freq_mhz"
+
+		if [ "$gov" = "performance" ]; then
+			cp "$sysfs_rp0" "$sysfs_min"
+		elif [ -n "$gov" ]; then
+			cp "$sysfs_rp1" "$sysfs_min"
+		fi
+
+		echo "$sysfs_min: $(cat $sysfs_min)"
+	done
+}
+
+cpufreq_set_governor "$cpu_governor"
+devfreq_set_governor_and_pm "$gpu_governor" "$suspend_delay"
+i915_set_min_freq "$gpu_governor"
