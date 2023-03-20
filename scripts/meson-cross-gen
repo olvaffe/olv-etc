@@ -79,10 +79,12 @@ init_vars() {
 		target_triple="$target_arch-linux-$target_env"
 	fi
 
-	local basedirs="/usr/lib /usr/lib/$target_triple /usr/share"
+	local basedirs="/usr/lib /usr/lib64 /usr/lib/$target_triple /usr/share"
 	pkgconfigdirs=""
 	for b in $basedirs; do
-		pkgconfigdirs="$pkgconfigdirs:$sysroot$b/pkgconfig"
+		if [ -d "$sysroot$b/pkgconfig" ]; then
+			pkgconfigdirs="$pkgconfigdirs:$sysroot$b/pkgconfig"
+		fi
 	done
 	pkgconfigdirs="${pkgconfigdirs#:}"
 }
