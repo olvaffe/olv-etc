@@ -19,15 +19,28 @@ HISTCONTROL=ignoredups:erasedups
 if [ -n "$BASH_VERSION" ]; then
 	shopt -s histappend
 
-	PS1="\u@\h:\w\$ "
-	# set window title as well
-	PS1="\[\e]2;\u@\h:\w\a\]$PS1"
+	hn="$(hostname)"
+	case "$hn" in
+		olv-glaptop4*)
+			hn="x1"
+			;;
+		olv-ct-22*)
+			hn="ct"
+			;;
+		*)
+			hn="\h"
+			;;
+	esac
 
 	# for cros chroot
 	if [ -n "$CROS_WORKON_SRCROOT" ]; then
-		PS1="\u@cros-sdk:\w\$ "
+		hn="cros-sdk"
 		unset LESS
 	fi
+
+	PS1="\u@$hn:\w\$ "
+	# set window title as well
+	PS1="\[\e]2;\u@$hn:\w\a\]$PS1"
 else
 	PS1='$USER:$PWD$ '
 fi
