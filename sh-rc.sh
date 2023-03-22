@@ -19,7 +19,7 @@ HISTCONTROL=ignoredups:erasedups
 if [ -n "$BASH_VERSION" ]; then
 	shopt -s histappend
 
-	hn="$(hostnamectl hostname)"
+	hn="$(uname -n)"
 	case "$hn" in
 		olv-glaptop4*)
 			hn="x1"
