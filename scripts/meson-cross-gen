@@ -1,5 +1,12 @@
 #!/bin/sh
 
+# Tips for android
+#
+#  - thread_local uses __tls_get_addr that is only available on higher api
+#    level
+#  - comment out sys_root if pkg-config is used
+#  - add -static-libstdc++ to cpp_link_args if C++ is used
+#
 android_api="28"
 
 if [ $# -ne 4 ]; then
