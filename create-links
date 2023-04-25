@@ -31,27 +31,22 @@ install() {
 
 create_xdg_base_dirs
 
+install "alacritty.yml" ".config/alacritty/alacritty.yml"
+install "fontconfig-fonts.conf" ".config/fontconfig/fonts.conf"
+install "gdbearlyinit" ".config/gdb/gdbearlyinit"
+install "gdbinit" ".config/gdb/gdbinit"
+install "gitconfig" ".config/git/config"
+touch "$DST/.config/git/credentials"
+install "i3status-config" ".config/i3status/config"
 install "sh-aliases.sh" ".config/sh/aliases.sh"
 install "sh-paths.sh" ".config/sh/paths.sh"
 install "sh-rc.sh" ".config/sh/rc.sh"
 install "sh-rc.sh" ".bashrc"
 install "sh-rc.sh" ".bash_profile"
-
+install "ssh-config" ".ssh/config"
+install "sway-config" ".config/sway/config"
 install "sway-session" ".local/bin/sway-session"
 install "sway-session-autostart" ".local/bin/sway-session-autostart"
-install "sway-config" ".config/sway/config"
-install "i3status-config" ".config/i3status/config"
-install "alacritty.yml" ".config/alacritty/alacritty.yml"
-install "fontconfig-fonts.conf" ".config/fontconfig/fonts.conf"
-
+install "tmux.conf" ".config/tmux/tmux.conf"
 install "vimrc" ".vim/vimrc"
 install "vim-pack" ".vim/pack"
-
-install "gitconfig" ".config/git/config"
-touch "$DST/.config/git/credentials"
-
-install "gdbearlyinit" ".config/gdb/gdbearlyinit"
-install "gdbinit" ".config/gdb/gdbinit"
-
-install "ssh-config" ".ssh/config"
-install "tmux.conf" ".config/tmux/tmux.conf"
