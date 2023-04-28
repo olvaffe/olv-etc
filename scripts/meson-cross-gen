@@ -1,90 +1,114 @@
 #!/bin/sh
 
-# Tips for android
+# Tips for ndk
 #
 #  - thread_local uses __tls_get_addr that is only available on higher api
 #    level
-#  - comment out sys_root if pkg-config is used
+#  - specify both sysroot and ndk_root if pkg-config is used
 #  - add -static-libstdc++ to cpp_link_args if C++ is used
-#
-android_api="28"
 
-if [ $# -ne 4 ]; then
-	echo "$0 <arm|x86> <32|64> <linux|cros|android> <sysroot|ndk_root>"
+ndk_api="28"
+
+if [ $# -lt 4 ]; then
+	echo "$0 <linux|cros|ndk> <x86|arm> <64|32> <sysroot> [ndk_root]"
 	exit 1
 fi
 
-arch="$1"
-bits="$2"
-system="$3"
+flavor="$1"
+arch="$2"
+bits="$3"
 sysroot="$4"
+ndk_root="$5"
 
 init_vars() {
 	# https://mesonbuild.com/Reference-tables.html#cpu-families
 	# https://wiki.debian.org/Multiarch/Tuples
 	# https://clang.llvm.org/docs/CrossCompilation.html
+	meson_system=""
+	meson_cpu_family=""
+	meson_cpu=""
+	target_arch=""
 	target_vendor=""
-	target_env="gnu"
-	meson_system="$system"
+	target_sys="linux"
+	target_env=""
 
 	case "$arch-$bits" in
 		x86-64)
-			target_arch="x86_64"
 			meson_cpu_family="x86_64"
 			meson_cpu="x86_64"
+			target_arch="x86_64"
 			;;
 		x86-32)
-			target_arch="i386"
 			meson_cpu_family="x86"
 			meson_cpu="i686"
+			target_arch="i386"
 			;;
 		arm-64)
-			target_arch="aarch64"
 			meson_cpu_family="aarch64"
 			meson_cpu="aarch64"
+			target_arch="aarch64"
 			;;
 		arm-32)
-			target_arch="arm"
-			target_env="gnueabihf"
 			meson_cpu_family="arm"
 			meson_cpu="armv7a"
+			target_arch="arm"
+			target_env="eabihf"
 			;;
 		*)
 			echo "unknown $arch-$bits"
 			exit 1
 			;;
 	esac
-
-	case "$system" in
+	case "$flavor" in
 		linux)
-			args="'--sysroot', sysroot"
-			if [ "$arch-$bits" = "x86-32" ]; then
-				args="'-m32', $args"
-			fi
+			meson_system="linux"
+			target_env="gnu$target_env"
 			;;
 		cros)
-			target_vendor="cros"
 			meson_system="linux"
-			args="'-target', target_triple, '--sysroot', sysroot"
+			target_arch="$meson_cpu"
+			target_vendor="cros-"
+			target_env="gnu$target_env"
 			;;
-		android)
-			ndk_root="$sysroot"
-			sysroot="/not-exist"
-
-			target_env="android$android_api"
-			args="'-target', target_triple"
+		ndk)
+			meson_system="android"
+			target_arch="$meson_cpu"
+			target_env="android${target_env%hf}$ndk_api"
 			;;
 		*)
-			echo "unknown $system"
+			echo "unknown $flavor"
 			exit 1
 			;;
 	esac
 
-	if [ -n "$target_vendor" ]; then
-		target_triple="$target_arch-$target_vendor-linux-$target_env"
-	else
-		target_triple="$target_arch-linux-$target_env"
-	fi
+	target_triple="$target_arch-$target_vendor$target_sys-$target_env"
+
+	case "$flavor" in
+		linux)
+			toolchain_prefix=""
+			if [ "$arch" != "x86" ]; then
+				toolchain_prefix="$target_triple-"
+			fi
+
+			common_args="'--sysroot', sysroot"
+			if [ "$arch-$bits" = "x86-32" ]; then
+				common_args="'-m32', $common_args"
+			fi
+			;;
+		cros)
+			toolchain_prefix=""
+			common_args="'-target', '$target_triple', '--sysroot', sysroot"
+			;;
+		ndk)
+			if [ -z "$ndk_root" ]; then
+				ndk_root="$sysroot"
+				sysroot="/not-exist"
+			fi
+
+			toolchain_prefix="$ndk_root/toolchains/llvm/prebuilt/linux-x86_64/bin/"
+			common_args="'-target', '$target_triple'"
+			;;
+	esac
 
 	local basedirs="/usr/lib /usr/lib64 /usr/lib/$target_triple /usr/share"
 	pkgconfigdirs=""
@@ -101,41 +125,30 @@ init_vars
 gen_constants() {
 	cat <<EOF
 [constants]
-target_triple = '$target_triple'
+toolchain_prefix = '$toolchain_prefix'
 sysroot = '$sysroot'
+common_args = [$common_args]
 EOF
 }
 
-gen_binaries_linux() {
+gen_binaries_gcc() {
 	cat <<EOF
 [binaries]
-ar = target_triple + '-ar'
-c = target_triple + '-gcc'
-cpp = target_triple + '-g++'
-strip = target_triple + '-strip'
+ar = toolchain_prefix + 'ar'
+c = toolchain_prefix + 'gcc'
+cpp = toolchain_prefix + 'g++'
+strip = toolchain_prefix + 'strip'
 pkgconfig = '/usr/bin/pkg-config'
 EOF
 }
 
-gen_binaries_cros() {
+gen_binaries_llvm() {
 	cat <<EOF
 [binaries]
-ar = 'llvm-ar'
-c = 'clang'
-cpp = 'clang++'
-strip = 'llvm-strip'
-pkgconfig = '/usr/bin/pkg-config'
-EOF
-}
-
-gen_binaries_android() {
-	ndk_bin="$ndk_root/toolchains/llvm/prebuilt/linux-x86_64/bin"
-	cat <<EOF
-[binaries]
-ar = '$ndk_bin/llvm-ar'
-c = '$ndk_bin/clang'
-cpp = '$ndk_bin/clang++'
-strip = '$ndk_bin/llvm-strip'
+ar = toolchain_prefix + 'llvm-ar'
+c = toolchain_prefix + 'clang'
+cpp = toolchain_prefix + 'clang++'
+strip = toolchain_prefix + 'llvm-strip'
 pkgconfig = '/usr/bin/pkg-config'
 EOF
 }
@@ -143,10 +156,10 @@ EOF
 gen_builtin_options() {
 	cat <<EOF
 [built-in options]
-c_args = [$args]
-c_link_args = [$args]
-cpp_args = [$args]
-cpp_link_args = [$args]
+c_args = common_args + []
+c_link_args = common_args + []
+cpp_args = common_args + []
+cpp_link_args = common_args + []
 EOF
 }
 
@@ -171,15 +184,12 @@ EOF
 
 gen_constants
 echo
-case "$system" in
+case "$flavor" in
 	linux)
-		gen_binaries_linux
+		gen_binaries_gcc
 		;;
-	cros)
-		gen_binaries_cros
-		;;
-	android)
-		gen_binaries_android
+	cros|ndk)
+		gen_binaries_llvm
 		;;
 esac
 echo
