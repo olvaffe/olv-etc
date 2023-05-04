@@ -1,0 +1,28 @@
+#!/bin/sh
+
+CR="$HOME/chromium/src"
+if [ ! -d "$CR" ]; then
+	CR="$PWD"
+fi
+
+PROJECTS="base
+	  cc
+	  chrome
+	  components
+	  content
+	  gpu
+	  media
+	  sandbox
+	  services
+	  skia
+	  third_party/khronos
+	  third_party/libdrm
+	  third_party/minigbm
+	  third_party/skia
+	  ui
+	  "
+
+CROS_PROJECTS=""
+#CROS_PROJECTS="ash chromeos"
+
+(cd "$CR" && ctags -R $PROJECTS $CROS_PROJECTS)
