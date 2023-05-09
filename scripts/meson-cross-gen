@@ -89,6 +89,7 @@ init_vars() {
 	esac
 
 	local target_triple="$target_arch-$target_vendor$target_sys-$target_env"
+	llvm_config=""
 	cpp_args=""
 	cpp_link_args=""
 
@@ -107,6 +108,7 @@ init_vars() {
 		cros)
 			toolchain_prefix=""
 			common_args="'-target', '$target_triple', '--sysroot', sysroot"
+			llvm_config="/usr/lib/llvm/bin/llvm-config-host"
 			;;
 		arc)
 			if [ -z "$toolchain_root" ]; then
@@ -141,6 +143,8 @@ init_vars() {
 			local arc_sysroot="$toolchain_root/$arc_sysroot_arch"
 
 			toolchain_prefix="$toolchain_root/arc-llvm/$arc_llvm_ver/bin/"
+			llvm_config="/opt/google/containers/android/build/bin/llvm-config-host"
+
 			common_args="'-target', '$target_triple', '-gcc-toolchain', '$arc_gcc', '--sysroot', '$arc_sysroot', '-isystem', sysroot + '/usr/include'"
 			cpp_args="'-nostdinc++', '-I$arc_sysroot/usr/include/c++/$arc_gcc_ver'"
 			;;
@@ -196,6 +200,7 @@ c = toolchain_prefix + 'clang'
 cpp = toolchain_prefix + 'clang++'
 strip = toolchain_prefix + 'llvm-strip'
 pkgconfig = '/usr/bin/pkg-config'
+llvm-config = sysroot + '$llvm_config'
 EOF
 }
 
