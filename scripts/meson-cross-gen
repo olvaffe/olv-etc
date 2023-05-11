@@ -185,8 +185,8 @@ gen_binaries_gcc() {
 	cat <<EOF
 [binaries]
 ar = toolchain_prefix + 'ar'
-c = toolchain_prefix + 'gcc'
-cpp = toolchain_prefix + 'g++'
+c = ['ccache', toolchain_prefix + 'gcc']
+cpp = ['ccache', toolchain_prefix + 'g++']
 strip = toolchain_prefix + 'strip'
 pkgconfig = '/usr/bin/pkg-config'
 EOF
@@ -196,8 +196,8 @@ gen_binaries_llvm() {
 	cat <<EOF
 [binaries]
 ar = toolchain_prefix + 'llvm-ar'
-c = toolchain_prefix + 'clang'
-cpp = toolchain_prefix + 'clang++'
+c = ['ccache', toolchain_prefix + 'clang']
+cpp = ['ccache', toolchain_prefix + 'clang++']
 strip = toolchain_prefix + 'llvm-strip'
 pkgconfig = '/usr/bin/pkg-config'
 llvm-config = sysroot + '$llvm_config'
