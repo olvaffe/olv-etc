@@ -12,7 +12,7 @@
 ndk_api="28"
 
 if [ $# -lt 4 ]; then
-	echo "$0 <linux|cros|arc|ndk> <x86|arm> <64|32> <sysroot> [arc_root|ndk_root]"
+	echo "$0 <linux|cros|arc-p|arc-r|arc-t|ndk> <x86|arm> <64|32> <sysroot> [arc_root|ndk_root]"
 	exit 1
 fi
 
@@ -72,7 +72,7 @@ init_vars() {
 			target_vendor="cros-"
 			target_env="gnu$target_env"
 			;;
-		arc)
+		arc-p|arc-r|arc-t)
 			meson_system="android"
 			target_arch="$meson_cpu"
 			target_env="android${target_env%hf}"
@@ -90,6 +90,7 @@ init_vars() {
 
 	local target_triple="$target_arch-$target_vendor$target_sys-$target_env"
 	llvm_config=""
+	c_link_args=""
 	cpp_args=""
 	cpp_link_args=""
 
@@ -110,17 +111,28 @@ init_vars() {
 			common_args="'-target', '$target_triple', '--sysroot', sysroot"
 			llvm_config="/usr/lib/llvm/bin/llvm-config-host"
 			;;
-		arc)
+		arc-*)
 			if [ -z "$toolchain_root" ]; then
 				toolchain_root="$sysroot"
 				sysroot="/not-exist"
 			fi
 
-			local arc_llvm_ver="11.0.2"
+			local arc_llvm_ver=""
 			local arc_gcc_ver="4.9"
 			local arc_gcc_arch=""
 			local arc_gcc_env=""
 			local arc_sysroot_arch=""
+			case "$flavor" in
+				arc-p)
+					arc_llvm_ver="6.0"
+					;;
+				arc-r)
+					arc_llvm_ver="11.0.2"
+					;;
+				arc-t)
+					arc_llvm_ver="14.0.5"
+					;;
+			esac
 			case "$arch-$bits" in
 				x86-*)
 					arc_gcc_arch="x86_64"
@@ -139,14 +151,32 @@ init_vars() {
 					;;
 			esac
 
-			local arc_gcc="$toolchain_root/arc-gcc/$arc_gcc_arch/$arc_gcc_arch-linux-$arc_gcc_env-$arc_gcc_ver"
-			local arc_sysroot="$toolchain_root/$arc_sysroot_arch"
-
 			toolchain_prefix="$toolchain_root/arc-llvm/$arc_llvm_ver/bin/"
 			llvm_config="/opt/google/containers/android/build/bin/llvm-config-host"
 
-			common_args="'-target', '$target_triple', '-gcc-toolchain', '$arc_gcc', '--sysroot', '$arc_sysroot', '-isystem', sysroot + '/usr/include'"
-			cpp_args="'-nostdinc++', '-I$arc_sysroot/usr/include/c++/$arc_gcc_ver'"
+			local arc_gcc="$toolchain_root/arc-gcc/$arc_gcc_arch/$arc_gcc_arch-linux-$arc_gcc_env-$arc_gcc_ver"
+			local arc_sysroot="$toolchain_root/$arc_sysroot_arch"
+			common_args="'-target', '$target_triple', '--sysroot', '$arc_sysroot', '-isystem', sysroot + '/usr/include'"
+			c_link_args="'-Wl,--allow-shlib-undefined'"
+			cpp_link_args="'-Wl,--allow-shlib-undefined'"
+			case "$flavor" in
+				arc-p)
+					common_args="$common_args, '-gcc-toolchain', '$arc_gcc'"
+					cpp_args="'-stdlib=libc++'"
+					cpp_link_args="$cpp_link_args, '-stdlib=libc++'"
+					;;
+				arc-r)
+					common_args="$common_args, '-gcc-toolchain', '$arc_gcc'"
+					cpp_args="'-nostdinc++', '-I$arc_sysroot/usr/include/c++/$arc_gcc_ver'"
+					c_link_args="$c_link_args, '-fuse-ld=lld'"
+					cpp_link_args="$cpp_link_args, '-fuse-ld=lld'"
+					;;
+				arc-t)
+					cpp_args="'-nostdinc++', '-I$arc_sysroot/usr/include/c++/$arc_gcc_ver'"
+					c_link_args="$c_link_args, '-fuse-ld=lld'"
+					cpp_link_args="$cpp_link_args, '-fuse-ld=lld'"
+					;;
+			esac
 			;;
 		ndk)
 			if [ -z "$toolchain_root" ]; then
@@ -208,7 +238,7 @@ gen_builtin_options() {
 	cat <<EOF
 [built-in options]
 c_args = common_args + []
-c_link_args = common_args + []
+c_link_args = common_args + [$c_link_args]
 cpp_args = common_args + [$cpp_args]
 cpp_link_args = common_args + [$cpp_link_args]
 EOF
@@ -239,7 +269,7 @@ case "$flavor" in
 	linux)
 		gen_binaries_gcc
 		;;
-	cros|arc|ndk)
+	cros|arc-*|ndk)
 		gen_binaries_llvm
 		;;
 esac
