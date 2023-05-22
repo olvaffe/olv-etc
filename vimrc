@@ -36,14 +36,7 @@ let c_space_errors=1
 " plugin settings
 let g:EditorConfig_max_line_indicator = "none"
 
-augroup filetype_fix
-  au!
-  au BufNewFile,BufRead SConstruct,SConscript setl ft=python
-  au BufNewFile,BufRead Android.bp setl ft=go
-augroup END
-
 augroup filetype_indent
   au!
-  au FileType c,cpp,cmake,groovy,java setl sw=4 sts=4 et
   au FileType vim setl sw=2 sts=2
 augroup END
