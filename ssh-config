@@ -26,6 +26,11 @@ Host dut-3 lnx-3
 	LocalForward 2203 localhost:22
 	LocalForward 12343 localhost:1234
 
+Host dut-servo lnx-servo
+	Hostname my:test:net:work:8a54:1fff:fe0f:9291
+	LocalForward 2209 localhost:22
+	LocalForward 12349 localhost:1234
+
 Host dut-borealis
 	Hostname 100.115.92.26
 	User chronos
