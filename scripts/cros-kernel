@@ -1,0 +1,195 @@
+#!/bin/sh
+
+# NOT for chromeos, but for chromebooks converted to linux
+
+set -e
+
+if [ $# -lt 2 ]; then
+	echo "Usage:"
+	echo "  $0 pack <OUT> <CMDLINE> [DTBs]..."
+	echo "  $0 deploy <OUT> <DUT> <BLKDEV>"
+	exit 1
+fi
+
+cmd="$1"
+out="$2"
+shift 2
+
+tmpfile="tmp-cros-kernel"
+
+cros_kernel_pack_arm64() {
+	if [ $# -lt 1 ]; then
+		echo "no dtbs specified"
+		exit 1
+	fi
+
+	tmpfile_lz4="$out/$tmpfile.lz4"
+	lz4 -zf "$out/$kernel" "$tmpfile_lz4"
+
+	tmpfile_its="$out/$tmpfile.its"
+	cat > "$tmpfile_its" <<EOF
+/dts-v1/;
+
+/ {
+	images {
+		kernel@1{
+			description = "kernel";
+			data = /incbin/("$(basename "$tmpfile_lz4")");
+			type = "kernel_noload";
+			arch = "arm64";
+			os = "linux";
+			compression = "lz4";
+			load = <0>;
+			entry = <0>;
+		};
+EOF
+
+	# loop over and consume args
+	dtb_count="$#"
+	for i in $(seq "$dtb_count"); do
+		dtb="arch/arm64/boot/dts/$1.dtb"
+		shift
+
+		if [ ! -f "$out/$dtb" ]; then
+			echo "$out/$dtb is missing"
+			exit 1
+		fi
+
+		cat >> "$tmpfile_its" <<EOF
+		fdt@$i{
+			data = /incbin/("$dtb");
+			type = "flat_dt";
+			arch = "arm64";
+			compression = "none";
+			hash@1{
+				algo = "sha1";
+			};
+		};
+EOF
+	done
+
+	cat >> "$tmpfile_its" <<EOF
+	};
+	configurations {
+EOF
+
+	for i in $(seq "$dtb_count"); do
+		cat >> "$tmpfile_its" <<EOF
+		conf@$i{
+			kernel = "kernel@1";
+			fdt = "fdt@$i";
+		};
+EOF
+	done
+
+	cat >> "$tmpfile_its" <<EOF
+	};
+};
+EOF
+
+	dtc -I dts -O dtb -p 1024 -o "$tmpfile_vmlinuz" "$tmpfile_its"
+
+	if [ ! -f "$tmpfile_bootloader" ]; then
+		dd if=/dev/zero of="$tmpfile_bootloader" bs=512 count=1
+	fi
+}
+
+cros_kernel_pack_x86() {
+	ln -sf "$kernel" "$tmpfile_vmlinuz"
+
+	if [ ! -f "$tmpfile_bootloader" ]; then
+		echo "please copy bootloader from cros chroot's /lib64/bootstub/bootstub.efi to $tmpfile_bootloader"
+		exit 1
+	fi
+}
+
+cros_kernel_pack() {
+	cmdline="$1"
+	shift
+
+	if [ -f "$out/arch/arm64/boot/Image" ]; then
+		kernel="arch/arm64/boot/Image"
+		kernel_arch="arm64"
+		uefi_arch="aarch64"
+	elif [ -f "$out/arch/x86/boot/bzImage" ]; then
+		kernel="arch/x86/boot/bzImage"
+		kernel_arch="x86"
+		uefi_arch="x86_64"
+	else
+		echo "$out is invalid or unsupported"
+	fi
+
+	tmpfile_pack="$out/$tmpfile.pack"
+	tmpfile_vmlinuz="$out/$tmpfile.vmlinuz"
+	tmpfile_config="$out/$tmpfile.config"
+	tmpfile_bootloader="$out/$tmpfile.bootloader"
+
+	echo "$cmdline" > "$tmpfile_config"
+	# generate $tmpfile_vmlinuz and $tmpfile_bootloader
+	"cros_kernel_pack_$kernel_arch" "$@"
+
+	futility vbutil_kernel \
+		--pack "$tmpfile_pack" \
+		--vmlinuz "$tmpfile_vmlinuz" \
+		--config "$tmpfile_config" \
+		--bootloader "$tmpfile_bootloader" \
+		--version 1 \
+		--arch "$uefi_arch" \
+		--keyblock /usr/share/vboot/devkeys/kernel.keyblock \
+		--signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk
+}
+
+cros_kernel_deploy() {
+	if [ $# -lt 2 ]; then
+		echo "no dut or blkdev specified"
+		exit 1
+	fi
+
+	dut="$1"
+	blkdev="$2"
+	# asssume blkdev has been partitioned as follows:
+	#
+	#  part 1: kernel      (cgpt add -i 1 -S 1 -T 2 -P 10 "$blkdev")
+	#  part 2: test kernel (cgpt add -i 2 -S 1 -T 2 -P 5 "$blkdev")
+	#  part 3: rootfs
+	part="2"
+
+	case "$blkdev" in
+		/dev/nvme*)
+			# e.g., /dev/nvme0n1p2
+			partdev="${blkdev}p${part}"
+			;;
+		/dev/mmcblk*)
+			# e.g., /dev/mmcblk1p2
+			partdev="${blkdev}p${part}"
+			;;
+		/dev/sd*)
+			# e.g., /dev/sda2
+			partdev="${blkdev}${part}"
+			;;
+		*)
+			echo "unsupported blkdev $blkdev"
+			exit 1
+	esac
+
+	#tar zc -C MODULES lib/modules | ssh $dut sudo tar zx --no-same-owner -C /
+
+	scp "$out/$tmpfile.pack" "$dut:~"
+
+	ssh $dut sudo cp "$tmpfile.pack" "$partdev"
+	ssh $dut sudo cgpt add -i "$part" -S 0 -T 1 -P15 "$blkdev"
+	ssh $dut sudo reboot
+}
+
+case "$cmd" in
+	pack)
+		cros_kernel_pack "$@"
+		;;
+	deploy)
+		cros_kernel_deploy "$@"
+		;;
+	*)
+		echo "unknown command"
+		exit 1
+		;;
+esac
