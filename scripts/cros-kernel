@@ -128,6 +128,7 @@ cros_kernel_pack() {
 	# generate $tmpfile_vmlinuz and $tmpfile_bootloader
 	"cros_kernel_pack_$kernel_arch" "$@"
 
+	echo "packing kernel..."
 	futility vbutil_kernel \
 		--pack "$tmpfile_pack" \
 		--vmlinuz "$tmpfile_vmlinuz" \
@@ -137,6 +138,20 @@ cros_kernel_pack() {
 		--arch "$uefi_arch" \
 		--keyblock /usr/share/vboot/devkeys/kernel.keyblock \
 		--signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk
+
+	# assume modules have been installed with
+	#
+	#   $ make INSTALL_MOD_PATH="$out/tmp-cros-kernel-modules" modules_install
+	if [ -d "$out/$tmpfile-modules" ]; then
+		kernel_release=$(cat "$out/include/config/kernel.release")
+
+		echo "packing modules..."
+		tar -zcf "$out/$tmpfile-modules.tar.gz" \
+			-C "$out/$tmpfile-modules" \
+			"lib/modules/$kernel_release"
+	else
+		echo "no modules"
+	fi
 }
 
 cros_kernel_deploy() {
@@ -172,11 +187,21 @@ cros_kernel_deploy() {
 			exit 1
 	esac
 
-	#tar zc -C MODULES lib/modules | ssh $dut sudo tar zx --no-same-owner -C /
-
+	echo "installing kernel..."
 	scp "$out/$tmpfile.pack" "$dut:~"
-
 	ssh $dut sudo cp "$tmpfile.pack" "$partdev"
+
+	if [ -f "$out/$tmpfile-modules.tar.gz" ]; then
+		kernel_release=$(cat "$out/include/config/kernel.release")
+
+		echo "installing modules..."
+		scp "$out/$tmpfile-modules.tar.gz" "$dut:~"
+		ssh $dut sudo tar -zxf "$tmpfile-modules.tar.gz" --no-same-owner -C /
+		ssh $dut sudo depmod -a "$kernel_release"
+	fi
+
+
+	echo "preparing to reboot..."
 	ssh $dut sudo cgpt add -i "$part" -S 0 -T 1 -P15 "$blkdev"
 	ssh $dut sudo reboot
 }
