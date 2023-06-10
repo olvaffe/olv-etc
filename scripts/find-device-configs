@@ -1,0 +1,48 @@
+#!/bin/sh
+
+kernel_makefiles=""
+if [ $# -ge 1 ]; then
+	kernel_src="$1"
+	kernel_makefiles=$(find "$kernel_src" -name Makefile)
+fi
+
+find_config() {
+	module="$1"
+
+	# obj-$(CONFIG_FOO) += foo.o
+	regex="^obj-\$(CONFIG_.*= $module\.o$"
+	grep -h "$regex" $kernel_makefiles | cut -d'(' -f2 | cut -d')' -f1
+}
+
+for f in $(find /sys/devices -name modalias); do
+	modalias=$(cat $f)
+
+	modules=""
+	if [ -n "$modalias" ]; then
+		modules=$(modprobe -R -q "$modalias" | tr '\n' ' ')
+	fi
+
+	configs=""
+	if [ -n "$kernel_makefiles" ]; then
+		for m in $modules; do
+			config=$(find_config "$m")
+
+			# try again
+			if [ -z "$config" ]; then
+				m=$(echo "$m" | tr _ -)
+				config=$(find_config "$m")
+			fi
+
+			if [ -n "$config" ]; then
+				configs="$configs $config"
+			fi
+		done
+
+		configs="${configs# }"
+	fi
+
+	echo "$(dirname $f)"
+	echo "  modalias: $modalias"
+	echo "  modules: $modules"
+	echo "  configs: $configs"
+done
