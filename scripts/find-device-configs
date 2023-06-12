@@ -14,7 +14,7 @@ find_config() {
 	grep -h "$regex" $kernel_makefiles | cut -d'(' -f2 | cut -d')' -f1
 }
 
-for f in $(find /sys/devices -name modalias); do
+for f in $(find /sys/devices -name modalias | sort); do
 	modalias=$(cat $f)
 
 	modules=""
