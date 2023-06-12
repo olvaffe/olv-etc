@@ -16,11 +16,21 @@ find_config() {
 
 sysfs_devices=$(find /sys/devices -name modalias -exec dirname {} \; | sort)
 for dev in $sysfs_devices; do
-	modalias=$(cat $dev/modalias)
+	modalias=$(cat "$dev/modalias")
+
+	driver=""
+	if [ -h "$dev/driver" ]; then
+		driver=" $(basename $(realpath "$dev/driver"))"
+	fi
 
 	modules=""
 	if [ -n "$modalias" ]; then
 		modules=$(modprobe -R -q "$modalias" | tr '\n' ' ')
+
+		modalias=" $modalias"
+		if [ -n "$modules" ]; then
+			modules=" ${modules% }"
+		fi
 	fi
 
 	configs=""
@@ -38,12 +48,11 @@ for dev in $sysfs_devices; do
 				configs="$configs $config"
 			fi
 		done
-
-		configs="${configs# }"
 	fi
 
 	echo "$dev"
-	echo "  modalias: $modalias"
-	echo "  modules: $modules"
-	echo "  configs: $configs"
+	echo "  modalias:$modalias"
+	echo "  driver:$driver"
+	echo "  modules:$modules"
+	echo "  configs:$configs"
 done
