@@ -15,7 +15,7 @@ fi
 
 prepend_path "$HOME/.local/bin"
 prepend_path "$HOME/projects/depot_tools"
-prepend_path "$HOME/android/sdk/build-tools/33.0.1"
+prepend_path "$HOME/android/sdk/build-tools/34.0.0"
 prepend_path "$HOME/android/sdk/platform-tools"
 
 unset -f prepend_path

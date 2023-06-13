@@ -1,0 +1,54 @@
+#!/bin/sh
+
+set -e
+
+if [ $# -lt 1 ]; then
+	echo "Usage: $0 <DUT>"
+	exit 1
+fi
+
+dut="$1"
+
+run() {
+	ssh "$dut" "$@"
+}
+
+unpack() {
+	vendor_img="/opt/google/containers/android/vendor.raw.img"
+	vendor_unpack="/usr/local/android-vendor-unpack"
+
+	#run rm -rf "$vendor_unpack"
+	if run test -d "$vendor_unpack";  then
+		echo "$vendor_unpack already exists"
+		exit 1
+	fi
+
+	echo "unpacking $vendor_img to $vendor_unpack..."
+	run unsquashfs -q -n -d "$vendor_unpack" "$vendor_img"
+}
+
+modify_config() {
+	config_file="/opt/google/containers/android/config.json"
+	config_key=".mounts[1]"
+	config_old='{"destination":"/vendor","type":"squashfs","source":"/opt/google/containers/android/vendor.raw.img","options":["loop","ro","nodev"]}'
+	config_new='{"destination":"/vendor","type":"bind",    "source":"/usr/local/android-vendor-unpack",             "options":["bind","rw","nodev"]}'
+
+	#run mv "$config_file.orig" "$config_file"
+	config_cur=$(run jq -c "$config_key" "$config_file")
+	if [ "$config_cur" != "$config_old" ]; then
+		echo "$config_file has unexpected value"
+		exit 1
+	fi
+
+	script=$(cat <<EOF
+jq '$config_key = $config_new' "$config_file" > "$config_file.tmp"
+EOF
+)
+	echo "modifying $config_file..."
+	run "$script"
+	run mv "$config_file" "$config_file.orig"
+	run mv "$config_file.tmp" "$config_file"
+}
+
+unpack
+modify_config
