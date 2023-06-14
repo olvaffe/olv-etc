@@ -4,11 +4,9 @@ Host ct
 	LocalForward 5900 localhost:5900
 	RemoteForward 2200 localhost:22
 
-Host dut-priv lnx-priv
-	Hostname 192.168.0.5
-
 Host dut-1 lnx-1
-	Hostname my:test:net:work:7288:6bff:fe89:43dd
+	# UNITEK USB-A
+	Hostname my:test:net:work:2e0:4cff:fef0:f7
 	# sslh
 	LocalForward 2201 localhost:22
 	# gdbserver
@@ -17,24 +15,18 @@ Host dut-1 lnx-1
 	LocalForward 39920 localhost:39920
 
 Host dut-2 lnx-2
-	Hostname my:test:net:work:5e85:7eff:fe3a:b1d4
+	# Monoprice USB-C
+	Hostname my:test:net:work:2e0:4cff:fe68:4398
 	LocalForward 2202 localhost:22
 	LocalForward 12342 localhost:1234
 
-Host dut-3 lnx-3
-	Hostname my:test:net:work:5e85:7eff:fe3b:8382
-	LocalForward 2203 localhost:22
-	LocalForward 12343 localhost:1234
-
-Host dut-servo lnx-servo
-	Hostname my:test:net:work:8a54:1fff:fe0f:9291
-	LocalForward 2209 localhost:22
-	LocalForward 12349 localhost:1234
+Host dut-priv lnx-priv
+	Hostname 192.168.0.2
 
 Host dut-borealis
 	Hostname 100.115.92.26
 	User chronos
-	ProxyJump dut-3
+	ProxyJump dut-1
 
 Host dut-*
 	User root
@@ -56,6 +48,6 @@ Host my:test:net:work:*
 
 Host *
 	ControlMaster auto
-	ControlPath ~/.ssh/control-%r@%h:%p
+	ControlPath ~/.ssh/control-%C
 	ControlPersist 10
 	#ExitOnForwardFailure yes
