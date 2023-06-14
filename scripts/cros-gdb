@@ -1,25 +1,59 @@
 #!/bin/sh
 
-BOARD=""
-HOST=""
+if [ -z "$BOARD" -o ! -d "/build/$BOARD" ]; then
+	echo "\${BOARD} is undefined or invalid"
+	exit 1
+fi
 
-PORT=1234
-SYSROOT="/build/$BOARD"
+case "$BOARD" in
+	hatch|dedede|volteer|brya|nissa)
+		# emerge-$BOARD --info | grep CHOST
+		chost="x86_64-cros-linux-gnu"
+		mesa="mesa-iris"
+		;;
+	grunt|zork|guybrush|skyrim)
+		chost="x86_64-cros-linux-gnu"
+		mesa="mesa-amd"
+		;;
+	trogdor|herobrine)
+		chost="aarch64-cros-linux-gnu"
+		mesa="mesa-freedreno"
+		;;
+	*)
+		echo "$BOARD is unsupported"
+		exit 1
+		;;
+esac
 
-PROJECTS="src/platform/drm-tests
-	  src/platform/minigbm
-	  src/third_party/libdrm
-	  src/third_party/mesa
-	  src/third_party/virglrenderer"
-SRC_DIRS="."
-for project in $PROJECTS; do
-	SRC_DIRS="$SRC_DIRS:$HOME/trunk/$project"
-done
+get_directories() {
+	projects="
+		src/platform/minigbm
+		src/platform2
+		src/third_party/libdrm
+		src/third_party/$mesa
+		src/third_party/virglrenderer
+	"
 
-$HOST-gdb \
-        -ex "set sysroot $SYSROOT" \
-        -ex "set solib-absolute-prefix $SYSROOT" \
-        -ex "set debug-file-directory $SYSROOT/usr/lib/debug" \
-        -ex "set directories $SRC_DIRS" \
-        -ex "target remote :$PORT" \
-	$@
+	dirs="."
+	for p in $projects; do
+		dirs="$dirs:$HOME/chromiumos/$p"
+	done
+
+	echo $dirs
+}
+
+sysroot="/build/$BOARD"
+directories=$(get_directories)
+
+ex="show sysroot"
+if [[ "$1" = :* ]]; then
+	ex="target remote $1"
+	shift
+fi
+
+"$chost-gdb"  \
+        -iex "set sysroot $sysroot" \
+        -iex "set debug-file-directory /usr/lib/debug" \
+        -iex "set directories $directories" \
+        -ex "$ex" \
+        "$@"
