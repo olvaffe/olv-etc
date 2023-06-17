@@ -4,10 +4,10 @@ image="arch.img"
 size="4G"
 parts='
 label: gpt
-name="esp",     type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, size=260M
-name="kernel",  type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M
-name="kernel2", type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M
-name="arch",    type=0FC63DAF-8483-4772-8E79-3D69D8477DE4
+name="arch-esp",     type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, size=260M
+name="arch-kernel",  type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M
+name="arch-kernel2", type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M
+name="arch-root",    type=0FC63DAF-8483-4772-8E79-3D69D8477DE4
 '
 loopdev="/dev/loop0"
 mirror="https://mirror.fcix.net/archlinux"
@@ -24,15 +24,15 @@ me="olv"
 
 set -e
 
-create_image_trap() {
+image_create_trap() {
 	tmpdir="$1"
+
+	echo "cleaning up..."
 
 	if mountpoint -q "$tmpdir/chroot"; then
 		umount "$tmpdir/chroot"
 	fi
 
-	echo "exit"
-	losetup -n -O NAME,BACK-FILE
 	if losetup -n -O NAME,BACK-FILE | grep -q "^$loopdev .*$tmpdir"; then
 		losetup -d "$loopdev"
 	fi
@@ -42,7 +42,7 @@ create_image_trap() {
 	fi
 }
 
-create_image() {
+image_create() {
 	if [ -f "$image" ]; then
 		echo "$image already exists"
 		exit 1
@@ -58,7 +58,7 @@ create_image() {
 	# set up the loop device
 	losetup -P "$loopdev" "$tmpdir/$image"
 	while [ ! -b "${loopdev}p1" ]; do
-		sleep 1;
+		sleep 1
 	done
 	sleep 2
 
@@ -73,7 +73,6 @@ create_image() {
 	# download and untar into chroot
 	echo "downloading rootfs..."
 	curl "$mirror/iso/latest/$tarball" | tar -zx --warning=no-unknown-keyword -C "$tmpdir/chroot" --strip 1
-	echo "Server = $mirror/\$repo/os/\$arch" > "$tmpdir/chroot/etc/pacman.d/mirrorlist"
 
 	trap - EXIT
 	umount "$tmpdir/chroot" || :
@@ -84,17 +83,32 @@ create_image() {
 	echo "created $image"
 }
 
-bootstrap_image() {
+image_setup() {
 	script="/tmp/$(basename "$0")"
 	bind="$0:$script"
 	systemd-nspawn -i "$image" --private-users=identity --bind="$bind" "$script" container
 }
 
-container_setup_pacman() {
-	echo "Server = $mirror/\$repo/os/\$arch" > "/etc/pacman.d/mirrorlist"
+image_fsck() {
+	losetup -P "$loopdev" "$image"
+	trap "losetup -d $loopdev" EXIT
+	while [ ! -b "${loopdev}p1" ]; do
+		sleep 1
+	done
+	sleep 2
 
+	fsck.vfat -p "${loopdev}p1"
+	fsck.f2fs -p "${loopdev}p4"
+
+	trap - EXIT
+	losetup -d "$loopdev"
+}
+
+container_setup_pacman() {
 	pacman-key --init
 	pacman-key --populate
+
+	echo "Server = $mirror/\$repo/os/\$arch" > "/etc/pacman.d/mirrorlist"
 	pacman -R --noconfirm arch-install-scripts
 	pacman -Syu --noconfirm $packages
 	yes | pacman -Scc
@@ -104,18 +118,22 @@ container_setup_system() {
 	rm -f /pkglist.x86_64.txt
 	rm -f /version
 
-	echo "PARTLABEL=esp	/boot	vfat	defaults	0	2" >> "/etc/fstab"
-	echo "PARTLABEL=arch	/	f2fs	defaults	0	1" >> "/etc/fstab"
-
-	echo "arch" > /etc/hostname
-	ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+	echo "PARTLABEL=arch-esp	/boot	vfat	defaults	0	2" >> "/etc/fstab"
+	echo "PARTLABEL=arch-root	/	f2fs	defaults	0	1" >> "/etc/fstab"
 
 	locale="en_US.UTF-8"
 	sed -i "s/^#$locale/$locale/" /etc/locale.gen
-	echo "LANG=$locale" > /etc/locale.conf
 	locale-gen
 
-	echo -e '[zram0]\nzram-size = ram' > /etc/systemd/zram-generator.conf
+	systemd-firstboot \
+		--locale="$locale" \
+		--timezone="America/Los_Angeles" \
+		--hostname="arch"
+
+	echo -e "[zram0]\nzram-size = ram" > /etc/systemd/zram-generator.conf
+	for ty in ether wlan; do
+		echo -e "[Match]\nType=$ty\n\n[Network]\nDHCP=yes" > "/etc/systemd/network/$ty.network"
+	done
 
 	systemctl enable iwd systemd-networkd systemd-resolved sshd
 }
@@ -126,29 +144,30 @@ container_setup_me() {
 	my_etc="https://github.com/olvaffe/olv-etc.git"
 	my_home="/home/$me"
 
-	sudo -u "$me" git clone --recurse-submodules "$my_etc" "$my_home/olv-etc"
 	rm "$my_home/.bashrc"
 	rm "$my_home/.bash_profile"
+	sudo -u "$me" git clone --recurse-submodules "$my_etc" "$my_home/olv-etc"
 	sudo -u "$me" "$my_home/olv-etc/create-links"
-}
-
-container_setup_login() {
-	sudo_policy="%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
-	sed -i "s/^# $sudo_policy/$sudo_policy/" /etc/sudoers
-
-	passwd -d "$me"
-	passwd -d root
 }
 
 container_setup_bootloader() {
 	bootctl install
-	echo 'default arch.conf' >> /boot/loader/loader.conf
+
+	echo "default arch.conf" >> /boot/loader/loader.conf
 	cat > /boot/loader/entries/arch.conf <<EOF
-title	Arch Linux
+title	Arch Linux Fallback
 linux	/vmlinuz-linux
-initrd	/initramfs-linux.img
-options	root=PARTLABEL=arch
+initrd	/initramfs-linux-fallback.img
+options	root=PARTLABEL=arch-root
 EOF
+}
+
+container_setup_login() {
+	echo "root:test0000" | chpasswd
+	echo "olv:test0000" | chpasswd
+
+	policy="%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
+	sed -i "s/^# $policy/$policy/" /etc/sudoers
 }
 
 mode="$1"
@@ -158,10 +177,11 @@ if [ "$mode" = "container" ]; then
 	container_setup_pacman
 	container_setup_system
 	container_setup_me
-	container_setup_login
 	container_setup_bootloader
+	container_setup_login
 	#bash
 else
-	create_image
-	bootstrap_image
+	image_create
+	image_setup
+	image_fsck
 fi
