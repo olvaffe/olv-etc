@@ -5,28 +5,27 @@ size="4G"
 parts='
 label: gpt
 name="arch-esp",     type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, size=260M
-name="arch-kernel",  type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M
-name="arch-kernel2", type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M
+name="arch-kernel",  type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M, attrs="GUID:49,51,53,56"
+name="arch-kernel2", type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M, attrs="GUID:48,50,53,56"
 name="arch-root",    type=0FC63DAF-8483-4772-8E79-3D69D8477DE4
 '
 loopdev="/dev/loop0"
 mirror="https://mirror.fcix.net/archlinux"
 tarball="archlinux-bootstrap-x86_64.tar.gz"
 packages="
-linux linux-firmware zram-generator
-dosfstools f2fs-tools
-sudo vim man-db base-devel git
-iwd openssh
+linux linux-firmware
+sudo vim dosfstools usbutils
+iwd openssh zram-generator
+base-devel git man-db
 sway polkit i3status swayidle noto-fonts alacritty
 wayland-utils mesa mesa-utils vulkan-tools
 "
+aur_packages="cgpt-bin"
 me="olv"
 
 set -e
 
-image_create_trap() {
-	tmpdir="$1"
-
+image_trap() {
 	echo "cleaning up..."
 
 	if mountpoint -q "$tmpdir/chroot"; then
@@ -43,14 +42,6 @@ image_create_trap() {
 }
 
 image_create() {
-	if [ -f "$image" ]; then
-		echo "$image already exists"
-		exit 1
-	fi
-
-	tmpdir=$(mktemp -d arch-XXXXXX)
-	trap "build_image_trap $tmpdir" EXIT
-	
 	# create and partition the disk image
 	fallocate -l "$size" "$tmpdir/$image"
 	echo "$parts" | sfdisk "$tmpdir/$image"
@@ -64,7 +55,7 @@ image_create() {
 
 	# format partitions
 	mkfs.vfat -F 32 "${loopdev}p1"
-	mkfs.f2fs -O extra_attr,compression "${loopdev}p4"
+	mkfs.ext4 "${loopdev}p4"
 	
 	# mount chroot
 	mkdir -p "$tmpdir/chroot"
@@ -74,68 +65,45 @@ image_create() {
 	echo "downloading rootfs..."
 	curl "$mirror/iso/latest/$tarball" | tar -zx --warning=no-unknown-keyword -C "$tmpdir/chroot" --strip 1
 
-	trap - EXIT
-	umount "$tmpdir/chroot" || :
-	losetup -d "$loopdev" || :
-	mv "$tmpdir/$image" "$image" || :
-	rm -rf "$tmpdir"
-
-	echo "created $image"
+	# unmount chroot
+	umount "$tmpdir/chroot"
 }
 
 image_setup() {
 	script="/tmp/$(basename "$0")"
 	bind="$0:$script"
-	systemd-nspawn -i "$image" --private-users=identity --bind="$bind" "$script" container
+	systemd-nspawn -i "$tmpdir/$image" --private-users=identity --bind="$bind" "$script" container
 }
 
-image_fsck() {
-	losetup -P "$loopdev" "$image"
-	trap "losetup -d $loopdev" EXIT
-	while [ ! -b "${loopdev}p1" ]; do
-		sleep 1
-	done
-	sleep 2
-
+image_finalize() {
 	fsck.vfat -p "${loopdev}p1"
-	fsck.f2fs -p "${loopdev}p4"
+	fsck.ext4 -p -f "${loopdev}p4"
 
-	trap - EXIT
 	losetup -d "$loopdev"
+
+	mv "$tmpdir/$image" "$image"
+	rm -rf "$tmpdir"
+
+	echo "created $image"
 }
 
-container_setup_pacman() {
+container_setup_packages() {
 	pacman-key --init
 	pacman-key --populate
 
 	echo "Server = $mirror/\$repo/os/\$arch" > "/etc/pacman.d/mirrorlist"
 	pacman -R --noconfirm arch-install-scripts
 	pacman -Syu --noconfirm $packages
-	yes | pacman -Scc
-}
 
-container_setup_system() {
-	rm -f /pkglist.x86_64.txt
-	rm -f /version
-
-	echo "PARTLABEL=arch-esp	/boot	vfat	defaults	0	2" >> "/etc/fstab"
-	echo "PARTLABEL=arch-root	/	f2fs	defaults	0	1" >> "/etc/fstab"
-
-	locale="en_US.UTF-8"
-	sed -i "s/^#$locale/$locale/" /etc/locale.gen
-	locale-gen
-
-	systemd-firstboot \
-		--locale="$locale" \
-		--timezone="America/Los_Angeles" \
-		--hostname="arch"
-
-	echo -e "[zram0]\nzram-size = ram" > /etc/systemd/zram-generator.conf
-	for ty in ether wlan; do
-		echo -e "[Match]\nType=$ty\n\n[Network]\nDHCP=yes" > "/etc/systemd/network/$ty.network"
+	mkdir -p /tmp/aur
+	for pkg in $aur_packages; do
+		git clone "https://aur.archlinux.org/$pkg.git" "/tmp/aur/$pkg"
+		chown -R nobody:nobody "/tmp/aur/$pkg"
+		(cd "/tmp/aur/$pkg" && sudo -u nobody makepkg && pacman -U --noconfirm "$pkg"-*.pkg.tar.zst)
 	done
+	rm -rf /tmp/aur
 
-	systemctl enable iwd systemd-networkd systemd-resolved sshd
+	yes | pacman -Scc
 }
 
 container_setup_me() {
@@ -150,11 +118,37 @@ container_setup_me() {
 	sudo -u "$me" "$my_home/olv-etc/create-links"
 }
 
+container_setup_system() {
+	echo "PARTLABEL=arch-esp	/boot	vfat	defaults	0	2" >> "/etc/fstab"
+	echo "PARTLABEL=arch-root	/	ext4	defaults	0	1" >> "/etc/fstab"
+
+	locale="en_US.UTF-8"
+	sed -i "s/^#$locale/$locale/" /etc/locale.gen
+	locale-gen
+
+	systemd-firstboot \
+		--locale="$locale" \
+		--timezone="America/Los_Angeles" \
+		--hostname="arch"
+
+	sed 's/#Storage=auto/Storage=volatile/' /etc/systemd/journald.conf
+	for ty in ether wlan; do
+		echo -e "[Match]\nType=$ty\n\n[Network]\nDHCP=yes" > "/etc/systemd/network/$ty.network"
+	done
+	echo -e "[zram0]\nzram-size = ram" > /etc/systemd/zram-generator.conf
+
+	systemctl enable systemd-resolved systemd-networkd iwd sshd
+
+	rm -f /etc/resolv.conf
+	rm -f /pkglist.x86_64.txt
+	rm -f /version
+}
+
 container_setup_bootloader() {
 	bootctl install
 
-	echo "default arch.conf" >> /boot/loader/loader.conf
-	cat > /boot/loader/entries/arch.conf <<EOF
+	echo "default arch-fallback.conf" >> /boot/loader/loader.conf
+	cat > /boot/loader/entries/arch-fallback.conf <<EOF
 title	Arch Linux Fallback
 linux	/vmlinuz-linux
 initrd	/initramfs-linux-fallback.img
@@ -174,14 +168,24 @@ mode="$1"
 
 if [ "$mode" = "container" ]; then
 	#bash
-	container_setup_pacman
-	container_setup_system
+	container_setup_packages
 	container_setup_me
+	container_setup_system
 	container_setup_bootloader
 	container_setup_login
 	#bash
 else
+	if [ -f "$image" ]; then
+		echo "$image already exists"
+		exit 1
+	fi
+
+	tmpdir=$(mktemp -d arch-XXXXXX)
+	trap "image_trap" EXIT
+
 	image_create
 	image_setup
-	image_fsck
+	image_finalize
+
+	trap - EXIT
 fi
