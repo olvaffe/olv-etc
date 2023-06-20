@@ -8,6 +8,12 @@ if [ $# -lt 2 ]; then
 	echo "Usage:"
 	echo "  $0 pack <OUT> <CMDLINE> [DTBs]..."
 	echo "  $0 deploy <OUT> <DUT> <BLKDEV>"
+	echo
+	echo "Build example:"
+	echo "  make O=out && make O=out INSTALL_MOD_PATH=tmp-cros-kernel-modules modules_install"
+	echo
+	echo "CMDLINE example:"
+	echo "  console=ttyS0,115200 console=tty0 root=PARTLABEL=arch-root rootwait rw"
 	exit 1
 fi
 
