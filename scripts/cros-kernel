@@ -170,22 +170,23 @@ cros_kernel_deploy() {
 	blkdev="$2"
 	# asssume blkdev has been partitioned as follows:
 	#
-	#  part 1: kernel      (cgpt add -i 1 -S 1 -T 2 -P 10 "$blkdev")
-	#  part 2: test kernel (cgpt add -i 2 -S 1 -T 2 -P 5 "$blkdev")
-	#  part 3: rootfs
-	part="2"
+	#  part 1: esp
+	#  part 2: kernel      (cgpt add -i 1 -S 1 -T 2 -P 10 "$blkdev")
+	#  part 3: test kernel (cgpt add -i 2 -S 1 -T 2 -P 5 "$blkdev")
+	#  part 4: rootfs
+	part="3"
 
 	case "$blkdev" in
 		/dev/nvme*)
-			# e.g., /dev/nvme0n1p2
+			# e.g., /dev/nvme0n1p3
 			partdev="${blkdev}p${part}"
 			;;
 		/dev/mmcblk*)
-			# e.g., /dev/mmcblk1p2
+			# e.g., /dev/mmcblk1p3
 			partdev="${blkdev}p${part}"
 			;;
 		/dev/sd*)
-			# e.g., /dev/sda2
+			# e.g., /dev/sda3
 			partdev="${blkdev}${part}"
 			;;
 		*)
