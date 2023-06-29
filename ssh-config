@@ -48,6 +48,6 @@ Host my:test:net:work:*
 
 Host *
 	ControlMaster auto
-	ControlPath ~/.ssh/control-%C
+	ControlPath ~/.ssh/control-%r@%h:%p
 	ControlPersist 10
 	#ExitOnForwardFailure yes
