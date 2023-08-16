@@ -35,7 +35,9 @@ if [ -n "$BASH_VERSION" ]; then
 	# for cros chroot
 	if [ -n "$CROS_WORKON_SRCROOT" ]; then
 		hn="cros-sdk"
+
 		unset LESS
+		cd ~/chromiumos/src/scripts
 	fi
 
 	PS1="\u@$hn:\w\$ "
