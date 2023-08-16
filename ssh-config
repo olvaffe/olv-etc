@@ -20,6 +20,12 @@ Host dut-2 lnx-2
 	LocalForward 2202 localhost:22
 	LocalForward 12342 localhost:1234
 
+Host dut-3 lnx-3
+	# Monoprice USB-A
+	Hostname my:test:net:work:2fe1:228e:4f35:e783
+	LocalForward 2203 localhost:22
+	LocalForward 12343 localhost:1234
+
 Host dut-priv lnx-priv
 	Hostname 192.168.0.2
 
@@ -43,8 +49,8 @@ Host lnx-*
 	UserKnownHostsFile /dev/null
 	StrictHostKeyChecking no
 
-Host my:test:net:work:*
-	ProxyCommand /usr/bin/ssh-helper %h %p
+#Host my:test:net:work:*
+#	ProxyCommand /usr/bin/ssh-helper %h %p
 
 Host *
 	ControlMaster auto
