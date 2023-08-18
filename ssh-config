@@ -22,7 +22,7 @@ Host dut-2 lnx-2
 
 Host dut-3 lnx-3
 	# Monoprice USB-A
-	Hostname my:test:net:work:2fe1:228e:4f35:e783
+	Hostname my:test:net:work:2e0:4cff:fe68:166
 	LocalForward 2203 localhost:22
 	LocalForward 12343 localhost:1234
 
