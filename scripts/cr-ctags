@@ -5,9 +5,13 @@ if [ ! -d "$CR" ]; then
 	CR="$PWD"
 fi
 
+OPTS="--map-C++=+.mojom -ICOMPONENT_EXPORT+"
+
 PROJECTS="base
 	  cc
-	  chrome
+	  chrome/app
+	  chrome/browser
+	  chrome/common
 	  components
 	  content
 	  gpu
@@ -25,4 +29,4 @@ PROJECTS="base
 CROS_PROJECTS=""
 #CROS_PROJECTS="ash chromeos"
 
-(cd "$CR" && ctags -R $PROJECTS $CROS_PROJECTS)
+(cd "$CR" && ctags -R $OPTS $PROJECTS $CROS_PROJECTS)
