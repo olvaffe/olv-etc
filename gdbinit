@@ -19,4 +19,4 @@ set pagination off
 set confirm off
 set breakpoint pending on
 
-set debuginfod enabled on
+set debuginfod enabled off
