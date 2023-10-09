@@ -3,15 +3,6 @@
 # SSH_AUTH_SOCK has been explicitly set in sway-session
 ssh-agent -a "$SSH_AUTH_SOCK"
 
-# gnome defaults to 11pt while is good.  But it assumes 96dpi while my
-# displays are 160dpi.  Scale by 1.50 or 1.75 depending on whether the display
-# is internal or external.
-text_scaling_factor="1.50"
-[ $(swaymsg -t get_outputs | grep '"name"' | wc -l) -gt 1 ] && text_scaling_factor="1.75"
-gsettings set org.gnome.desktop.interface text-scaling-factor "$text_scaling_factor"
-
-#gsettings set org.gnome.desktop.interface cursor-size 36
-
 nm-applet --indicator &
 fcitx5 &
 

@@ -3,7 +3,7 @@ selection:
   save_to_clipboard: true
 
 font:
-  # 11pt * 1.75 (text-scaling-factor)
+  # size * (dpi / 96) * disntance, with size 11, dpi 160, and distance 1.05
   size: 19.25
 
 color-schemes:
