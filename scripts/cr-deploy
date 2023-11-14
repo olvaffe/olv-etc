@@ -1,0 +1,40 @@
+#!/bin/sh
+
+if [ "$#" -ne 2 ]; then
+	echo "$0 <out-dir> <dst-host>"
+	exit 1
+fi
+
+out=$(realpath "$1")
+dst="$2"
+name="google-chrome"
+
+contents="
+	MEIPreload
+	WidevineCdm
+	chrome
+	chrome_sandbox
+	chrome_100_percent.pak
+	chrome_200_percent.pak
+	chrome_crashpad_handler
+	icudtl.dat
+	libvulkan.so.1
+	locales
+	resources.pak
+	v8_context_snapshot.bin
+	vk_swiftshader_icd.json"
+
+paths=""
+for c in $contents; do
+	if [ ! -e "$out/$c" ]; then
+		echo "$out/$c is missing"
+		exit 1
+	fi
+
+	paths="$paths $out/$c"
+done
+
+paths="$paths $(ls "$out"/*.so)"
+
+#tar -cv --zstd --transform="s,${out#/},$name," -f "$name.tar.zst" $paths
+rsync -avzHP $paths "$dst:~/$name"
