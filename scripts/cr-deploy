@@ -5,36 +5,57 @@ if [ "$#" -ne 2 ]; then
 	exit 1
 fi
 
-out=$(realpath "$1")
-dst="$2"
-name="google-chrome"
+out_dir="$1"
+dst_host="$2"
 
-contents="
-	MEIPreload
-	WidevineCdm
+if [ ! -d "$out_dir" ]; then
+	echo "$out_dir is not a directory"
+	exit 1
+fi
+
+dist_name="google-chrome-dist"
+
+dist_exec="
 	chrome
-	chrome_sandbox
+	chrome_crashpad_handler
+	libvulkan.so.1
+"
+dist_exec="$dist_exec $(basename -a "$out_dir"/*.so)"
+
+dist_data="
 	chrome_100_percent.pak
 	chrome_200_percent.pak
-	chrome_crashpad_handler
 	icudtl.dat
-	libvulkan.so.1
-	locales
 	resources.pak
 	v8_context_snapshot.bin
-	vk_swiftshader_icd.json"
+	vk_swiftshader_icd.json
+"
 
-paths=""
-for c in $contents; do
-	if [ ! -e "$out/$c" ]; then
-		echo "$out/$c is missing"
-		exit 1
-	fi
+dist_dirs="
+	MEIPreload
+	WidevineCdm
+	locales
+"
 
-	paths="$paths $out/$c"
+staging_dir="$out_dir/$dist_name"
+
+echo "creating staging directory $staging_dir..."
+mkdir -p "$staging_dir"
+
+echo "stripping executables..."
+for i in $dist_exec; do
+	s="$out_dir/$i"
+	d="$staging_dir/$i"
+	[ "$s" -nt "$d" ] && strip -g -o "$d" "$s"
 done
 
-paths="$paths $(ls "$out"/*.so)"
+echo "symlinking data files..."
+for i in $dist_data $dist_dirs; do
+	ln -snf "../$i" "$staging_dir/$i"
+done
 
-#tar -cv --zstd --transform="s,${out#/},$name," -f "$name.tar.zst" $paths
-rsync -avzHP $paths "$dst:~/$name"
+#echo "creating tarball..."
+#tar -chv --zstd -f "$dist_name.tar.zst" -C "$out_dir" "$dist_name"
+
+echo "rsyncing to $dst_host..."
+rsync -azP --copy-links "$staging_dir" "$dst_host:"
