@@ -2,7 +2,14 @@ Host ct
 	Hostname blah
 	# VNC
 	LocalForward 5900 localhost:5900
+	# reverse ssh
 	RemoteForward 2200 localhost:22
+
+Host x1
+	Hostname localhost
+	Port 2200
+	# gdbserver
+	LocalForward 1234 localhost:1234
 
 Host dut-1 lnx-1
 	# UNITEK USB-A
