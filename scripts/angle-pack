@@ -1,0 +1,38 @@
+#!/bin/sh
+
+set -e
+
+src_dir="$PWD"
+if [ ! -d "$src_dir/src/libANGLE" ]; then
+	echo "this script must be run from the top directory of angle"
+	exit 1
+fi
+
+if [ "$#" -ne 1 ]; then
+	echo "usage: $0 <out-dir>"
+	exit 1
+fi
+out_dir=$(realpath "$1")
+
+flavor=$(basename "$out_dir")
+if [ "$flavor" == "out" ]; then
+	flavor="dist"
+fi
+
+dist_name="angle-$flavor-$(date +%Y%m%d)"
+dist_src_data="src/tests/deqp_support/*.txt src/tests/restricted_traces/*.json third_party/VK-GL-CTS/src/external/openglcts/data/mustpass"
+dist_out_exec=$(find "$out_dir" -maxdepth 1 -type f -executable -printf "%f\n")
+dist_out_data="angledata gen"
+
+echo "stripping executables..."
+(cd "$out_dir" && strip -g $dist_out_exec)
+
+echo "creating tarball..."
+tar -cf "$dist_name.tar" --transform="s,,$dist_name/," -C "$out_dir" $dist_out_exec
+tar -rf "$dist_name.tar" --transform="s,,$dist_name/," -C "$out_dir" $dist_out_data
+tar -rf "$dist_name.tar" --transform="s,,$dist_name/," -C "$src_dir" $dist_src_data
+
+echo "compressing tarball..."
+zstd -q -f --rm "$dist_name.tar"
+
+echo "created $dist_name.tar.zst"
