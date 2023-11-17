@@ -1,0 +1,70 @@
+#!/bin/sh
+
+set -e
+
+src_dir="$PWD"
+if [ ! -d "$src_dir/external/vulkancts" ]; then
+	echo "this script must be run from the top directory of VK-GL-CTS"
+	exit 1
+fi
+
+if [ "$#" -ne 2 ]; then
+	echo "usage: $0 <out-dir> <flavor>"
+	exit 1
+fi
+out_dir=$(realpath "$1")
+flavor="$2"
+
+dist_name="deqp-$flavor"
+
+dist_out_exec="
+	external/vulkancts/modules/vulkan/deqp-vk
+	external/openglcts/modules/glcts
+	modules/egl/deqp-egl
+	modules/gles2/deqp-gles2
+	modules/gles3/deqp-gles3
+	modules/gles31/deqp-gles31
+"
+
+dist_out_data="
+	external/vulkancts/modules/vulkan/vulkan
+	external/openglcts/modules/gl_cts
+	modules/gles2/gles2
+	modules/gles3/gles3
+	modules/gles31/gles31
+"
+
+dist_src_data="
+	android/cts/main/vk-master
+	android/cts/main/vk-master.txt
+	android/cts/main/egl-master.txt
+	android/cts/main/gles2-master.txt
+	android/cts/main/gles3-master.txt
+	android/cts/main/gles31-master.txt
+"
+
+echo "creating staging directory $dist_name..."
+mkdir "$dist_name"
+
+for i in $dist_out_exec $dist_out_data; do
+	ln -snf "$out_dir/$i" "$dist_name"
+done
+
+for i in $dist_src_data; do
+	if [ ! -e "$src_dir/$i" ]; then
+		i="android/cts/master/${i#android/cts/main/}"
+		if [ ! -e "$src_dir/$i" ]; then
+			continue
+		fi
+	fi
+	ln -snf "$src_dir/$i" "$dist_name"
+done
+
+echo "stripping executables..."
+(cd "$out_dir" && strip -g $dist_out_exec)
+
+echo "creating tarball..."
+tar -cf "$dist_name.tar.zst" --zstd "$dist_name"
+rm -rf "$dist_name"
+
+echo "created $dist_name.tar.zst"
