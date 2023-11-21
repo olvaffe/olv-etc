@@ -1,4 +1,4 @@
-# rc.sh
+# sh-rc.sh
 
 # If not running interactively, don't do anything
 case "$-" in

@@ -1,4 +1,4 @@
-# aliases.sh
+# sh-aliases.sh
 
 # utils
 alias ls='ls --color=auto'
