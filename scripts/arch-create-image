@@ -131,7 +131,7 @@ container_setup_system() {
 		--timezone="America/Los_Angeles" \
 		--hostname="arch"
 
-	sed 's/#Storage=auto/Storage=volatile/' /etc/systemd/journald.conf
+	sed -i 's/#Storage=auto/Storage=volatile/' /etc/systemd/journald.conf
 	for ty in ether wlan; do
 		echo -e "[Match]\nType=$ty\n\n[Network]\nDHCP=yes" > "/etc/systemd/network/$ty.network"
 	done
