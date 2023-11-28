@@ -22,6 +22,7 @@ wayland-utils mesa mesa-utils vulkan-tools
 "
 aur_packages="cgpt-bin"
 me="olv"
+password="test0000"
 
 set -e
 
@@ -109,13 +110,15 @@ container_setup_packages() {
 container_setup_me() {
 	useradd -m -G wheel,video "$me"
 
-	my_etc="https://github.com/olvaffe/olv-etc.git"
-	my_home="/home/$me"
+	if [ "$me" = "olv" ]; then
+		my_etc="https://github.com/olvaffe/olv-etc.git"
+		my_home="/home/$me"
 
-	rm "$my_home/.bashrc"
-	rm "$my_home/.bash_profile"
-	sudo -u "$me" git clone --recurse-submodules "$my_etc" "$my_home/olv-etc"
-	sudo -u "$me" "$my_home/olv-etc/create-links"
+		rm "$my_home/.bashrc"
+		rm "$my_home/.bash_profile"
+		sudo -u "$me" git clone --recurse-submodules "$my_etc" "$my_home/olv-etc"
+		sudo -u "$me" "$my_home/olv-etc/create-links"
+	fi
 }
 
 container_setup_system() {
@@ -157,8 +160,8 @@ EOF
 }
 
 container_setup_login() {
-	echo "root:test0000" | chpasswd
-	echo "olv:test0000" | chpasswd
+	echo "root:$password" | chpasswd
+	echo "$me:$password" | chpasswd
 
 	policy="%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
 	sed -i "s/^# $policy/$policy/" /etc/sudoers
