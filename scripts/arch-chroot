@@ -1,0 +1,51 @@
+#!/bin/sh
+
+if [ "$#" -ne "1" ]; then
+	echo "Usage: $0 <NEWROOT>"
+	exit 1
+fi
+
+if [ "$$" -ne "1" ]; then
+	pid_ns_args="--pid --fork"
+	# no --net nor --user
+	misc_ns_args="--ipc --mount --uts --cgroup --time"
+
+	unshare $pid_ns_args $user_ns_args $misc_ns_args "$0" "$@"
+else
+	newroot="$1"
+
+	# pacman CheckSpace expects / to be a mountpoint
+	mount --bind "$newroot" "$newroot"
+
+	mount -t proc none "$newroot/proc"
+
+	mount -t sysfs none "$newroot/sys"
+	mount -t bpf none "$newroot/sys/fs/bpf"
+	mount -t cgroup2 none "$newroot/sys/fs/cgroup"
+	mount -t pstore none "$newroot/sys/fs/pstore"
+	mount -t debugfs none "$newroot/sys/kernel/debug"
+	mount -t tracefs none "$newroot/sys/kernel/tracing"
+
+	mount -t devtmpfs none "$newroot/dev"
+	mount -t mqueue none "$newroot/dev/mqueue"
+	mount -t devpts none "$newroot/dev/pts"
+	mount -t tmpfs none "$newroot/dev/shm"
+
+	mount -t tmpfs none "$newroot/run"
+	mount -t tmpfs none "$newroot/tmp"
+
+	hostname $(cat "$newroot/etc/hostname")
+
+	cp /etc/resolv.conf "$newroot/etc/resolv.conf"
+
+	wl_sock=$(find /run -name wayland-* -type s -print -quit 2>/dev/null)
+	if [ -n "$wl_sock" ]; then
+		wl_bind="/run/$(basename "$wl_sock")"
+
+		touch "$newroot/$wl_bind"
+		mount --bind -o ro "$wl_sock" "$newroot/$wl_bind"
+		export WAYLAND_DISPLAY="$wl_bind"
+	fi
+
+	chroot "$newroot" su -w WAYLAND_DISPLAY - olv
+fi
