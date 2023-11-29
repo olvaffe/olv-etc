@@ -185,7 +185,7 @@ cros_kernel_deploy() {
 		echo "installing new kernel..."
 		sudo cp "$out/$tmpfile.pack" "${blkdev}p2"
 		sudo cp "$out/$tmpfile.pack" "${blkdev}p3"
-		sudo tar -zxf "$out/$tmpfile-modules.tar.gz" --no-same-owner -C "$sysroot"
+		sudo tar -zxf "$out/$tmpfile-modules.tar.gz" --no-same-owner --keep-directory-symlink -C "$sysroot"
 		sudo depmod -a "$kernel_release" -b "$sysroot"
 
 		echo "unmounting /mnt and detaching $blkdev..."
@@ -199,7 +199,7 @@ cros_kernel_deploy() {
 
 		echo "installing new kernel..."
 		ssh "$dut" sudo cp "$tmp/$tmpfile.pack" "$partdev"
-		ssh "$dut" sudo tar -zxf "$tmp/$tmpfile-modules.tar.gz" --no-same-owner -C /
+		ssh "$dut" sudo tar -zxf "$tmp/$tmpfile-modules.tar.gz" --no-same-owner --keep-directory-symlink -C /
 		ssh "$dut" sudo depmod -a "$kernel_release"
 
 		echo "rebooting to the new kernel once..."
