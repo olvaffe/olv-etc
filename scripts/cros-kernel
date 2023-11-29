@@ -9,9 +9,6 @@ if [ $# -lt 2 ]; then
 	echo "  $0 pack <OUT> <CMDLINE> [DTBs]..."
 	echo "  $0 deploy <OUT> <DUT> <BLKDEV>"
 	echo
-	echo "Build example:"
-	echo "  make O=out && make O=out INSTALL_MOD_PATH=tmp-cros-kernel-modules modules_install"
-	echo
 	echo "CMDLINE example:"
 	echo "  console=ttyS0,115200 console=tty0 root=PARTLABEL=arch-root rootwait ro"
 	exit 1
@@ -94,19 +91,10 @@ EOF
 EOF
 
 	dtc -I dts -O dtb -p 1024 -o "$tmpfile_vmlinuz" "$tmpfile_its"
-
-	if [ ! -f "$tmpfile_bootloader" ]; then
-		dd if=/dev/zero of="$tmpfile_bootloader" bs=512 count=1
-	fi
 }
 
 cros_kernel_pack_x86() {
 	ln -sf "$kernel" "$tmpfile_vmlinuz"
-
-	if [ ! -f "$tmpfile_bootloader" ]; then
-		echo "please copy bootloader from cros chroot's /lib64/bootstub/bootstub.efi to $tmpfile_bootloader"
-		exit 1
-	fi
 }
 
 cros_kernel_pack() {
@@ -130,9 +118,12 @@ cros_kernel_pack() {
 	tmpfile_config="$out/$tmpfile.config"
 	tmpfile_bootloader="$out/$tmpfile.bootloader"
 
-	echo "$cmdline" > "$tmpfile_config"
-	# generate $tmpfile_vmlinuz and $tmpfile_bootloader
+	rm -rf "$out/$tmpfile"*
+
+	# generate $tmpfile_vmlinuz
 	"cros_kernel_pack_$kernel_arch" "$@"
+	echo "$cmdline" > "$tmpfile_config"
+	dd if=/dev/zero of="$tmpfile_bootloader" bs=512 count=1
 
 	echo "packing kernel..."
 	futility vbutil_kernel \
@@ -145,19 +136,9 @@ cros_kernel_pack() {
 		--keyblock /usr/share/vboot/devkeys/kernel.keyblock \
 		--signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk
 
-	# assume modules have been installed with
-	#
-	#   $ make INSTALL_MOD_PATH="$out/tmp-cros-kernel-modules" modules_install
-	if [ -d "$out/$tmpfile-modules" ]; then
-		kernel_release=$(cat "$out/include/config/kernel.release")
-
-		echo "packing modules..."
-		tar -zcf "$out/$tmpfile-modules.tar.gz" \
-			-C "$out/$tmpfile-modules" \
-			"lib/modules/$kernel_release"
-	else
-		echo "no modules"
-	fi
+	echo "packing modules..."
+	make O="$out" INSTALL_MOD_PATH="$tmpfile-modules" modules_install
+	tar -zcf "$out/$tmpfile-modules.tar.gz" -C "$out/$tmpfile-modules" lib
 }
 
 cros_kernel_deploy() {
@@ -171,18 +152,14 @@ cros_kernel_deploy() {
 	# asssume blkdev has been partitioned as follows:
 	#
 	#  part 1: esp
-	#  part 2: kernel      (cgpt add -i 1 -S 1 -T 2 -P 10 "$blkdev")
-	#  part 3: test kernel (cgpt add -i 2 -S 1 -T 2 -P 5 "$blkdev")
+	#  part 2: kernel  (cgpt add -i 2 -S 1 -T 2 -P 10 "$blkdev")
+	#  part 3: kernel2
 	#  part 4: rootfs
 	part="3"
 
 	case "$blkdev" in
-		/dev/nvme*)
-			# e.g., /dev/nvme0n1p3
-			partdev="${blkdev}p${part}"
-			;;
-		/dev/mmcblk*)
-			# e.g., /dev/mmcblk1p3
+		/dev/nvme* | /dev/mmcblk* | /dev/loop*)
+			# e.g., /dev/nvme0n1p3, /dev/mmcblk1p3, or /dev/loop0p3
 			partdev="${blkdev}p${part}"
 			;;
 		/dev/sd*)
@@ -194,23 +171,41 @@ cros_kernel_deploy() {
 			exit 1
 	esac
 
-	echo "installing kernel..."
-	scp "$out/$tmpfile.pack" "$dut:~"
-	ssh $dut sudo cp "$tmpfile.pack" "$partdev"
+	kernel_release=$(cat "$out/include/config/kernel.release")
 
-	if [ -f "$out/$tmpfile-modules.tar.gz" ]; then
-		kernel_release=$(cat "$out/include/config/kernel.release")
+	if [ -f "$dut" ]; then
+		read -p "deploying new kernel to disk image $dut? "
 
-		echo "installing modules..."
-		scp "$out/$tmpfile-modules.tar.gz" "$dut:~"
-		ssh $dut sudo tar -zxf "$tmpfile-modules.tar.gz" --no-same-owner -C /
-		ssh $dut sudo depmod -a "$kernel_release"
+		sysroot="/mnt"
+
+		echo "setting up $blkdev and mouting rootfs to $sysroot..."
+		sudo losetup -P "$blkdev" "$dut"
+		sudo mount "${blkdev}p4" "$sysroot"
+
+		echo "installing new kernel..."
+		sudo cp "$out/$tmpfile.pack" "${blkdev}p2"
+		sudo cp "$out/$tmpfile.pack" "${blkdev}p3"
+		sudo tar -zxf "$out/$tmpfile-modules.tar.gz" --no-same-owner -C "$sysroot"
+		sudo depmod -a "$kernel_release" -b "$sysroot"
+
+		echo "unmounting /mnt and detaching $blkdev..."
+		sudo umount /mnt
+		sudo losetup -d "$blkdev"
+	else
+		tmp="/tmp"
+
+		echo "copying new kernel..."
+		scp "$out/$tmpfile.pack" "$out/$tmpfile-modules.tar.gz" "$dut:$tmp"
+
+		echo "installing new kernel..."
+		ssh "$dut" sudo cp "$tmp/$tmpfile.pack" "$partdev"
+		ssh "$dut" sudo tar -zxf "$tmp/$tmpfile-modules.tar.gz" --no-same-owner -C /
+		ssh "$dut" sudo depmod -a "$kernel_release"
+
+		echo "rebooting to the new kernel once..."
+		ssh "$dut" sudo cgpt add -i "$part" -S 0 -T 1 -P15 "$blkdev"
+		ssh "$dut" sudo reboot
 	fi
-
-
-	echo "preparing to reboot..."
-	ssh $dut sudo cgpt add -i "$part" -S 0 -T 1 -P15 "$blkdev"
-	ssh $dut sudo reboot
 }
 
 case "$cmd" in

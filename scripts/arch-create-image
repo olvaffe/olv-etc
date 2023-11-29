@@ -1,28 +1,25 @@
 #!/bin/sh
 
 image="arch.img"
-size="4G"
-parts='
+image_size="4G"
+image_parts='
 label: gpt
 name="arch-esp",     type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, size=260M
-name="arch-kernel",  type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M, attrs="GUID:49,51,53,56"
-name="arch-kernel2", type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M, attrs="GUID:48,50,53,56"
+name="cros-kernel",  type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M, attrs="GUID:49,51,53,56"
+name="cros-kernel2", type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M
 name="arch-root",    type=0FC63DAF-8483-4772-8E79-3D69D8477DE4
 '
-loopdev="/dev/loop0"
-mirror="https://mirror.fcix.net/archlinux"
-tarball="archlinux-bootstrap-x86_64.tar.gz"
-packages="
-linux linux-firmware
-sudo vim dosfstools usbutils
-iwd openssh zram-generator
-base-devel git man-db
-sway polkit i3status swayidle noto-fonts alacritty
-wayland-utils mesa mesa-utils vulkan-tools
-"
-aur_packages="cgpt-bin"
-me="olv"
-password="test0000"
+image_loopdev="/dev/loop0"
+
+arch_mirror="https://mirror.fcix.net/archlinux"
+arch_tarball="archlinux-bootstrap-x86_64.tar.gz"
+arch_base_packages="linux linux-firmware dosfstools zram-generator iwd openssh sudo vim"
+arch_dev_packages="base-devel git"
+arch_gui_packages="sway polkit i3status swayidle noto-fonts alacritty mesa mesa-utils vulkan-tools"
+arch_aur_packages="cgpt-bin"
+
+user_name="olv"
+user_password="test0000"
 
 set -e
 
@@ -33,8 +30,8 @@ image_trap() {
 		umount "$tmpdir/chroot"
 	fi
 
-	if losetup -n -O NAME,BACK-FILE | grep -q "^$loopdev .*$tmpdir"; then
-		losetup -d "$loopdev"
+	if losetup -n -O NAME,BACK-FILE | grep -q "^$image_loopdev .*$tmpdir"; then
+		losetup -d "$image_loopdev"
 	fi
 
 	if [ -d "$tmpdir" ]; then
@@ -44,27 +41,27 @@ image_trap() {
 
 image_create() {
 	# create and partition the disk image
-	fallocate -l "$size" "$tmpdir/$image"
-	echo "$parts" | sfdisk "$tmpdir/$image"
+	fallocate -l "$image_size" "$tmpdir/$image"
+	echo "$image_parts" | sfdisk "$tmpdir/$image"
 
 	# set up the loop device
-	losetup -P "$loopdev" "$tmpdir/$image"
-	while [ ! -b "${loopdev}p1" ]; do
+	losetup -P "$image_loopdev" "$tmpdir/$image"
+	while [ ! -b "${image_loopdev}p1" ]; do
 		sleep 1
 	done
 	sleep 2
 
 	# format partitions
-	mkfs.vfat -F 32 "${loopdev}p1"
-	mkfs.ext4 "${loopdev}p4"
+	mkfs.vfat -F 32 "${image_loopdev}p1"
+	mkfs.ext4 "${image_loopdev}p4"
 	
 	# mount chroot
 	mkdir -p "$tmpdir/chroot"
-	mount "${loopdev}p4" "$tmpdir/chroot"
+	mount "${image_loopdev}p4" "$tmpdir/chroot"
 
 	# download and untar into chroot
 	echo "downloading rootfs..."
-	curl "$mirror/iso/latest/$tarball" | tar -zx --warning=no-unknown-keyword -C "$tmpdir/chroot" --strip 1
+	curl "$arch_mirror/iso/latest/$arch_tarball" | tar -zx --warning=no-unknown-keyword -C "$tmpdir/chroot" --strip 1
 
 	# unmount chroot
 	umount "$tmpdir/chroot"
@@ -77,10 +74,10 @@ image_setup() {
 }
 
 image_finalize() {
-	fsck.vfat -p "${loopdev}p1"
-	fsck.ext4 -p -f "${loopdev}p4"
+	fsck.vfat -p "${image_loopdev}p1"
+	fsck.ext4 -p -f "${image_loopdev}p4"
 
-	losetup -d "$loopdev"
+	losetup -d "$image_loopdev"
 
 	mv "$tmpdir/$image" "$image"
 	rm -rf "$tmpdir"
@@ -92,12 +89,12 @@ container_setup_packages() {
 	pacman-key --init
 	pacman-key --populate
 
-	echo "Server = $mirror/\$repo/os/\$arch" > "/etc/pacman.d/mirrorlist"
+	echo "Server = $arch_mirror/\$repo/os/\$arch" > "/etc/pacman.d/mirrorlist"
 	pacman -R --noconfirm arch-install-scripts
-	pacman -Syu --noconfirm $packages
+	pacman -Syu --noconfirm $arch_base_packages $arch_dev_packages $arch_gui_packages
 
 	mkdir -p /tmp/aur
-	for pkg in $aur_packages; do
+	for pkg in $arch_aur_packages; do
 		git clone "https://aur.archlinux.org/$pkg.git" "/tmp/aur/$pkg"
 		chown -R nobody:nobody "/tmp/aur/$pkg"
 		(cd "/tmp/aur/$pkg" && sudo -u nobody makepkg && pacman -U --noconfirm "$pkg"-*.pkg.tar.zst)
@@ -107,18 +104,16 @@ container_setup_packages() {
 	yes | pacman -Scc
 }
 
-container_setup_me() {
-	useradd -m -G wheel,video "$me"
+container_setup_bootloader() {
+	bootctl install
 
-	if [ "$me" = "olv" ]; then
-		my_etc="https://github.com/olvaffe/olv-etc.git"
-		my_home="/home/$me"
-
-		rm "$my_home/.bashrc"
-		rm "$my_home/.bash_profile"
-		sudo -u "$me" git clone --recurse-submodules "$my_etc" "$my_home/olv-etc"
-		sudo -u "$me" "$my_home/olv-etc/create-links"
-	fi
+	echo "default arch-fallback.conf" >> /boot/loader/loader.conf
+	cat > /boot/loader/entries/arch-fallback.conf <<EOF
+title	Arch Linux Fallback
+linux	/vmlinuz-linux
+initrd	/initramfs-linux-fallback.img
+options	root=PARTLABEL=arch-root
+EOF
 }
 
 container_setup_system() {
@@ -140,28 +135,30 @@ container_setup_system() {
 	done
 	echo -e "[zram0]\nzram-size = ram" > /etc/systemd/zram-generator.conf
 
-	systemctl enable systemd-resolved systemd-networkd iwd sshd
+	systemctl enable systemd-resolved systemd-networkd sshd
 
 	rm -f /etc/resolv.conf
 	rm -f /pkglist.x86_64.txt
 	rm -f /version
 }
 
-container_setup_bootloader() {
-	bootctl install
+container_setup_user() {
+	useradd -m -G wheel,video "$user_name"
 
-	echo "default arch-fallback.conf" >> /boot/loader/loader.conf
-	cat > /boot/loader/entries/arch-fallback.conf <<EOF
-title	Arch Linux Fallback
-linux	/vmlinuz-linux
-initrd	/initramfs-linux-fallback.img
-options	root=PARTLABEL=arch-root
-EOF
+	if [ "$user_name" = "olv" ]; then
+		my_etc="https://github.com/olvaffe/olv-etc.git"
+		my_home="/home/$user_name"
+
+		rm "$my_home/.bashrc"
+		rm "$my_home/.bash_profile"
+		sudo -u "$user_name" git clone --recurse-submodules "$my_etc" "$my_home/olv-etc"
+		sudo -u "$user_name" "$my_home/olv-etc/create-links"
+	fi
 }
 
 container_setup_login() {
-	echo "root:$password" | chpasswd
-	echo "$me:$password" | chpasswd
+	echo "root:$user_password" | chpasswd
+	echo "$user_name:$user_password" | chpasswd
 
 	policy="%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
 	sed -i "s/^# $policy/$policy/" /etc/sudoers
@@ -172,9 +169,9 @@ mode="$1"
 if [ "$mode" = "container" ]; then
 	#bash
 	container_setup_packages
-	container_setup_me
-	container_setup_system
 	container_setup_bootloader
+	container_setup_system
+	container_setup_user
 	container_setup_login
 	#bash
 else
