@@ -13,6 +13,8 @@ if [ $(id -u) -ne 0 ]; then
 fi
 
 unshare_and_restart() {
+	echo "entering namespace..."
+
 	# no --net nor --user
 	pid_ns_args="--pid --fork"
 	misc_ns_args="--ipc --mount --uts --cgroup --time"
@@ -32,19 +34,19 @@ chroot_bootstrap() {
 		return 0
 	fi
 
-	read -p "$newroot does not exist.  Bootstrap? "
+	read -p "$newroot does not exist.  Bootstrap? " unused
+	echo "bootstrapping..."
 
 	mkdir -p "$newroot"
 	curl "$mirror/iso/latest/archlinux-bootstrap-x86_64.tar.gz" | \
 		tar -zx --warning=no-unknown-keyword -C "$newroot" --strip 1
 
-	rm -f "$newroot/pkglist.x86_64.txt"
-	rm -f "$newroot/version"
-
 	touch "$newroot/arch-chroot-bootstrap2"
 }
 
 chroot_pseudo_mounts() {
+	echo "mounting pseudo filesystems..."
+
 	# pacman CheckSpace expects / to be a mountpoint
 	mount --bind "$newroot" "$newroot"
 
@@ -58,7 +60,7 @@ chroot_pseudo_mounts() {
 	mount -t tracefs none "$newroot/sys/kernel/tracing"
 
 	mount -t devtmpfs none "$newroot/dev"
-	mount -t mqueue none "$newroot/dev/mqueue"
+	[ -d "$newroot/dev/mqueue" ] && mount -t mqueue none "$newroot/dev/mqueue"
 	mount -t devpts none "$newroot/dev/pts"
 	mount -t tmpfs none "$newroot/dev/shm"
 
@@ -67,10 +69,12 @@ chroot_pseudo_mounts() {
 }
 
 chroot_fixups() {
+	echo "applying fixups..."
+
 	cp /etc/resolv.conf "$newroot/etc/resolv.conf"
 
 	if command -v hostname > /dev/null; then
-		hostname $(cat "$newroot/etc/hostname")
+		hostname "arch-chroot"
 	fi
 }
 
@@ -79,15 +83,17 @@ chroot_bootstrap2() {
 		return
 	fi
 
+	echo "one-time setup..."
+
+	rm -f "$newroot/pkglist.x86_64.txt"
+	rm -f "$newroot/version"
+
+	ln -sf /usr/share/zoneinfo/America/Los_Angeles "$newroot/etc/localtime"
+
 	locale="en_US.UTF-8"
+	echo "LANG=$locale" > "$newroot/etc/locale.conf"
 	sed -i "s/^#$locale/$locale/" "$newroot/etc/locale.gen"
 	chroot "$newroot" locale-gen
-
-	systemd-firstboot \
-		--root="$newroot" \
-		--locale="$locale" \
-		--timezone="America/Los_Angeles" \
-		--hostname="arch-chroot"
 
 	echo "Server = $mirror/\$repo/os/\$arch" > "$newroot/etc/pacman.d/mirrorlist"
 	chroot "$newroot" pacman-key --init
@@ -109,12 +115,14 @@ chroot_bootstrap2() {
 
 	rm -f "$newroot/arch-chroot-bootstrap2"
 
-	echo "Bootstrapped $newroot!"
 	echo
+	echo "bootstrapped $newroot!"
 }
 
 chroot_bind_mounts() {
-	wl_sock=$(find /run -name "wayland-*" -type s -print -quit 2>/dev/null)
+	echo "bind-mounting display server sockets..."
+
+	wl_sock=$(find /run -name "wayland-*" -type s -print -quit 2>/dev/null || true)
 	if [ -n "$wl_sock" ]; then
 		wl_bind="/run/$(basename "$wl_sock")"
 
@@ -123,7 +131,7 @@ chroot_bind_mounts() {
 		export WAYLAND_DISPLAY="$wl_bind"
 	fi
 
-	x11_sock=$(find /tmp/.X11-unix -name "X*" -type s -print -quit 2>/dev/null)
+	x11_sock=$(find /tmp/.X11-unix -name "X*" -type s -print -quit 2>/dev/null || true)
 	if [ -n "$x11_sock" ]; then
 		mkdir -p "$newroot/$(dirname "$x11_sock")"
 		touch "$newroot/$x11_sock"
@@ -133,6 +141,9 @@ chroot_bind_mounts() {
 }
 
 chroot_enter() {
+	echo "entering $newroot..."
+	echo
+
 	chroot "$newroot" su -w WAYLAND_DISPLAY,DISPLAY - olv
 }
 
