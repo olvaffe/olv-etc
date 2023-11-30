@@ -1,19 +1,50 @@
 #!/bin/sh
 
-if [ "$#" -ne "1" ]; then
+set -e
+
+if [ "$#" -ne 1 ]; then
 	echo "Usage: $0 <NEWROOT>"
 	exit 1
 fi
 
-if [ "$$" -ne "1" ]; then
-	pid_ns_args="--pid --fork"
+if [ $(id -u) -ne 0 ]; then
+	echo "Please run as root."
+	exit 1
+fi
+
+unshare_and_restart() {
 	# no --net nor --user
+	pid_ns_args="--pid --fork"
 	misc_ns_args="--ipc --mount --uts --cgroup --time"
 
-	unshare $pid_ns_args $user_ns_args $misc_ns_args "$0" "$@"
-else
-	newroot="$1"
+	exec unshare $pid_ns_args $misc_ns_args "$0" "$@"
+}
 
+if [ "$$" -ne "1" ]; then
+	unshare_and_restart "$@"
+fi
+
+newroot="$1"
+mirror="https://mirror.fcix.net/archlinux"
+
+chroot_bootstrap() {
+	if [ -d "$newroot" ]; then
+		return 0
+	fi
+
+	read -p "$newroot does not exist.  Bootstrap? "
+
+	mkdir -p "$newroot"
+	curl "$mirror/iso/latest/archlinux-bootstrap-x86_64.tar.gz" | \
+		tar -zx --warning=no-unknown-keyword -C "$newroot" --strip 1
+
+	rm -f "$newroot/pkglist.x86_64.txt"
+	rm -f "$newroot/version"
+
+	touch "$newroot/arch-chroot-bootstrap2"
+}
+
+chroot_pseudo_mounts() {
 	# pacman CheckSpace expects / to be a mountpoint
 	mount --bind "$newroot" "$newroot"
 
@@ -33,12 +64,57 @@ else
 
 	mount -t tmpfs none "$newroot/run"
 	mount -t tmpfs none "$newroot/tmp"
+}
 
-	hostname $(cat "$newroot/etc/hostname")
-
+chroot_fixups() {
 	cp /etc/resolv.conf "$newroot/etc/resolv.conf"
 
-	wl_sock=$(find /run -name wayland-* -type s -print -quit 2>/dev/null)
+	if command -v hostname > /dev/null; then
+		hostname $(cat "$newroot/etc/hostname")
+	fi
+}
+
+chroot_bootstrap2() {
+	if [ ! -f "$newroot/arch-chroot-bootstrap2" ]; then
+		return
+	fi
+
+	locale="en_US.UTF-8"
+	sed -i "s/^#$locale/$locale/" "$newroot/etc/locale.gen"
+	chroot "$newroot" locale-gen
+
+	systemd-firstboot \
+		--root="$newroot" \
+		--locale="$locale" \
+		--timezone="America/Los_Angeles" \
+		--hostname="arch-chroot"
+
+	echo "Server = $mirror/\$repo/os/\$arch" > "$newroot/etc/pacman.d/mirrorlist"
+	chroot "$newroot" pacman-key --init
+	chroot "$newroot" pacman-key --populate
+	chroot "$newroot" pacman -R --noconfirm arch-install-scripts
+	chroot "$newroot" pacman -Syu --noconfirm sudo vim git
+
+	policy="%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
+	sed -i "s/^# $policy/$policy/" "$newroot/etc/sudoers"
+
+	user="olv"
+	chroot "$newroot" useradd -m -G wheel "$user"
+	echo "root:test0000" | chroot "$newroot" chpasswd
+	echo "$user:test0000" | chroot "$newroot" chpasswd
+
+	rm -f "$newroot/home/$user/.bash"*
+	chroot "$newroot" su - "$user" -c "git clone https://github.com/olvaffe/olv-etc.git"
+	chroot "$newroot" su - "$user" -c "./olv-etc/create-links"
+
+	rm -f "$newroot/arch-chroot-bootstrap2"
+
+	echo "Bootstrapped $newroot!"
+	echo
+}
+
+chroot_bind_mounts() {
+	wl_sock=$(find /run -name "wayland-*" -type s -print -quit 2>/dev/null)
 	if [ -n "$wl_sock" ]; then
 		wl_bind="/run/$(basename "$wl_sock")"
 
@@ -47,5 +123,24 @@ else
 		export WAYLAND_DISPLAY="$wl_bind"
 	fi
 
-	chroot "$newroot" su -w WAYLAND_DISPLAY - olv
-fi
+	x11_sock=$(find /tmp/.X11-unix -name "X*" -type s -print -quit 2>/dev/null)
+	if [ -n "$x11_sock" ]; then
+		mkdir -p "$newroot/$(dirname "$x11_sock")"
+		touch "$newroot/$x11_sock"
+		export DISPLAY=$(echo $(basename "$x11_sock") | tr X :)
+		mount --bind -o ro "$x11_sock" "$newroot/$x11_sock"
+	fi
+}
+
+chroot_enter() {
+	chroot "$newroot" su -w WAYLAND_DISPLAY,DISPLAY - olv
+}
+
+# prepare the chroot
+chroot_bootstrap
+chroot_pseudo_mounts
+chroot_fixups
+
+chroot_bootstrap2
+chroot_bind_mounts
+chroot_enter
