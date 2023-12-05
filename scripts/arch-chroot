@@ -2,6 +2,8 @@
 
 set -e
 
+username="olv"
+
 if [ "$#" -ne 1 ]; then
 	echo "Usage: $0 <NEWROOT>"
 	exit 1
@@ -104,14 +106,15 @@ chroot_bootstrap2() {
 	policy="%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
 	sed -i "s/^# $policy/$policy/" "$newroot/etc/sudoers"
 
-	user="olv"
-	chroot "$newroot" useradd -m -G wheel "$user"
+	chroot "$newroot" useradd -m -G wheel "$username"
 	echo "root:test0000" | chroot "$newroot" chpasswd
-	echo "$user:test0000" | chroot "$newroot" chpasswd
+	echo "$username:test0000" | chroot "$newroot" chpasswd
 
-	rm -f "$newroot/home/$user/.bash"*
-	chroot "$newroot" su - "$user" -c "git clone https://github.com/olvaffe/olv-etc.git"
-	chroot "$newroot" su - "$user" -c "./olv-etc/create-links"
+	if [ "$username" = "olv" ]; then
+		rm -f "$newroot/home/$username/.bash"*
+		chroot "$newroot" su - "$username" -c "git clone https://github.com/olvaffe/olv-etc.git"
+		chroot "$newroot" su - "$username" -c "./olv-etc/create-links"
+	fi
 
 	rm -f "$newroot/arch-chroot-bootstrap2"
 
@@ -144,7 +147,7 @@ chroot_enter() {
 	echo "entering $newroot..."
 	echo
 
-	chroot "$newroot" su -w WAYLAND_DISPLAY,DISPLAY - olv
+	exec chroot "$newroot" su -w WAYLAND_DISPLAY,DISPLAY - "$username"
 }
 
 # prepare the chroot
