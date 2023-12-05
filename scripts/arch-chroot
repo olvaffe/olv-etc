@@ -123,7 +123,7 @@ chroot_bootstrap2() {
 }
 
 chroot_bind_mounts() {
-	echo "bind-mounting display server sockets..."
+	echo "bind-mounting sockets..."
 
 	wl_sock=$(find /run -name "wayland-*" -type s -print -quit 2>/dev/null || true)
 	if [ -n "$wl_sock" ]; then
@@ -141,13 +141,19 @@ chroot_bind_mounts() {
 		export DISPLAY=$(echo $(basename "$x11_sock") | tr X :)
 		mount --bind -o ro "$x11_sock" "$newroot/$x11_sock"
 	fi
+
+	perfetto_sock="/run/perfetto"
+	if [ -d "$perfetto_sock" ]; then
+		mkdir "$newroot/$perfetto_sock"
+		mount --bind -o ro "$perfetto_sock" "$newroot/$perfetto_sock"
+	fi
 }
 
 chroot_enter() {
 	echo "entering $newroot..."
 	echo
 
-	exec chroot "$newroot" su -w WAYLAND_DISPLAY,DISPLAY - "$username"
+	chroot "$newroot" su -w WAYLAND_DISPLAY,DISPLAY - "$username"
 }
 
 # prepare the chroot
