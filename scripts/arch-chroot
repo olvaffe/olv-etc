@@ -84,6 +84,13 @@ arch_chroot_phase2_bind_mount_app() {
 		mount --bind -o ro "$x11_sock" "$newroot/$x11_sock"
 	fi
 
+	dev_log_sock="/run/systemd/journal/dev-log"
+	if [ -S "$dev_log_sock" ]; then
+		mkdir -p "$newroot/$(dirname "$dev_log_sock")"
+		touch "$newroot/$dev_log_sock"
+		mount --bind -o ro "$dev_log_sock" "$newroot/$dev_log_sock"
+	fi
+
 	perfetto_sock="/tmp/perfetto-producer"
 	if [ -S "$perfetto_sock" ]; then
 		touch "$newroot/$perfetto_sock"
