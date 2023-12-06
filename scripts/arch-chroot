@@ -2,82 +2,41 @@
 
 set -e
 
+mirror="https://mirror.fcix.net/archlinux"
 username="olv"
 
 if [ "$#" -ne 1 ]; then
 	echo "Usage: $0 <NEWROOT>"
 	exit 1
 fi
+newroot="$1"
 
 if [ $(id -u) -ne 0 ]; then
 	echo "Please run as root."
 	exit 1
 fi
 
-unshare_and_restart() {
-	echo "entering namespace..."
-
-	# no --net nor --user
-	pid_ns_args="--pid --fork"
-	misc_ns_args="--ipc --mount --uts --cgroup --time"
-
-	exec unshare $pid_ns_args $misc_ns_args "$0" "$@"
-}
-
-if [ "$$" -ne "1" ]; then
-	unshare_and_restart "$@"
-fi
-
-newroot="$1"
-mirror="https://mirror.fcix.net/archlinux"
-
-chroot_bootstrap() {
+chroot_bootstrap1() {
 	if [ -d "$newroot" ]; then
-		return 0
+		return
 	fi
 
 	read -p "$newroot does not exist.  Bootstrap? " unused
-	echo "bootstrapping..."
-
 	mkdir -p "$newroot"
-	curl "$mirror/iso/latest/archlinux-bootstrap-x86_64.tar.gz" | \
-		tar -zx --warning=no-unknown-keyword -C "$newroot" --strip 1
-
 	touch "$newroot/arch-chroot-bootstrap2"
 }
 
-chroot_pseudo_mounts() {
-	echo "mounting pseudo filesystems..."
+unshare_and_restart() {
+	echo "entering namespace..."
 
-	# pacman CheckSpace expects / to be a mountpoint
-	mount --bind "$newroot" "$newroot"
+	user_ns_args="--user --map-users=auto --map-groups=auto"
+	# no --user
+	user_ns_args=""
+	pid_ns_args="--pid --fork"
+	# no --net
+	misc_ns_args="--mount --ipc --uts --cgroup --time"
 
-	mount -t proc none "$newroot/proc"
-
-	mount -t sysfs none "$newroot/sys"
-	mount -t bpf none "$newroot/sys/fs/bpf"
-	mount -t cgroup2 none "$newroot/sys/fs/cgroup"
-	mount -t pstore none "$newroot/sys/fs/pstore"
-	mount -t debugfs none "$newroot/sys/kernel/debug"
-	mount -t tracefs none "$newroot/sys/kernel/tracing"
-
-	mount -t devtmpfs none "$newroot/dev"
-	[ -d "$newroot/dev/mqueue" ] && mount -t mqueue none "$newroot/dev/mqueue"
-	mount -t devpts none "$newroot/dev/pts"
-	mount -t tmpfs none "$newroot/dev/shm"
-
-	mount -t tmpfs none "$newroot/run"
-	mount -t tmpfs none "$newroot/tmp"
-}
-
-chroot_fixups() {
-	echo "applying fixups..."
-
-	cp /etc/resolv.conf "$newroot/etc/resolv.conf"
-
-	if command -v hostname > /dev/null; then
-		hostname "arch-chroot"
-	fi
+	exec unshare $user_ns_args $pid_ns_args $misc_ns_args "$0" "$@"
 }
 
 chroot_bootstrap2() {
@@ -85,10 +44,41 @@ chroot_bootstrap2() {
 		return
 	fi
 
-	echo "one-time setup..."
+	echo "downloading rootfs..."
 
-	rm -f "$newroot/pkglist.x86_64.txt"
-	rm -f "$newroot/version"
+	curl "$mirror/iso/latest/archlinux-bootstrap-x86_64.tar.gz" | \
+		tar -zx --warning=no-unknown-keyword -C "$newroot" --strip 1
+
+	touch "$newroot/arch-chroot-bootstrap3"
+	rm -f "$newroot/arch-chroot-bootstrap2"
+}
+
+chroot_mount_pseudo() {
+	echo "mounting pseudo filesystems..."
+
+	# pacman CheckSpace expects / to be a mountpoint
+	mount --bind "$newroot" "$newroot"
+
+	mount --rbind "/dev" "$newroot/dev"
+	mount --bind -o ro "/sys" "$newroot/sys"
+	mount -t proc -o ro none "$newroot/proc"
+
+	mount -t tmpfs none "$newroot/run"
+	mount -t tmpfs none "$newroot/tmp"
+}
+
+chroot_fix_network() {
+	echo "fixing network..."
+
+	cp /etc/resolv.conf "$newroot/etc/resolv.conf"
+}
+
+chroot_bootstrap3() {
+	if [ ! -f "$newroot/arch-chroot-bootstrap3" ]; then
+		return
+	fi
+
+	echo "bootstrapping..."
 
 	ln -sf /usr/share/zoneinfo/America/Los_Angeles "$newroot/etc/localtime"
 
@@ -100,8 +90,8 @@ chroot_bootstrap2() {
 	echo "Server = $mirror/\$repo/os/\$arch" > "$newroot/etc/pacman.d/mirrorlist"
 	chroot "$newroot" pacman-key --init
 	chroot "$newroot" pacman-key --populate
-	chroot "$newroot" pacman -R --noconfirm arch-install-scripts
-	chroot "$newroot" pacman -Syu --noconfirm sudo vim git
+	chroot "$newroot" pacman -R --noconfirm arch-install-scripts || true
+	chroot "$newroot" pacman -Syu --noconfirm inetutils sudo vim git
 
 	policy="%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
 	sed -i "s/^# $policy/$policy/" "$newroot/etc/sudoers"
@@ -112,17 +102,25 @@ chroot_bootstrap2() {
 
 	if [ "$username" = "olv" ]; then
 		rm -f "$newroot/home/$username/.bash"*
-		chroot "$newroot" su - "$username" -c "git clone https://github.com/olvaffe/olv-etc.git"
+		chroot "$newroot" su - "$username" -c "git clone https://github.com/olvaffe/olv-etc.git" || true
 		chroot "$newroot" su - "$username" -c "./olv-etc/create-links"
 	fi
 
-	rm -f "$newroot/arch-chroot-bootstrap2"
+	rm -f "$newroot/pkglist.x86_64.txt"
+	rm -f "$newroot/version"
+	rm -f "$newroot/arch-chroot-bootstrap3"
 
 	echo
 	echo "bootstrapped $newroot!"
 }
 
-chroot_bind_mounts() {
+chroot_fix_hostname() {
+	echo "fixing hostname..."
+
+	chroot "$newroot" hostname "arch-chroot"
+}
+
+chroot_mount_sockets() {
 	echo "bind-mounting sockets..."
 
 	wl_sock=$(find /run -name "wayland-*" -type s -print -quit 2>/dev/null || true)
@@ -142,10 +140,16 @@ chroot_bind_mounts() {
 		mount --bind -o ro "$x11_sock" "$newroot/$x11_sock"
 	fi
 
-	perfetto_sock="/run/perfetto"
-	if [ -d "$perfetto_sock" ]; then
-		mkdir "$newroot/$perfetto_sock"
+	perfetto_sock="/tmp/perfetto-producer"
+	if [ -S "$perfetto_sock" ]; then
+		touch "$newroot/$perfetto_sock"
 		mount --bind -o ro "$perfetto_sock" "$newroot/$perfetto_sock"
+	fi
+
+	perfetto_dir="/run/perfetto"
+	if [ -d "$perfetto_dir" ]; then
+		mkdir "$newroot/$perfetto_dir"
+		mount --bind -o ro "$perfetto_dir" "$newroot/$perfetto_dir"
 	fi
 }
 
@@ -156,11 +160,14 @@ chroot_enter() {
 	chroot "$newroot" su -w WAYLAND_DISPLAY,DISPLAY - "$username"
 }
 
-# prepare the chroot
-chroot_bootstrap
-chroot_pseudo_mounts
-chroot_fixups
-
+chroot_bootstrap1
+if [ "$$" -ne "1" ]; then
+	unshare_and_restart "$@"
+fi
 chroot_bootstrap2
-chroot_bind_mounts
+chroot_mount_pseudo
+chroot_fix_network
+chroot_bootstrap3
+chroot_fix_hostname
+chroot_mount_sockets
 chroot_enter
