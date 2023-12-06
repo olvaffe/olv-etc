@@ -8,60 +8,79 @@ if [ $(id -u) -ne 0 ]; then
 fi
 
 if [ "$#" -ne 1 ]; then
-	echo "Usage: $0 <NEWROOT>"
+	echo "Usage: $0 <SYSROOT>"
 	exit 1
 fi
 
-newroot="$(realpath $1)"
+sysroot="$(realpath $1)"
+if [ -n "$SUDO_UID" -a -n "$SUDO_GID" ]; then
+	sysroot_uid="$SUDO_UID"
+	sysroot_gid="$SUDO_GID"
+elif id -u "chronos" > /dev/null 2>/dev/null; then
+	sysroot_uid=$(id -u "chronos")
+	sysroot_gid=$(id -g "chronos")
+elif [ -d "$sysroot" ]; then
+	sysroot_uid=$(stat -c "%u" "$sysroot")
+	sysroot_gid=$(stat -c "%g" "$sysroot")
+else
+	sysroot_uid="0"
+	sysroot_gid="0"
+fi
+
 mirror="https://mirror.fcix.net/archlinux"
 hostname="arch-chroot"
-username="olv"
 
-arch_chroot_phase1_download() {
-	if [ -f "$newroot/etc/arch-release" -a ! -f "$newroot/$hostname-download" ]; then
-		return
+arch_chroot_phase1_bootstrap() {
+	if [ -f "$sysroot/etc/arch-release" ]; then
+		if [ ! -f "$sysroot/$hostname-phase1" -a \
+		     $(stat -c "%u" "$sysroot") = "$sysroot_uid" -a \
+		     $(stat -c "%g" "$sysroot") = "$sysroot_gid" ]; then
+			return
+		fi
 	fi
 
-	read -p "Boostrap $newroot? " unused
+	read -p "Boostrap $sysroot for user $(id -un $sysroot_uid)? " unused
 
-	mkdir -p "$newroot"
-	touch "$newroot/$hostname-download"
+	mkdir -p "$sysroot"
+	touch "$sysroot/$hostname-phase1"
 
-	echo "downloading rootfs to $newroot..."
+	echo "downloading rootfs to $sysroot..."
 	curl "$mirror/iso/latest/archlinux-bootstrap-x86_64.tar.gz" | \
-		tar -zx --warning=no-unknown-keyword -C "$newroot" --strip 1
+		tar -zx --no-same-owner --warning=no-unknown-keyword -C "$sysroot" --strip 1
 
-	touch "$newroot/$hostname-bootstrap"
-	rm -f "$newroot/$hostname-download"
+	chown -R "$sysroot_uid:$sysroot_gid" "$sysroot"
+
+	touch "$sysroot/$hostname-phase3"
+	rm -f "$sysroot/$hostname-phase1"
 }
 
-arch_chroot_phase1_namespace() {
+arch_chroot_phase1_transition() {
 	echo "entering mount namespace..."
 	# restart in phase2
 	ARCH_CHROOT_PHASE="phase2" exec unshare --mount "$0" "$@"
 }
 
 arch_chroot_phase1() {
-	# no namspace yet
-	arch_chroot_phase1_download
-	arch_chroot_phase1_namespace "$@"
+	# phase1 runs as root outside of namespaces
+	arch_chroot_phase1_bootstrap
+	arch_chroot_phase1_transition "$@"
 }
 
 arch_chroot_phase2_mount_sys() {
 	echo "mounting system filesystems..."
 
 	# pacman CheckSpace expects / to be a mountpoint
-	mount --bind "$newroot" "$newroot"
+	mount --bind "$sysroot" "$sysroot"
 
-	mount -t tmpfs none "$newroot/tmp"
-	mount -t tmpfs none "$newroot/run"
+	mount -t tmpfs none "$sysroot/tmp"
+	mount -t tmpfs none "$sysroot/run"
 }
 
 arch_chroot_phase2_bind_mount_sys() {
 	echo "bind-mounting system filesystems..."
 
-	mount --bind -o ro "/sys" "$newroot/sys"
-	mount --rbind "/dev" "$newroot/dev"
+	mount --bind "/sys" "$sysroot/sys"
+	mount --rbind "/dev" "$sysroot/dev"
 }
 
 arch_chroot_phase2_bind_mount_app() {
@@ -71,129 +90,139 @@ arch_chroot_phase2_bind_mount_app() {
 	if [ -n "$wl_sock" ]; then
 		wl_bind="/run/$(basename "$wl_sock")"
 
-		touch "$newroot/$wl_bind"
-		mount --bind -o ro "$wl_sock" "$newroot/$wl_bind"
+		touch "$sysroot/$wl_bind"
+		mount --bind "$wl_sock" "$sysroot/$wl_bind"
 		export WAYLAND_DISPLAY="$wl_bind"
 	fi
 
 	x11_sock=$(find /tmp/.X11-unix -name "X*" -type s -print -quit 2>/dev/null || true)
 	if [ -n "$x11_sock" ]; then
-		mkdir -p "$newroot/$(dirname "$x11_sock")"
-		touch "$newroot/$x11_sock"
+		mkdir -p "$sysroot/$(dirname "$x11_sock")"
+		touch "$sysroot/$x11_sock"
 		export DISPLAY=$(echo $(basename "$x11_sock") | tr X :)
-		mount --bind -o ro "$x11_sock" "$newroot/$x11_sock"
+		mount --bind "$x11_sock" "$sysroot/$x11_sock"
 	fi
 
 	dev_log_sock="/run/systemd/journal/dev-log"
 	if [ -S "$dev_log_sock" ]; then
-		mkdir -p "$newroot/$(dirname "$dev_log_sock")"
-		touch "$newroot/$dev_log_sock"
-		mount --bind -o ro "$dev_log_sock" "$newroot/$dev_log_sock"
+		mkdir -p "$sysroot/$(dirname "$dev_log_sock")"
+		touch "$sysroot/$dev_log_sock"
+		mount --bind "$dev_log_sock" "$sysroot/$dev_log_sock"
 	fi
 
 	perfetto_sock="/tmp/perfetto-producer"
 	if [ -S "$perfetto_sock" ]; then
-		touch "$newroot/$perfetto_sock"
-		mount --bind -o ro "$perfetto_sock" "$newroot/$perfetto_sock"
+		touch "$sysroot/$perfetto_sock"
+		mount --bind "$perfetto_sock" "$sysroot/$perfetto_sock"
 	fi
 
 	perfetto_dir="/run/perfetto"
 	if [ -d "$perfetto_dir" ]; then
-		mkdir "$newroot/$perfetto_dir"
-		mount --bind -o ro "$perfetto_dir" "$newroot/$perfetto_dir"
+		mkdir "$sysroot/$perfetto_dir"
+		mount --bind "$perfetto_dir" "$sysroot/$perfetto_dir"
 	fi
 }
 
-arch_chroot_phase2_namespace() {
+arch_chroot_phase2_transition() {
 	echo "entering all namespaces..."
 
-	user_ns_args="--user --map-users=auto --map-groups=auto"
-	# disable --user because it requires /etc/sub{uid,gid} to be set up
-	user_ns_args=""
-
+	user_ns_args="--user --map-root-user"
 	pid_ns_args="--pid --fork"
-
 	# no --net
 	misc_ns_args="--mount --uts --time --ipc --cgroup"
 
 	# restart in phase3
-	ARCH_CHROOT_PHASE="phase3" exec unshare $user_ns_args $pid_ns_args $misc_ns_args "$0" "$@"
+	ARCH_CHROOT_PHASE="phase3" exec sudo -E -u "#$sysroot_uid" -g "#$sysroot_gid" \
+		unshare $user_ns_args $pid_ns_args $misc_ns_args "$0" "$@"
 }
 
 arch_chroot_phase2() {
-	# in mount namespace
+	# phase2 runs as root in the intermediate mount namespace
 	arch_chroot_phase2_mount_sys
 	arch_chroot_phase2_bind_mount_sys
 	arch_chroot_phase2_bind_mount_app
-	arch_chroot_phase2_namespace "$@"
+	arch_chroot_phase2_transition "$@"
 }
 
 arch_chroot_phase3_mount_proc() {
 	echo "mounting /proc..."
-	mount -t proc -o ro none "$newroot/proc"
+	mount -t proc -o nosuid,nodev,noexec none "$sysroot/proc"
 }
 
 arch_chroot_phase3_fix_network() {
 	echo "fixing network..."
-	cp /etc/resolv.conf "$newroot/etc/resolv.conf"
+	cp /etc/resolv.conf "$sysroot/etc/resolv.conf"
 }
 
 arch_chroot_phase3_bootstrap() {
-	if [ ! -f "$newroot/$hostname-bootstrap" ]; then
+	if [ ! -f "$sysroot/$hostname-phase3" ]; then
 		return
 	fi
 
-	echo "bootstrapping $newroot..."
+	echo "bootstrapping $sysroot..."
 
-	echo "$hostname" > "$newroot/etc/hostname"
-	ln -sf /usr/share/zoneinfo/America/Los_Angeles "$newroot/etc/localtime"
+	echo "$hostname" > "$sysroot/etc/hostname"
+	ln -sf /usr/share/zoneinfo/America/Los_Angeles "$sysroot/etc/localtime"
 
 	locale="en_US.UTF-8"
-	echo "LANG=$locale" > "$newroot/etc/locale.conf"
-	sed -i "s/^#$locale/$locale/" "$newroot/etc/locale.gen"
-	chroot "$newroot" locale-gen
+	echo "LANG=$locale" > "$sysroot/etc/locale.conf"
+	sed -i "s/^#$locale/$locale/" "$sysroot/etc/locale.gen"
+	chroot "$sysroot" locale-gen
 
-	echo "Server = $mirror/\$repo/os/\$arch" > "$newroot/etc/pacman.d/mirrorlist"
-	chroot "$newroot" pacman-key --init
-	chroot "$newroot" pacman-key --populate
-	chroot "$newroot" pacman -R --noconfirm arch-install-scripts || true
-	chroot "$newroot" pacman -Syu --noconfirm inetutils sudo vim git
+	echo "Server = $mirror/\$repo/os/\$arch" > "$sysroot/etc/pacman.d/mirrorlist"
+	chroot "$sysroot" pacman-key --init
+	chroot "$sysroot" pacman-key --populate
+	chroot "$sysroot" pacman -R --noconfirm arch-install-scripts || true
+	chroot "$sysroot" pacman -Syu --noconfirm inetutils vim
 
-	policy="%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
-	sed -i "s/^# $policy/$policy/" "$newroot/etc/sudoers"
+	echo "root:test0000" | chroot "$sysroot" chpasswd
 
-	chroot "$newroot" useradd -m -G wheel "$username" || true
-	echo "root:test0000" | chroot "$newroot" chpasswd
-	echo "$username:test0000" | chroot "$newroot" chpasswd
-
-	if [ "$username" = "olv" ]; then
-		rm -f "$newroot/home/$username/.bash"*
-		chroot "$newroot" su - "$username" -c "git clone https://github.com/olvaffe/olv-etc.git" || true
-		chroot "$newroot" su - "$username" -c "./olv-etc/create-links"
+	if true; then
+		chroot "$sysroot" pacman -S --noconfirm base-devel git wayland-utils mesa mesa-utils vulkan-tools
+		chroot "$sysroot" git clone --recurse-submodules "https://github.com/olvaffe/olv-etc.git" "/root/olv-etc" || true
+		HOME="/root" chroot "$sysroot" "/root/olv-etc/create-links"
 	fi
 
-	rm -f "$newroot/pkglist.x86_64.txt"
-	rm -f "$newroot/version"
-	rm -f "$newroot/$hostname-bootstrap"
+	rm -f "$sysroot/pkglist.x86_64.txt"
+	rm -f "$sysroot/version"
+	rm -f "$sysroot/$hostname-phase3"
 
 	echo
-	echo "bootstrapped $newroot!"
+	echo "bootstrapped $sysroot!"
 }
 
 arch_chroot_phase3_hostname() {
 	echo "setting hostname..."
-	chroot "$newroot" hostname "$hostname"
+	chroot "$sysroot" hostname "$hostname"
 }
 
 arch_chroot_phase3_chroot() {
-	echo "entering $newroot..."
+	echo "entering $sysroot..."
 	echo
 
-	chroot "$newroot" su -w WAYLAND_DISPLAY,DISPLAY - "$username"
+	extra_env="TERM=$TERM"
+	if [ -n "$WAYLAND_DISPLAY" ]; then
+		extra_env="$extra_env WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
+	fi
+	if [ -n "$DISPLAY" ]; then
+		extra_env="$extra_env DISPLAY=$DISPLAY"
+	fi
+
+	LOGNAME="root"
+	USER="root"
+	HOME="/root"
+	SHELL="/bin/bash"
+	chroot "$sysroot" env -C "$HOME" -i \
+		LOGNAME="$LOGNAME" \
+		USER="$USER" \
+		HOME="$HOME" \
+		SHELL="$SHELL" \
+		$extra_env \
+		"$SHELL" -l
 }
 
 arch_chroot_phase3() {
-	# in all namespaces
+	# phase3 runs as root inside namespaces (and as $sysroot_uid outside of namespaces)
 	arch_chroot_phase3_mount_proc
 	arch_chroot_phase3_fix_network
 	arch_chroot_phase3_bootstrap
