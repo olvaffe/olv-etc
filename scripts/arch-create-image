@@ -14,7 +14,7 @@ image_loopdev="/dev/loop0"
 arch_mirror="https://mirror.fcix.net/archlinux"
 arch_tarball="archlinux-bootstrap-x86_64.tar.gz"
 arch_base_packages="linux linux-firmware dosfstools zram-generator iwd openssh sudo vim"
-arch_dev_packages="base-devel git"
+arch_dev_packages="base-devel git man-db"
 arch_gui_packages="sway polkit i3status swayidle noto-fonts alacritty mesa mesa-utils vulkan-tools"
 arch_aur_packages="cgpt-bin"
 
