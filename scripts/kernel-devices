@@ -1,0 +1,95 @@
+#!/bin/sh
+
+case "$#" in
+	0)
+		action="do_dump"
+		;;
+	2)
+		action="do_parse"
+		;;
+	*)
+		echo "Usage: $0 [<dump-file> <kernel-tree>]"
+		exit 1
+esac
+
+do_dump() {
+	devices=$(find /sys/devices -name uevent | xargs dirname | sort)
+
+	for dev in $devices; do
+		modalias=""
+		if [ -f "$dev/modalias" ]; then
+			modalias=$(cat "$dev/modalias")
+		fi
+
+		driver=""
+		if [ -h "$dev/driver" ]; then
+			driver=$(basename $(realpath "$dev/driver"))
+		fi
+
+		modules=""
+		if [ -n "$modalias" ]; then
+			modules=$(modprobe -R -q "$modalias" | sort | uniq | tr '\n' ' ')
+			if [ -n "$modules" ]; then
+				modules="${modules% }"
+			fi
+		fi
+
+		echo "$dev"
+		if [ -n "$modalias" ]; then
+			echo "  modalias: $modalias"
+		fi
+		if [ -n "$driver" ]; then
+			echo "  driver: $driver"
+		fi
+		if [ -n "$modules" ]; then
+			echo "  modules: $modules"
+		fi
+	done
+}
+
+do_parse() {
+	dump_file="$1"
+	kernel_tree="$2"
+
+	kernel_makefiles=$(find "$kernel_tree" -name Makefile)
+
+	while read line; do
+		modules=""
+		case "$line" in
+			/sys/devices/*)
+				echo "$line"
+				;;
+			modules:*)
+				echo "  $line"
+				modules="${line#modules: }"
+				;;
+			*)
+				echo "  $line"
+				;;
+		esac
+
+		configs=""
+		if [ -n "$modules" ]; then
+			for mod in $modules; do
+				# obj-$(CONFIG_FOO) += foo.o
+				regex=$(echo "$mod" | tr _ .)
+				regex="^obj-\$(CONFIG_.*= $regex\.o$"
+
+				conf=$(grep -h "$regex" $kernel_makefiles | cut -d'(' -f2 | cut -d')' -f1)
+				if [ -n "$conf" ]; then
+					configs="$configs $conf"
+				fi
+			done
+
+			if [ -n "$configs" ]; then
+				configs="${configs# }"
+			fi
+		fi
+
+		if [ -n "$configs" ]; then
+			echo "  configs: $configs"
+		fi
+	done < "$dump_file"
+}
+
+"$action" "$@"
