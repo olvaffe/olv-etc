@@ -243,11 +243,12 @@ arch_chroot_phase3_optional() {
 
 	chroot "$sysroot" pacman -S --noconfirm \
 		base-devel ccache git ctags meson \
-		python-mako glslang wayland-protocols \
-		python-jinja \
 		man-db man-pages \
-		mesa mesa-utils vulkan-tools \
-		wayland-utils \
+		strace \
+		python-mako python-jinja \
+		mesa mesa-utils \
+		glslang vulkan-tools vulkan-headers \
+		wayland-utils wayland-protocols \
 		xorg-xwayland xorg-xev
 
 	home="/root"
