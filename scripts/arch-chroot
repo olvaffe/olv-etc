@@ -19,15 +19,19 @@ hostname="arch-chroot"
 arch_chroot_phase1_try_nsenter() {
 	bash_pids=$(pgrep -x "bash")
 	for pid in $bash_pids; do
+		# root must be $sysroot
 		[ $(realpath "/proc/$pid/root") = "$sysroot" ] || continue
 
+		# pid1 must be bash
 		pid1="/proc/$pid/root/proc/1"
-		[ $(cat "$pid1/comm") = "bash" ] || continue
+		[ -d "$pid1"  -a $(cat "$pid1/comm") = "bash" ] || continue
 
-		echo "phase1: nsentering pid $pid..."
-
+		# pid1 must have ARCH_CHROOT_PHASE=chroot
 		pid1_env=$(cat "$pid1/environ" | tr '\0' '\n')
 		eval "$pid1_env"
+		[ "$ARCH_CHROOT_PHASE" = "chroot" ] || continue
+
+		echo "phase1: nsentering pid $pid..."
 		exec nsenter -a -t "$pid" chroot "$sysroot" \
 			env -C "$HOME" -i $pid1_env "$SHELL" -l
 	done
@@ -35,30 +39,31 @@ arch_chroot_phase1_try_nsenter() {
 
 arch_chroot_phase12_common() {
 	if [ -n "$SUDO_UID" -a -n "$SUDO_GID" ]; then
-		sysroot_uid="$SUDO_UID"
-		sysroot_gid="$SUDO_GID"
+		real_uid="$SUDO_UID"
+		real_gid="$SUDO_GID"
 	elif id -u "chronos" > /dev/null 2>/dev/null; then
-		sysroot_uid=$(id -u "chronos")
-		sysroot_gid=$(id -g "chronos")
+		real_uid=$(id -u "chronos")
+		real_gid=$(id -g "chronos")
 	elif [ -d "$sysroot" ]; then
-		sysroot_uid=$(stat -c "%u" "$sysroot")
-		sysroot_gid=$(stat -c "%g" "$sysroot")
+		real_uid=$(stat -c "%u" "$sysroot")
+		real_gid=$(stat -c "%g" "$sysroot")
 	else
-		sysroot_uid="0"
-		sysroot_gid="0"
+		real_uid="0"
+		real_gid="0"
 	fi
 }
 
 arch_chroot_phase1_bootstrap() {
 	if [ -f "$sysroot/etc/arch-release" ]; then
 		if [ ! -f "$sysroot/$hostname-phase1-bootstrap" -a \
-		     $(stat -c "%u" "$sysroot") = "$sysroot_uid" -a \
-		     $(stat -c "%g" "$sysroot") = "$sysroot_gid" ]; then
+		     $(stat -c "%u" "$sysroot") = "$real_uid" -a \
+		     $(stat -c "%g" "$sysroot") = "$real_gid" ]; then
 			return
 		fi
 	fi
 
-	read -p "Boostrap $sysroot for user $(id -un $sysroot_uid)? " unused
+	read -p "Boostrap $sysroot for user $(id -un $real_uid)? [y/N] " yn
+	[ "$yn" = "y" -o "$yn" = "yes" ] || exit
 
 	mkdir -p "$sysroot"
 	touch "$sysroot/$hostname-phase1-bootstrap"
@@ -67,7 +72,7 @@ arch_chroot_phase1_bootstrap() {
 	curl "$mirror/iso/latest/archlinux-bootstrap-x86_64.tar.gz" | \
 		tar -zx --no-same-owner --warning=no-unknown-keyword -C "$sysroot" --strip 1
 
-	chown -R "$sysroot_uid:$sysroot_gid" "$sysroot"
+	chown -R "$real_uid:$real_gid" "$sysroot"
 
 	touch "$sysroot/$hostname-phase3-bootstrap"
 	rm -f "$sysroot/$hostname-phase1-bootstrap"
@@ -75,9 +80,9 @@ arch_chroot_phase1_bootstrap() {
 
 arch_chroot_phase1_transition() {
 	echo "phase1: entering intermediate mount namespace..."
+
 	# restart in phase2
-	exec unshare --mount \
-		env ARCH_CHROOT_PHASE="phase2" "$0" "$@"
+	exec unshare --mount env ARCH_CHROOT_PHASE="phase2" "$0" "$@"
 }
 
 arch_chroot_phase1() {
@@ -110,22 +115,24 @@ arch_chroot_phase2_bind_mount_sys() {
 arch_chroot_phase2_bind_mount_app() {
 	echo "phase2: bind-mounting sockets..."
 
+	wayland_display=""
 	wl_sock=$(find /run -name "wayland-*" -type s -print -quit 2>/dev/null || true)
 	if [ -n "$wl_sock" ]; then
 		wl_bind="/run/$(basename "$wl_sock")"
 		touch "$sysroot/$wl_bind"
 		mount --bind "$wl_sock" "$sysroot/$wl_bind"
 
-		export WAYLAND_DISPLAY="$wl_bind"
+		wayland_display="$wl_bind"
 	fi
 
+	display=""
 	x11_sock=$(find /tmp/.X11-unix -name "X*" -type s -print -quit 2>/dev/null || true)
 	if [ -n "$x11_sock" ]; then
 		mkdir -p "$sysroot/$(dirname "$x11_sock")"
 		touch "$sysroot/$x11_sock"
 		mount --bind "$x11_sock" "$sysroot/$x11_sock"
 
-		export DISPLAY=$(echo $(basename "$x11_sock") | tr X :)
+		display=$(echo $(basename "$x11_sock") | tr X :)
 	fi
 
 	dev_log_sock="/run/systemd/journal/dev-log"
@@ -156,10 +163,19 @@ arch_chroot_phase2_transition() {
 	# no --net
 	misc_ns_args="--mount --uts --time --ipc --cgroup"
 
+	chroot_env=""
+	if [ -n "$wayland_display" ]; then
+		chroot_env="$chroot_env WAYLAND_DISPLAY=$wayland_display"
+	fi
+	if [ -n "$display" ]; then
+		chroot_env="$chroot_env DISPLAY=$display"
+	fi
+
 	# restart in phase3
-	exec sudo -u "#$sysroot_uid" -g "#$sysroot_gid" \
+	exec sudo -u "#$real_uid" -g "#$real_gid" \
 		unshare $user_ns_args $pid_ns_args $misc_ns_args \
-		env ARCH_CHROOT_PHASE="phase3" "$0" "$@"
+		env ARCH_CHROOT_PHASE="phase3" ARCH_CHROOT_ENV="$chroot_env" \
+		"$0" "$@"
 }
 
 arch_chroot_phase2() {
@@ -234,17 +250,18 @@ arch_chroot_phase3_optional() {
 		wayland-utils \
 		xorg-xwayland xorg-xev
 
-	chroot "$sysroot" git clone --recurse-submodules "https://github.com/olvaffe/olv-etc.git" "/root/olv-etc" || true
-	HOME="/root" chroot "$sysroot" "/root/olv-etc/create-links"
+	home="/root"
+	chroot "$sysroot" git clone --recurse-submodules "https://github.com/olvaffe/olv-etc.git" "$home/olv-etc" || true
+	HOME="$home" chroot "$sysroot" "$home/olv-etc/create-links"
 
 	projects="
 		https://chromium.googlesource.com/chromiumos/platform2
 		https://gitlab.freedesktop.org/mesa/mesa.git
 	"
-	mkdir -p "$sysroot/root/projects"
+	mkdir -p "$sysroot$home/projects"
 	for proj in $projects; do
 		dst=$(basename "$proj" .git)
-		chroot "$sysroot" git clone "$proj" "/root/projects/$dst" || true
+		chroot "$sysroot" git clone "$proj" "$home/projects/$dst" || true
 	done
 
 	rm -f "$sysroot/$hostname-phase3-optional"
@@ -254,28 +271,15 @@ arch_chroot_phase3_chroot() {
 	echo "phase3: entering $sysroot..."
 	echo
 
-	inherit_env="TERM=$TERM"
-	if [ -n "$WAYLAND_DISPLAY" ]; then
-		inherit_env="$inherit_env WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
-	fi
-	if [ -n "$DISPLAY" ]; then
-		inherit_env="$inherit_env DISPLAY=$DISPLAY"
-	fi
+	home="/root"
+	shell="/bin/bash"
+	chroot_env="TERM=$TERM HOME=$home SHELL=$shell LOGNAME=root USER=root $ARCH_CHROOT_ENV"
 
-	HOME="/root"
-	SHELL="/bin/bash"
-	exec chroot "$sysroot" env -C "$HOME" -i \
-		"ARCH_CHROOT_PHASE=chroot" \
-		LOGNAME="root" \
-		USER="root" \
-		HOME="$HOME" \
-		SHELL="$SHELL" \
-		$inherit_env \
-		"$SHELL" -l
+	exec chroot "$sysroot" env -C "$home" -i ARCH_CHROOT_PHASE="chroot" $chroot_env "$SHELL" -l
 }
 
 arch_chroot_phase3() {
-	# phase3 runs as root inside namespaces (and as $sysroot_uid outside of namespaces)
+	# phase3 runs as root inside namespaces (and as $real_uid outside of namespaces)
 	arch_chroot_phase3_mount_proc
 	arch_chroot_phase3_fix_network
 	arch_chroot_phase3_bootstrap
