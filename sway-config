@@ -136,8 +136,8 @@ bindsym XF86AudioMute exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
 bindsym XF86AudioMicMute exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
 
 # Sreen brightness controls
-bindsym XF86MonBrightnessUp exec light -A 10
-bindsym XF86MonBrightnessDown exec light -U 10
+bindsym XF86MonBrightnessUp exec brightnessctl s 10%+
+bindsym XF86MonBrightnessDown exec brightnessctl s 10%-
 
 include /etc/sway/config.d/*
 exec sway-session-autostart
