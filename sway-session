@@ -5,14 +5,16 @@ exec </dev/null >"$HOME/.local/state/sway.log" 2>&1
 # init GUI envs so that they are inherited by sway and apps directly started
 # by sway (terminal, browser, and autostart)
 init_gui_envs() {
-	export GDK_BACKEND="wayland"
-	export QT_QPA_PLATFORM="wayland"
-	export SDL_VIDEODRIVER="wayland"
+	export XDG_CURRENT_DESKTOP="sway"
 
+	export GDK_BACKEND="wayland,x11"
+	export QT_QPA_PLATFORM="wayland;xcb"
+	export SDL_VIDEODRIVER="wayland,x11"
+
+	# https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland
 	export GTK_IM_MODULE="fcitx"
 	export QT_IM_MODULE="fcitx"
-
-	export NO_AT_BRIDGE="1"
+	export XMODIFIERS="@im=fcitx"
 }
 
 # init SSH_AUTO_SOCK explicitly for sway, but start ssh-agent later in
