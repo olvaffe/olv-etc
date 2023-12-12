@@ -29,17 +29,29 @@ image_loop_format() {
 
 image_loop_mount() {
 	echo "mounting $image_loopdev..."
-	image_chroot=$(mktemp -d "$image-chroot-XXXXXX")
-	mount "${image_loopdev}p4" "$image_chroot"
+
+	image_esp=$(mktemp -d "$image-esp-XXXXXX")
+	mount "${image_loopdev}p1" "$image_esp"
+
+	image_root=$(mktemp -d "$image-root-XXXXXX")
+	mount "${image_loopdev}p4" "$image_root"
 }
 
 image_loop_umount() {
 	echo "unmounting $image_loopdev..."
-	if [ -d "$image_chroot" ]; then
-		if mountpoint -q "$image_chroot"; then
-			umount "$image_chroot"
+
+	if [ -d "$image_esp" ]; then
+		if mountpoint -q "$image_esp"; then
+			umount "$image_esp"
 		fi
-		rmdir "$image_chroot"
+		rmdir "$image_esp"
+	fi
+
+	if [ -d "$image_root" ]; then
+		if mountpoint -q "$image_root"; then
+			umount "$image_root"
+		fi
+		rmdir "$image_root"
 	fi
 }
 
@@ -59,6 +71,7 @@ image_loop_detach() {
 image_usage() {
 	echo "Usage:"
 	echo "  $0 create <image-filename> <sysroot-src>"
+	echo "  $0 add-bootloader <image-filename>"
 	echo "  $0 chroot <image-filename>"
 	exit 1
 }
@@ -78,7 +91,31 @@ image_create() {
 	image_loop_mount
 
 	echo "copying files..."
-	cp -ax --sparse=always "$sysroot_src/"* "$image_chroot"
+	cp -ax --sparse=always "$sysroot_src/"* "$image_root"
+
+	image_loop_umount
+	image_loop_fsck
+	image_loop_detach
+}
+
+image_make_bootable() {
+	systemd-nspawn -i "$image" pacman -S --needed --noconfirm linux
+	systemd-nspawn -i "$image" sh -c 'yes | pacman -Scc'
+
+	systemd-nspawn -i "$image" bootctl install
+
+	image_loop_attach
+	image_loop_mount
+
+	echo "adding bootloader entries..."
+	mkdir -p "$image_esp/loader/entries"
+	echo "default arch-fallback.conf" >> "$image_esp/loader/loader.conf"
+	cat > "$image_esp/loader/entries/arch-fallback.conf" <<EOF
+title	Arch Linux Fallback
+linux	/vmlinuz-linux
+initrd	/initramfs-linux-fallback.img
+options	root=PARTLABEL=arch-root
+EOF
 
 	image_loop_umount
 	image_loop_fsck
@@ -89,7 +126,7 @@ image_chroot() {
 	image_loop_attach
 	image_loop_mount
 
-	chroot "$image_chroot"
+	chroot "$image_root"
 
 	image_loop_umount
 	image_loop_fsck
@@ -116,6 +153,9 @@ trap "image_trap" EXIT
 case "$image_cmd" in
 	create)
 		image_create "$@"
+		;;
+	make-bootable)
+		image_make_bootable "$@"
 		;;
 	chroot)
 		image_chroot "$@"

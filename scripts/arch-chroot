@@ -263,7 +263,7 @@ arch_chroot_phase3_bootstrap() {
 	chroot "$sysroot" pacman-key --init
 	chroot "$sysroot" pacman-key --populate
 	[ -n "$remove_packages" ] && chroot "$sysroot" pacman -R --noconfirm $remove_packages
-	chroot "$sysroot" pacman -Syu --noconfirm inetutils vim
+	chroot "$sysroot" pacman -Syu --needed --noconfirm inetutils vim
 
 	echo "root:test0000" | chroot "$sysroot" chpasswd
 
@@ -291,12 +291,27 @@ arch_chroot_phase3_bootable() {
 
 	echo "phase3: performing bootable setup..."
 
-	chroot "$sysroot" pacman -S --noconfirm \
+	chroot "$sysroot" pacman -S --needed --noconfirm \
 		linux-firmware linux-firmware-qcom \
 		zram-generator dosfstools sudo \
 		iwd openssh \
 		git \
 		sway polkit noto-fonts i3status alacritty
+
+	if [ "$machine" = "x86_64" ]; then
+		chroot "$sysroot" pacman -S --needed --noconfirm base-devel
+
+		mkdir -p "$sysroot/tmp/aur"
+		for pkg in cgpt-bin; do
+			chroot "$sysroot" git clone "https://aur.archlinux.org/$pkg.git" "/tmp/aur/$pkg"
+			chroot "$sysroot" chown -R nobody:nobody "/tmp/aur/$pkg"
+			chroot "$sysroot" env -C "/tmp/aur/$pkg" sudo -u nobody makepkg
+			tarball=$(basename "$sysroot/tmp/aur/$pkg/"*.tar.zst)
+			chroot "$sysroot" pacman -U --needed --noconfirm "/tmp/aur/$pkg/$tarball"
+		done
+		rm -rf "$sysroot/tmp/aur"
+	fi
+
 	yes | chroot "$sysroot" pacman -Scc
 
 	echo "arch" > "$sysroot/etc/hostname"
@@ -316,7 +331,7 @@ arch_chroot_phase3_bootable() {
 	policy="%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
 	sed -i "s/^# $policy/$policy/" "$sysroot/etc/sudoers"
 
-	chroot "$sysroot" useradd -m -G wheel olv
+	chroot "$sysroot" useradd -m -G wheel olv || true
 	echo "olv:test0000" | chroot "$sysroot" chpasswd
 
 	rm -f "$sysroot/arch-chroot-phase3-bootable"
@@ -329,7 +344,7 @@ arch_chroot_phase3_dev() {
 
 	echo "phase3: performing dev setup..."
 
-	chroot "$sysroot" pacman -S --noconfirm \
+	chroot "$sysroot" pacman -S --needed --noconfirm \
 		base-devel ccache git ctags meson \
 		man-db man-pages \
 		strace \
