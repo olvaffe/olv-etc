@@ -55,7 +55,7 @@ arch_chroot_phase12_common() {
 
 arch_chroot_phase1_bootstrap() {
 	if [ -f "$sysroot/etc/arch-release" ]; then
-		if [ ! -f "$sysroot/$hostname-phase1-bootstrap" -a \
+		if [ ! -f "$sysroot/arch-chroot-phase1-bootstrap" -a \
 		     $(stat -c "%u" "$sysroot") = "$real_uid" -a \
 		     $(stat -c "%g" "$sysroot") = "$real_gid" ]; then
 			return
@@ -66,7 +66,7 @@ arch_chroot_phase1_bootstrap() {
 	[ "$yn" = "y" -o "$yn" = "yes" ] || exit
 
 	mkdir -p "$sysroot"
-	touch "$sysroot/$hostname-phase1-bootstrap"
+	touch "$sysroot/arch-chroot-phase1-bootstrap"
 
 	echo "phase1: downloading rootfs to $sysroot..."
 	curl "$mirror/iso/latest/archlinux-bootstrap-x86_64.tar.gz" | \
@@ -74,8 +74,8 @@ arch_chroot_phase1_bootstrap() {
 
 	chown -R "$real_uid:$real_gid" "$sysroot"
 
-	touch "$sysroot/$hostname-phase3-bootstrap"
-	rm -f "$sysroot/$hostname-phase1-bootstrap"
+	touch "$sysroot/arch-chroot-phase3-bootstrap"
+	rm -f "$sysroot/arch-chroot-phase1-bootstrap"
 }
 
 arch_chroot_phase1_transition() {
@@ -194,11 +194,12 @@ arch_chroot_phase3_mount_proc() {
 
 arch_chroot_phase3_fix_network() {
 	echo "phase3: fixing network..."
+	rm -f "$sysroot/etc/resolv.conf"
 	cp /etc/resolv.conf "$sysroot/etc/resolv.conf"
 }
 
 arch_chroot_phase3_bootstrap() {
-	if [ ! -f "$sysroot/$hostname-phase3-bootstrap" ]; then
+	if [ ! -f "$sysroot/arch-chroot-phase3-bootstrap" ]; then
 		return
 	fi
 
@@ -222,11 +223,12 @@ arch_chroot_phase3_bootstrap() {
 
 	rm -f "$sysroot/pkglist.x86_64.txt"
 	rm -f "$sysroot/version"
-	rm -f "$sysroot/$hostname-phase3-bootstrap"
+	rm -f "$sysroot/arch-chroot-phase3-bootstrap"
 
 	echo
 	echo "bootstrapped $sysroot!"
-	echo "for optional setup, touch /$hostname-phase3-optional and re-enter the chroot"
+	#echo "for dev setup, touch /arch-chroot-phase3-dev and re-enter the chroot"
+	#echo "for bootable setup, touch /arch-chroot-phase3-bootable and re-enter the chroot"
 }
 
 arch_chroot_phase3_hostname() {
@@ -234,12 +236,12 @@ arch_chroot_phase3_hostname() {
 	chroot "$sysroot" hostname "$hostname"
 }
 
-arch_chroot_phase3_optional() {
-	if [ ! -f "$sysroot/$hostname-phase3-optional" ]; then
+arch_chroot_phase3_dev() {
+	if [ ! -f "$sysroot/arch-chroot-phase3-dev" ]; then
 		return
 	fi
 
-	echo "phase3: performing optional setup..."
+	echo "phase3: performing dev setup..."
 
 	chroot "$sysroot" pacman -S --noconfirm \
 		base-devel ccache git ctags meson \
@@ -265,7 +267,43 @@ arch_chroot_phase3_optional() {
 		chroot "$sysroot" git clone "$proj" "$home/projects/$dst" || true
 	done
 
-	rm -f "$sysroot/$hostname-phase3-optional"
+	rm -f "$sysroot/arch-chroot-phase3-dev"
+}
+
+arch_chroot_phase3_bootable() {
+	if [ ! -f "$sysroot/arch-chroot-phase3-bootable" ]; then
+		return
+	fi
+
+	echo "phase3: performing bootable setup..."
+
+	chroot "$sysroot" pacman -S --noconfirm \
+		linux-firmware linux-firmware-qcom \
+		zram-generator dosfstools sudo \
+		iwd openssh \
+		git \
+		sway polkit noto-fonts i3status alacritty
+	yes | chroot "$sysroot" pacman -Scc
+
+	echo "PARTLABEL=arch-esp	/boot	vfat	defaults	0	2" > "$sysroot/etc/fstab"
+	echo "PARTLABEL=arch-root	/	ext4	defaults	0	1" >> "$sysroot/etc/fstab"
+
+	echo -e "[zram0]\nzram-size = ram" > "$sysroot/etc/systemd/zram-generator.conf"
+
+	rm -f "$sysroot/etc/resolv.conf"
+	for ty in ether wlan; do
+		echo -e "[Match]\nType=$ty\n\n[Network]\nDHCP=yes" > "$sysroot/etc/systemd/network/$ty.network"
+	done
+
+	chroot "$sysroot" systemctl enable systemd-resolved systemd-networkd sshd
+
+	policy="%wheel ALL=(ALL:ALL) NOPASSWD: ALL"
+	sed -i "s/^# $policy/$policy/" "$sysroot/etc/sudoers"
+
+	chroot "$sysroot" useradd -m -G wheel olv
+	echo "olv:test0000" | chroot "$sysroot" chpasswd
+
+	rm -f "$sysroot/arch-chroot-phase3-bootable"
 }
 
 arch_chroot_phase3_chroot() {
@@ -285,7 +323,10 @@ arch_chroot_phase3() {
 	arch_chroot_phase3_fix_network
 	arch_chroot_phase3_bootstrap
 	arch_chroot_phase3_hostname
-	arch_chroot_phase3_optional
+
+	# these are optional
+	arch_chroot_phase3_dev
+	arch_chroot_phase3_bootable
 
 	arch_chroot_phase3_chroot
 }
