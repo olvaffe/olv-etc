@@ -326,6 +326,8 @@ arch_chroot_phase3_bootable() {
 		sway polkit noto-fonts i3status alacritty
 	yes | chroot "$sysroot" pacman -Scc
 
+	echo "arch" > "$sysroot/etc/hostname"
+
 	echo "PARTLABEL=arch-esp	/boot	vfat	defaults	0	2" > "$sysroot/etc/fstab"
 	echo "PARTLABEL=arch-root	/	ext4	defaults	0	1" >> "$sysroot/etc/fstab"
 

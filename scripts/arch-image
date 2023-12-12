@@ -1,0 +1,128 @@
+#!/bin/sh
+
+image_size="3G"
+image_parts='
+label: gpt
+name="arch-esp",     type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, size=260M
+name="cros-kernel",  type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M, attrs="GUID:49,51,53,56"
+name="cros-kernel2", type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M
+name="arch-root",    type=0FC63DAF-8483-4772-8E79-3D69D8477DE4
+'
+image_loopdev="/dev/loop0"
+
+set -e
+
+image_loop_attach() {
+	echo "attaching $image to $image_loopdev..."
+	losetup -P "$image_loopdev" "$image"
+	while [ ! -b "${image_loopdev}p1" ]; do
+		sleep 1
+	done
+	sleep 2
+}
+
+image_loop_format() {
+	echo "formatting $image_loopdev..."
+	mkfs.vfat -F 32 "${image_loopdev}p1"
+	mkfs.ext4 "${image_loopdev}p4"
+}
+
+image_loop_mount() {
+	echo "mounting $image_loopdev..."
+	image_chroot=$(mktemp -d "$image-chroot-XXXXXX")
+	mount "${image_loopdev}p4" "$image_chroot"
+}
+
+image_loop_umount() {
+	echo "unmounting $image_loopdev..."
+	if [ -d "$image_chroot" ]; then
+		if mountpoint -q "$image_chroot"; then
+			umount "$image_chroot"
+		fi
+		rmdir "$image_chroot"
+	fi
+}
+
+image_loop_fsck() {
+	echo "checking $image_loopdev..."
+	fsck.vfat -p "${image_loopdev}p1"
+	fsck.ext4 -p -f "${image_loopdev}p4"
+}
+
+image_loop_detach() {
+	echo "detaching $image_loopdev..."
+	if losetup -n -O NAME,BACK-FILE | grep -q "^$image_loopdev .*$image$"; then
+		losetup -d "$image_loopdev"
+	fi
+}
+
+image_usage() {
+	echo "Usage:"
+	echo "  $0 create <image-filename> <sysroot-src>"
+	echo "  $0 chroot <image-filename>"
+	exit 1
+}
+
+image_create() {
+	if [ "$#" -ne 1 ]; then
+		image_usage
+	fi
+	sysroot_src="$1"
+
+	echo "creating $image..."
+	fallocate -l "$image_size" "$image"
+	echo "$image_parts" | sfdisk "$image"
+
+	image_loop_attach
+	image_loop_format
+	image_loop_mount
+
+	echo "copying files..."
+	cp -ax --sparse=always "$sysroot_src/"* "$image_chroot"
+
+	image_loop_umount
+	image_loop_fsck
+	image_loop_detach
+}
+
+image_chroot() {
+	image_loop_attach
+	image_loop_mount
+
+	chroot "$image_chroot"
+
+	image_loop_umount
+	image_loop_fsck
+	image_loop_detach
+}
+
+image_trap() {
+	echo "cleaning up..."
+	image_loop_umount
+	image_loop_detach
+	[ "$image_cmd" = "create" ] && rm -f "$image"
+}
+
+if [ "$#" -lt 2 ]; then
+	image_usage
+fi
+
+image_cmd="$1"
+image="$2"
+shift 2
+
+trap "image_trap" EXIT
+
+case "$image_cmd" in
+	create)
+		image_create "$@"
+		;;
+	chroot)
+		image_chroot "$@"
+		;;
+	*)
+		image_usage
+		;;
+esac
+
+trap - EXIT
