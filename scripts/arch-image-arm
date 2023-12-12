@@ -93,12 +93,12 @@ image_setup_packages() {
 	chroot "$image_chroot" pacman-key --init
 	chroot "$image_chroot" pacman-key --populate
 	chroot "$image_chroot" pacman -R --noconfirm dhcpcd linux-aarch64 nano net-tools netctl vi which || true
-	chroot "$image_chroot" pacman -Syu --noconfirm linux-firmware-qcom zram-generator iwd openssh sudo vim
+	chroot "$image_chroot" pacman -Syu --noconfirm linux-firmware-qcom dosfstools zram-generator iwd openssh sudo vim
 	yes | chroot "$image_chroot" pacman -Scc
 }
 
 image_setup_etc() {
-	echo "PARTLABEL=arch-esp	/boot	vfat	defaults	0	2" >> "$image_chroot/etc/fstab"
+	echo "PARTLABEL=arch-esp	/boot	vfat	defaults	0	2" > "$image_chroot/etc/fstab"
 	echo "PARTLABEL=arch-root	/	ext4	defaults	0	1" >> "$image_chroot/etc/fstab"
 
 	echo "arch" > "$image_chroot/etc/hostname"
@@ -135,6 +135,21 @@ image_setup() {
 	image_loop_detach
 }
 
+image_olv() {
+	image_loop_attach
+	image_loop_mount
+
+	chroot "$image_chroot" pacman -Syu --noconfirm sway polkit noto-fonts i3status alacritty git
+	yes | chroot "$image_chroot" pacman -Scc
+
+	chroot "$image_chroot" useradd -m -G wheel olv
+	echo "olv:test0000" | chroot "$image_chroot" chpasswd
+
+	image_loop_umount
+	image_loop_fsck
+	image_loop_detach
+}
+
 image_trap() {
 	echo "cleaning up..."
 	image_loop_umount
@@ -143,7 +158,7 @@ image_trap() {
 }
 
 image_usage() {
-	echo "Usage: $0 <create|setup> <image-filename> <x86|arm>"
+	echo "Usage: $0 <create|setup|olv> <image-filename> <x86|arm>"
 	exit 1
 }
 
@@ -163,6 +178,9 @@ case "$image_cmd" in
 		;;
 	setup)
 		image_setup
+		;;
+	olv)
+		image_olv
 		;;
 	*)
 		image_usage
