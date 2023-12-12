@@ -7,14 +7,37 @@ if [ $(id -u) -ne 0 ]; then
 	exit 1
 fi
 
-if [ "$#" -ne 1 ]; then
-	echo "Usage: $0 <SYSROOT>"
+if [ "$#" -lt 1 ]; then
+	echo "Usage: $0 <SYSROOT> [x86_64|aarch64]"
 	exit 1
 fi
 
 sysroot="$(realpath $1)"
-mirror="https://mirror.fcix.net/archlinux"
+machine="$2"
+if [ -z "$machine" ]; then
+	machine=$(uname -m)
+fi
+
+tarball_x86="https://mirror.fcix.net/archlinux/iso/latest/archlinux-bootstrap-x86_64.tar.gz"
+mirror_x86="https://mirror.fcix.net/archlinux/\$repo/os/\$arch"
+tarball_arm="http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz"
+mirror_arm="http://mirror.archlinuxarm.org/\$arch/\$repo"
 hostname="arch-chroot"
+
+case "$machine" in
+	x86_64)
+		tarball="$tarball_x86"
+		mirror="$mirror_x86"
+		;;
+	aarch64)
+		tarball="$tarball_arm"
+		mirror="$mirror_arm"
+		;;
+	*)
+		echo "Unsupported machine $machine."
+		exit 1
+		;;
+esac
 
 arch_chroot_phase1_try_nsenter() {
 	bash_pids=$(pgrep -x "bash")
@@ -69,8 +92,12 @@ arch_chroot_phase1_bootstrap() {
 	touch "$sysroot/arch-chroot-phase1-bootstrap"
 
 	echo "phase1: downloading rootfs to $sysroot..."
-	curl "$mirror/iso/latest/archlinux-bootstrap-x86_64.tar.gz" | \
-		tar -zx --no-same-owner --warning=no-unknown-keyword -C "$sysroot" --strip 1
+
+	tar_args="-zx --no-same-owner --warning=no-unknown-keyword"
+	if [ "$machine" = "x86_64" ]; then
+		tar_args="$tar_args --strip-components=1"
+	fi
+	curl -L "$tarball" | tar -C "$sysroot" $tar_args
 
 	chown -R "$real_uid:$real_gid" "$sysroot"
 
@@ -213,10 +240,24 @@ arch_chroot_phase3_bootstrap() {
 	sed -i "s/^#$locale/$locale/" "$sysroot/etc/locale.gen"
 	chroot "$sysroot" locale-gen
 
-	echo "Server = $mirror/\$repo/os/\$arch" > "$sysroot/etc/pacman.d/mirrorlist"
+	# work out packages to remove
+	explicit_packages=$(chroot "$sysroot" pacman -Qeq)
+	dep_packages=""
+	for pkg in $explicit_packages; do
+		case "$pkg" in
+			base|archlinuxarm-keyring) ;;
+			*) dep_packages="$dep_packages $pkg"
+		esac
+	done
+	if [ -n "$dep_packages" ]; then
+		chroot "$sysroot" pacman -D --asdep $dep_packages
+	fi
+	remove_packages=$(chroot "$sysroot" pacman -Qttdq)
+
+	echo "Server = $mirror" > "$sysroot/etc/pacman.d/mirrorlist"
 	chroot "$sysroot" pacman-key --init
 	chroot "$sysroot" pacman-key --populate
-	chroot "$sysroot" pacman -R --noconfirm arch-install-scripts || true
+	chroot "$sysroot" pacman -R --noconfirm $remove_packages || true
 	chroot "$sysroot" pacman -Syu --noconfirm inetutils vim
 
 	echo "root:test0000" | chroot "$sysroot" chpasswd
