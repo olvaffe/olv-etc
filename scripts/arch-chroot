@@ -8,30 +8,30 @@ if [ $(id -u) -ne 0 ]; then
 fi
 
 if [ "$#" -lt 1 ]; then
-	echo "Usage: $0 <SYSROOT> [x86_64|aarch64]"
+	echo "Usage: $0 <SYSROOT> [x86_64|aarch64] [bootable]"
 	exit 1
 fi
 
 sysroot="$(realpath $1)"
 machine="$2"
-if [ -z "$machine" ]; then
-	machine=$(uname -m)
-fi
+bootable="$3"
+[ -z "$machine" ] && machine=$(uname -m)
+[ -n "$bootable" ] && bootable="1"
 
-tarball_x86="https://mirror.fcix.net/archlinux/iso/latest/archlinux-bootstrap-x86_64.tar.gz"
-mirror_x86="https://mirror.fcix.net/archlinux/\$repo/os/\$arch"
-tarball_arm="http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz"
-mirror_arm="http://mirror.archlinuxarm.org/\$arch/\$repo"
+bootstrap_tarball_x86="https://mirror.fcix.net/archlinux/iso/latest/archlinux-bootstrap-x86_64.tar.gz"
+bootstrap_mirror_x86="https://mirror.fcix.net/archlinux/\$repo/os/\$arch"
+bootstrap_tarball_arm="http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz"
+bootstrap_mirror_arm="http://mirror.archlinuxarm.org/\$arch/\$repo"
 hostname="arch-chroot"
 
 case "$machine" in
 	x86_64)
-		tarball="$tarball_x86"
-		mirror="$mirror_x86"
+		bootstrap_tarball="$bootstrap_tarball_x86"
+		bootstrap_mirror="$bootstrap_mirror_x86"
 		;;
 	aarch64)
-		tarball="$tarball_arm"
-		mirror="$mirror_arm"
+		bootstrap_tarball="$bootstrap_tarball_arm"
+		bootstrap_mirror="$bootstrap_mirror_arm"
 		;;
 	*)
 		echo "Unsupported machine $machine."
@@ -77,15 +77,16 @@ arch_chroot_phase12_common() {
 }
 
 arch_chroot_phase1_bootstrap() {
-	if [ -f "$sysroot/etc/arch-release" ]; then
-		if [ ! -f "$sysroot/arch-chroot-phase1-bootstrap" -a \
-		     $(stat -c "%u" "$sysroot") = "$real_uid" -a \
-		     $(stat -c "%g" "$sysroot") = "$real_gid" ]; then
+	if [ -f "$sysroot/etc/arch-release" -a \
+	     ! -f "$sysroot/arch-chroot-phase1-bootstrap" ]; then
 			return
-		fi
 	fi
 
-	read -p "Boostrap $sysroot for user $(id -un $real_uid)? [y/N] " yn
+	if [ -n "$bootable" ]; then
+		read -p "Boostrap $sysroot for $machine? [y/N] " yn
+	else
+		read -p "Boostrap $sysroot for $machine and user $(id -un $real_uid)? [y/N] " yn
+	fi
 	[ "$yn" = "y" -o "$yn" = "yes" ] || exit
 
 	mkdir -p "$sysroot"
@@ -93,13 +94,11 @@ arch_chroot_phase1_bootstrap() {
 
 	echo "phase1: downloading rootfs to $sysroot..."
 
-	tar_args="-zx --no-same-owner --warning=no-unknown-keyword"
-	if [ "$machine" = "x86_64" ]; then
-		tar_args="$tar_args --strip-components=1"
-	fi
-	curl -L "$tarball" | tar -C "$sysroot" $tar_args
+	tar_args="-zx --warning=no-unknown-keyword"
+	[ "$machine" = "x86_64" ] && tar_args="$tar_args --strip-components=1"
+	curl -L "$bootstrap_tarball" | tar -C "$sysroot" $tar_args
 
-	chown -R "$real_uid:$real_gid" "$sysroot"
+	[ -z "$bootable" ] && chown -R "$real_uid:$real_gid" "$sysroot"
 
 	touch "$sysroot/arch-chroot-phase3-bootstrap"
 	rm -f "$sysroot/arch-chroot-phase1-bootstrap"
@@ -185,10 +184,17 @@ arch_chroot_phase2_bind_mount_app() {
 arch_chroot_phase2_transition() {
 	echo "phase2: entering namespaces..."
 
+	sudo="sudo -u #$real_uid -g #$real_gid"
+
 	user_ns_args="--user --map-root-user"
 	pid_ns_args="--pid --fork"
 	# no --net
 	misc_ns_args="--mount --uts --time --ipc --cgroup"
+
+	if [ -n "$bootable" ]; then
+		sudo=""
+		user_ns_args=""
+	fi
 
 	chroot_env=""
 	if [ -n "$wayland_display" ]; then
@@ -199,8 +205,7 @@ arch_chroot_phase2_transition() {
 	fi
 
 	# restart in phase3
-	exec sudo -u "#$real_uid" -g "#$real_gid" \
-		unshare $user_ns_args $pid_ns_args $misc_ns_args \
+	exec $sudo unshare $user_ns_args $pid_ns_args $misc_ns_args \
 		env ARCH_CHROOT_PHASE="phase3" ARCH_CHROOT_ENV="$chroot_env" \
 		"$0" "$@"
 }
@@ -254,61 +259,29 @@ arch_chroot_phase3_bootstrap() {
 	fi
 	remove_packages=$(chroot "$sysroot" pacman -Qttdq)
 
-	echo "Server = $mirror" > "$sysroot/etc/pacman.d/mirrorlist"
+	echo "Server = $bootstrap_mirror" > "$sysroot/etc/pacman.d/mirrorlist"
 	chroot "$sysroot" pacman-key --init
 	chroot "$sysroot" pacman-key --populate
-	chroot "$sysroot" pacman -R --noconfirm $remove_packages || true
+	[ -n "$remove_packages" ] && chroot "$sysroot" pacman -R --noconfirm $remove_packages
 	chroot "$sysroot" pacman -Syu --noconfirm inetutils vim
 
 	echo "root:test0000" | chroot "$sysroot" chpasswd
 
 	rm -f "$sysroot/pkglist.x86_64.txt"
 	rm -f "$sysroot/version"
+
+	[ -n "$bootable" ] && touch "$sysroot/arch-chroot-phase3-bootable"
+	#touch /arch-chroot-phase3-dev
+
 	rm -f "$sysroot/arch-chroot-phase3-bootstrap"
 
 	echo
 	echo "bootstrapped $sysroot!"
-	#echo "for dev setup, touch /arch-chroot-phase3-dev and re-enter the chroot"
-	#echo "for bootable setup, touch /arch-chroot-phase3-bootable and re-enter the chroot"
 }
 
 arch_chroot_phase3_hostname() {
 	echo "phase3: setting hostname..."
 	chroot "$sysroot" hostname "$hostname"
-}
-
-arch_chroot_phase3_dev() {
-	if [ ! -f "$sysroot/arch-chroot-phase3-dev" ]; then
-		return
-	fi
-
-	echo "phase3: performing dev setup..."
-
-	chroot "$sysroot" pacman -S --noconfirm \
-		base-devel ccache git ctags meson \
-		man-db man-pages \
-		strace \
-		python-mako python-jinja \
-		mesa mesa-utils \
-		glslang vulkan-tools vulkan-headers \
-		wayland-utils wayland-protocols \
-		xorg-xwayland xorg-xev
-
-	home="/root"
-	chroot "$sysroot" git clone --recurse-submodules "https://github.com/olvaffe/olv-etc.git" "$home/olv-etc" || true
-	HOME="$home" chroot "$sysroot" "$home/olv-etc/create-links"
-
-	projects="
-		https://chromium.googlesource.com/chromiumos/platform2
-		https://gitlab.freedesktop.org/mesa/mesa.git
-	"
-	mkdir -p "$sysroot$home/projects"
-	for proj in $projects; do
-		dst=$(basename "$proj" .git)
-		chroot "$sysroot" git clone "$proj" "$home/projects/$dst" || true
-	done
-
-	rm -f "$sysroot/arch-chroot-phase3-dev"
 }
 
 arch_chroot_phase3_bootable() {
@@ -349,6 +322,40 @@ arch_chroot_phase3_bootable() {
 	rm -f "$sysroot/arch-chroot-phase3-bootable"
 }
 
+arch_chroot_phase3_dev() {
+	if [ ! -f "$sysroot/arch-chroot-phase3-dev" ]; then
+		return
+	fi
+
+	echo "phase3: performing dev setup..."
+
+	chroot "$sysroot" pacman -S --noconfirm \
+		base-devel ccache git ctags meson \
+		man-db man-pages \
+		strace \
+		python-mako python-jinja \
+		mesa mesa-utils \
+		glslang vulkan-tools vulkan-headers \
+		wayland-utils wayland-protocols \
+		xorg-xwayland xorg-xev
+
+	home="/root"
+	chroot "$sysroot" git clone --recurse-submodules "https://github.com/olvaffe/olv-etc.git" "$home/olv-etc" || true
+	HOME="$home" chroot "$sysroot" "$home/olv-etc/create-links"
+
+	projects="
+		https://chromium.googlesource.com/chromiumos/platform2
+		https://gitlab.freedesktop.org/mesa/mesa.git
+	"
+	mkdir -p "$sysroot$home/projects"
+	for proj in $projects; do
+		dst=$(basename "$proj" .git)
+		chroot "$sysroot" git clone "$proj" "$home/projects/$dst" || true
+	done
+
+	rm -f "$sysroot/arch-chroot-phase3-dev"
+}
+
 arch_chroot_phase3_chroot() {
 	echo "phase3: entering $sysroot..."
 	echo
@@ -368,8 +375,8 @@ arch_chroot_phase3() {
 	arch_chroot_phase3_hostname
 
 	# these are optional
-	arch_chroot_phase3_dev
 	arch_chroot_phase3_bootable
+	arch_chroot_phase3_dev
 
 	arch_chroot_phase3_chroot
 }
