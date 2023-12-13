@@ -245,6 +245,10 @@ arch_chroot_phase3_bootstrap() {
 	sed -i "s/^#$locale/$locale/" "$sysroot/etc/locale.gen"
 	chroot "$sysroot" locale-gen
 
+	echo "Server = $bootstrap_mirror" > "$sysroot/etc/pacman.d/mirrorlist"
+	chroot "$sysroot" pacman-key --init
+	chroot "$sysroot" pacman-key --populate
+
 	# work out packages to remove
 	explicit_packages=$(chroot "$sysroot" pacman -Qeq)
 	dep_packages=""
@@ -257,12 +261,12 @@ arch_chroot_phase3_bootstrap() {
 	if [ -n "$dep_packages" ]; then
 		chroot "$sysroot" pacman -D --asdep $dep_packages
 	fi
-	remove_packages=$(chroot "$sysroot" pacman -Qttdq)
+	while true; do
+		remove_packages=$(chroot "$sysroot" pacman -Qttdq || true)
+		[ -n "$remove_packages" ] || break
+		chroot "$sysroot" pacman -R --noconfirm $remove_packages
+	done
 
-	echo "Server = $bootstrap_mirror" > "$sysroot/etc/pacman.d/mirrorlist"
-	chroot "$sysroot" pacman-key --init
-	chroot "$sysroot" pacman-key --populate
-	[ -n "$remove_packages" ] && chroot "$sysroot" pacman -R --noconfirm $remove_packages
 	chroot "$sysroot" pacman -Syu --needed --noconfirm inetutils vim
 
 	echo "root:test0000" | chroot "$sysroot" chpasswd
