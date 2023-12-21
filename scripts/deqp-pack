@@ -64,7 +64,7 @@ echo "stripping executables..."
 (cd "$out_dir" && strip -g $dist_out_exec)
 
 echo "creating tarball..."
-tar -cf "$dist_name.tar.zst" --zstd "$dist_name"
+tar -chf "$dist_name.tar.zst" --zstd "$dist_name"
 rm -rf "$dist_name"
 
 echo "created $dist_name.tar.zst"
