@@ -21,9 +21,14 @@ do_dump() {
 			modalias=$(cat "$dev/modalias")
 		fi
 
+		subsystem=""
+		if [ -h "$dev/subsystem" ]; then
+			subsystem=$(basename "$(realpath "$dev/subsystem")")
+		fi
+
 		driver=""
 		if [ -h "$dev/driver" ]; then
-			driver=$(basename $(realpath "$dev/driver"))
+			driver=$(basename "$(realpath "$dev/driver")")
 		fi
 
 		modules=""
@@ -37,6 +42,9 @@ do_dump() {
 		echo "$dev"
 		if [ -n "$modalias" ]; then
 			echo "  modalias: $modalias"
+		fi
+		if [ -n "$subsystem" ]; then
+			echo "  subsystem: $subsystem"
 		fi
 		if [ -n "$driver" ]; then
 			echo "  driver: $driver"
