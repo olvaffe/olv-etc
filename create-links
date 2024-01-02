@@ -34,7 +34,7 @@ install() {
 
 create_xdg_base_dirs
 
-install "alacritty.yml" ".config/alacritty/alacritty.yml"
+install "alacritty.toml" ".config/alacritty/alacritty.toml"
 install "fontconfig-fonts.conf" ".config/fontconfig/fonts.conf"
 install "gdbearlyinit" ".config/gdb/gdbearlyinit"
 install "gdbinit" ".config/gdb/gdbinit"
