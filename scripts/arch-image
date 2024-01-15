@@ -71,7 +71,7 @@ image_loop_detach() {
 image_usage() {
 	echo "Usage:"
 	echo "  $0 create <image-filename> <sysroot-src>"
-	echo "  $0 add-bootloader <image-filename>"
+	echo "  $0 make-bootable <image-filename>"
 	echo "  $0 chroot <image-filename>"
 	exit 1
 }
