@@ -26,8 +26,12 @@ install() {
 	fi
 
 	dst_dir=$(dirname "$dst")
+	if ! mkdir -p -m 0700 "$dst_dir"; then
+		return
+	fi
+
 	src_rel=$(realpath --relative-to="$dst_dir" "$src")
-	if mkdir -p -m 0700 "$dst_dir" && ln -sfn "$src_rel" "$dst"; then
+	if ln -sfn "$src_rel" "$dst"; then
 		echo "$name installed"
 	fi
 }
