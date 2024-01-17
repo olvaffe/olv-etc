@@ -1,0 +1,39 @@
+#!/bin/sh
+
+git_repos="
+	chromiumos
+	chromiumos/chromium/src
+	projects/linux
+"
+fetched_repos=""
+failed_repos=""
+
+for repo in $git_repos; do
+	echo "fetching $repo..."
+
+	path="$HOME/$repo"
+	if [ -d "$path/.git" ]; then
+		cd "$path"
+		if git fetch --prune --all; then
+			fetched_repos="$fetched_repos $repo"
+		else
+			failed_repos="$failed_repos $repo"
+		fi
+	elif [ -d "$path/.repo" ]; then
+		cd "$path"
+		if ./depot_tools/repo sync -j8 -n; then
+			fetched_repos="$fetched_repos $repo"
+		else
+			failed_repos="$failed_repos $repo"
+		fi
+	else
+		failed_repos="$failed_repos $repo"
+	fi
+done
+
+if [ -n "$fetched_repos" ]; then
+	echo "fetched repos:$fetched_repos"
+fi
+if [ -n "$failed_repos" ]; then
+	echo "failed repos:$failed_repos"
+fi

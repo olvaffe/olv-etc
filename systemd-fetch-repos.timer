@@ -1,0 +1,9 @@
+[Unit]
+Description=Fetch my repos periodically
+
+[Timer]
+OnStartupSec=30s
+OnUnitActiveSec=4h
+
+[Install]
+WantedBy=timers.target

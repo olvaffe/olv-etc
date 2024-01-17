@@ -1,0 +1,5 @@
+[Unit]
+Description=Fetch my repos
+
+[Service]
+ExecStart=%h/olv-etc/scripts/my-fetch-repos
