@@ -9,7 +9,9 @@ esac
 [ -f "$HOME/.config/sh/paths.sh" ] && . "$HOME/.config/sh/paths.sh"
 [ -f "$HOME/.config/sh/aliases.sh" ] && . "$HOME/.config/sh/aliases.sh"
 
-[ -z "$WAYLAND_DISPLAY$DISPLAY" -a $(tty) = "/dev/tty1" ] && exec sway-session
+[ -z "$WAYLAND_DISPLAY$DISPLAY" -a $(tty) = "/dev/tty1" ] && \
+	command -v sway > /dev/null && \
+	exec sway-session
 
 HISTFILE="$HOME/.local/state/sh.history"
 HISTSIZE=64000
