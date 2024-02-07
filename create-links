@@ -10,7 +10,16 @@ dst_base=$(realpath "$dst_base")
 src_base=$(dirname "$(realpath "$0")")
 
 create_xdg_base_dirs() {
-	for dir in .cache .config .local/{bin,lib,share,state}; do
+	xdg_dirs="
+		.cache
+		.config
+		.local/bin
+		.local/lib
+		.local/share
+		.local/state
+	"
+
+	for dir in $xdg_dirs; do
 		mkdir -p -m 0700 "$dst_base/$dir"
 	done
 }
