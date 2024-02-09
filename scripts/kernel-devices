@@ -33,6 +33,10 @@ do_dump() {
 		if [ -h "$dev/firmware_node" ]; then
 			firmware_node=$(realpath "$dev/firmware_node")
 		fi
+		of_node=""
+		if [ -h "$dev/of_node" ]; then
+			of_node=$(realpath "$dev/of_node")
+		fi
 
 		name=""
 		if [ -f "$dev/name" ]; then
@@ -59,6 +63,9 @@ do_dump() {
 		fi
 		if [ -n "$firmware_node" ]; then
 			echo "  firmware_node: $firmware_node"
+		fi
+		if [ -n "$of_node" ]; then
+			echo "  of_node: $of_node"
 		fi
 		if [ -n "$name" ]; then
 			echo "  name: $name"
