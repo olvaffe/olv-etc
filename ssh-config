@@ -11,6 +11,10 @@ Host x1
 	# gdbserver
 	LocalForward 1234 localhost:1234
 
+Host home
+	Hostname olv-home.duckdns.org
+	Port 51820
+
 Host dut-1 lnx-1
 	# UNITEK USB-A
 	Hostname my:test:net:work:2e0:4cff:fef0:f7
