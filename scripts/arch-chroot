@@ -18,7 +18,7 @@ bootable="$3"
 [ -z "$machine" ] && machine=$(uname -m)
 [ -n "$bootable" ] && bootable="1"
 
-bootstrap_tarball_x86="https://mirror.fcix.net/archlinux/iso/latest/archlinux-bootstrap-x86_64.tar.gz"
+bootstrap_tarball_x86="https://mirror.fcix.net/archlinux/iso/latest/archlinux-bootstrap-x86_64.tar.zst"
 bootstrap_mirror_x86="https://mirror.fcix.net/archlinux/\$repo/os/\$arch"
 bootstrap_tarball_arm="http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz"
 bootstrap_mirror_arm="http://mirror.archlinuxarm.org/\$arch/\$repo"
@@ -94,8 +94,12 @@ arch_chroot_phase1_bootstrap() {
 
 	echo "phase1: downloading rootfs to $sysroot..."
 
-	tar_args="-zx --warning=no-unknown-keyword"
-	[ "$machine" = "x86_64" ] && tar_args="$tar_args --strip-components=1"
+	tar_args="-x --warning=no-unknown-keyword"
+	if [ "$machine" = "x86_64" ]; then
+		tar_args="$tar_args --zstd --strip-components=1"
+	else
+		tar_args="$tar_args -z"
+	fi
 	curl -L "$bootstrap_tarball" | tar -C "$sysroot" $tar_args
 
 	[ -z "$bootable" ] && chown -R "$real_uid:$real_gid" "$sysroot"
