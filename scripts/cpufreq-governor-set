@@ -28,7 +28,7 @@ case "$gov" in
 	performance)
 		cpufreq_gov="performance"
 		devfreq_gov="performance"
-		amdgpu_gov="high"
+		amdgpu_gov="profile_peak"
 		;;
 	powersave)
 		cpufreq_gov="powersave"
@@ -41,7 +41,7 @@ case "$gov" in
 		amdgpu_gov="auto"
 
 		drv=$(cat /sys/devices/system/cpu/cpufreq/policy0/scaling_driver)
-		if [ "$drv" = "intel_pstate" ]; then
+		if [ "$drv" = "intel_pstate" -o "$drv" = "amd-pstate-epp" ]; then
 			cpufreq_gov="powersave"
 		fi
 		;;
