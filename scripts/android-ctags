@@ -1,28 +1,26 @@
 #!/bin/sh
 
+set -x
 TOP="$ANDROID_BUILD_TOP"
 if [ -z "$TOP" ]; then
 	TOP="$PWD"
 fi
 
-PROJECTS="
+REPOS="
 	bionic
-	external/googletest
 	frameworks/av
-	frameworks/base/cmds
-	frameworks/base/core/jni
-	frameworks/base/libs
 	frameworks/native
 	hardware/interfaces
 	hardware/libhardware
-	out/soong/.intermediates/hardware/interfaces/graphics/
 	system/core
-	system/hwservicemanager
-	system/libfmq
-	system/libhidl
-	system/libhwbinder
-	system/libvintf
-	system/tools/hidl/utils"
+"
 
-(cd "$TOP" && ctags -R $PROJECTS)
+EXTRAS="
+	frameworks/base/cmds
+	frameworks/base/core/jni
+	frameworks/base/libs
+	out/soong/.intermediates/hardware/interfaces/graphics
+"
+
+(cd "$TOP" && ctags -R $REPOS $EXTRAS)
 (cd "$TOP/frameworks/base" && ctags -R)
