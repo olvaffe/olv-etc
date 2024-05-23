@@ -1,6 +1,5 @@
 #!/bin/sh
 
-set -x
 TOP="$ANDROID_BUILD_TOP"
 if [ -z "$TOP" ]; then
 	TOP="$PWD"
