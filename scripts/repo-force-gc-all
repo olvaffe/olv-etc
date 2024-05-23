@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+
+import subprocess
+import sys
+
+ret = subprocess.run(['repo', 'list'], stdout=subprocess.PIPE, text=True)
+if ret.returncode:
+    sys.exit(ret.returncode)
+
+names = set()
+paths = []
+for line in ret.stdout.splitlines():
+    path, name = line.split(' : ')
+    if name in names:
+        continue
+
+    names.add(name)
+    paths.append(path)
+
+for i, path in enumerate(paths):
+    git_config_get_precious = ['git', '-C', path, 'config', 'get', '--local',
+                               '--type', 'bool', 'extensions.preciousObjects']
+    git_config_set_precious = ['git', '-C', path, 'config', 'set', '--local',
+                               '--type', 'bool', 'extensions.preciousObjects']
+    git_gc = ['git', '-C', path, 'gc']
+
+    ret = subprocess.run(git_config_get_precious, capture_output=True,
+                         text=True)
+    is_precious = not ret.returncode and ret.stdout.strip() == 'true'
+
+    try:
+        # "git -c extensions.preciousObjects=false gc" does not work and we have
+        # to modify the local config file
+        if is_precious:
+            subprocess.run(git_config_set_precious + ['false'], check=True)
+
+        s = 'precious ' if is_precious else ''
+        print(f'\33[2K\r[{i + 1}/{len(paths)}] git gc {s}{path}...', end='')
+        ret = subprocess.run(git_gc, capture_output=True, text=True)
+    finally:
+        if is_precious:
+            print('done')
+            subprocess.run(git_config_set_precious + ['true'], check=True)
+
+    if ret.returncode:
+        print()
+        print(ret.stderr, file=sys.stderr, end='')
+        sys.exit(ret.returncode)
+
+print('done')
