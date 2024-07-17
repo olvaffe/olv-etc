@@ -15,6 +15,9 @@ Host home
 	Hostname olv-home.duckdns.org
 	Port 51820
 
+Host dut-priv lnx-priv
+	Hostname 192.168.0.2
+
 Host dut-1 lnx-1
 	# UNITEK USB-A
 	Hostname my:test:net:work:2e0:4cff:fef0:f7
@@ -36,14 +39,6 @@ Host dut-3 lnx-3
 	Hostname my:test:net:work:2e0:4cff:fe68:166
 	LocalForward 2203 localhost:22
 	LocalForward 12343 localhost:1234
-
-Host dut-priv lnx-priv
-	Hostname 192.168.0.2
-
-Host dut-borealis
-	Hostname 100.115.92.26
-	User chronos
-	ProxyJump dut-1
 
 Host dut-*
 	User root
