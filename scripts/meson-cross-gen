@@ -101,14 +101,14 @@ init_vars() {
 				toolchain_prefix="$target_triple-"
 			fi
 
-			common_args="'--sysroot', sysroot"
+			common_args="'--sysroot=' + sysroot"
 			if [ "$arch-$bits" = "x86-32" ]; then
 				common_args="'-m32', $common_args"
 			fi
 			;;
 		cros)
 			toolchain_prefix=""
-			common_args="'-target', '$target_triple', '--sysroot', sysroot"
+			common_args="'-target', '$target_triple', '--sysroot=' + sysroot"
 			llvm_config="/usr/lib/llvm/bin/llvm-config-host"
 			;;
 		arc-*)
@@ -156,7 +156,7 @@ init_vars() {
 
 			local arc_gcc="$toolchain_root/arc-gcc/$arc_gcc_arch/$arc_gcc_arch-linux-$arc_gcc_env-$arc_gcc_ver"
 			local arc_sysroot="$toolchain_root/$arc_sysroot_arch"
-			common_args="'-target', '$target_triple', '--sysroot', '$arc_sysroot', '-isystem', sysroot + '/usr/include'"
+			common_args="'-target', '$target_triple', '--sysroot=$arc_sysroot', '-isystem', sysroot + '/usr/include'"
 			c_link_args="'-Wl,--allow-shlib-undefined'"
 			cpp_link_args="'-Wl,--allow-shlib-undefined'"
 			case "$flavor" in
