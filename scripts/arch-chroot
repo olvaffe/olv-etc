@@ -304,7 +304,7 @@ arch_chroot_phase3_bootable() {
 		zram-generator dosfstools sudo \
 		iwd openssh \
 		git \
-		sway polkit noto-fonts i3status foot
+		sway polkit noto-fonts i3status alacritty
 
 	if [ "$machine" = "x86_64" ]; then
 		chroot "$sysroot" pacman -S --needed --noconfirm base-devel

@@ -1,0 +1,34 @@
+[selection]
+save_to_clipboard = true
+semantic_escape_chars = "()[]{}<>`'\",;:*|\t "
+
+# size * (dpi / 96) * distance, with size 11, dpi 160, and distance 1.05
+[font]
+size = 19.25
+
+# color-scheme-hcl007070
+[colors]
+
+[colors.primary]
+background = "#000000"
+foreground = "#c6c6c6"
+
+[colors.normal]
+black = "#000000"
+blue = "#0d81a0"
+cyan = "#0ebfb2"
+green = "#50c070"
+magenta = "#ea8adc"
+red = "#e74d4e"
+white = "#c6c6c6"
+yellow = "#abb234"
+
+[colors.bright]
+black = "#777777"
+blue = "#0d81a0"
+cyan = "#0ebfb2"
+green = "#50c070"
+magenta = "#ea8adc"
+red = "#e74d4e"
+white = "#ffffff"
+yellow = "#abb234"
