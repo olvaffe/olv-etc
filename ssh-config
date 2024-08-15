@@ -19,7 +19,7 @@ Host dut-priv lnx-priv
 	Hostname 192.168.0.2
 
 Host dut-1 lnx-1
-	# UNITEK USB-A
+	# UNITEK USB-A Black
 	Hostname my:test:net:work:2e0:4cff:fef0:f7
 	# sslh
 	LocalForward 2201 localhost:22
@@ -29,16 +29,10 @@ Host dut-1 lnx-1
 	LocalForward 39920 localhost:39920
 
 Host dut-2 lnx-2
-	# Monoprice USB-C
+	# Monoprice USB-C White
 	Hostname my:test:net:work:2e0:4cff:fe68:4398
 	LocalForward 2202 localhost:22
 	LocalForward 12342 localhost:1234
-
-Host dut-3 lnx-3
-	# Monoprice USB-A
-	Hostname my:test:net:work:2e0:4cff:fe68:166
-	LocalForward 2203 localhost:22
-	LocalForward 12343 localhost:1234
 
 Host dut-*
 	User root
