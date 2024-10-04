@@ -15,6 +15,9 @@ Host home
 	Hostname olv-home.duckdns.org
 	Port 51820
 
+Host opi
+	Hostname my:test:net:work:f487:cff:fe32:d5d5
+
 Host dut-priv lnx-priv
 	Hostname 192.168.0.2
 
