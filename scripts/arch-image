@@ -1,9 +1,9 @@
 #!/bin/sh
 
-image_size="3G"
+image_size="4G"
 image_parts='
 label: gpt
-name="arch-esp",     type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, size=260M
+name="arch-esp",     type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, size=1G
 name="cros-kernel",  type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M, attrs="GUID:49,51,53,56"
 name="cros-kernel2", type=FE3A2A5D-4F32-41A7-B725-ACCC3285A309, size=64M
 name="arch-root",    type=0FC63DAF-8483-4772-8E79-3D69D8477DE4
