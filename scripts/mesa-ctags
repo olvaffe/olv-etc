@@ -1,0 +1,7 @@
+#!/bin/sh
+
+ctags -R \
+	--languages=-RpmMacros \
+	--regex-c='/^panvk_per_arch\(([[:alnum:]_]*)\)/\1/' \
+	--regex-c='/^GENX\(([[:alnum:]_]*)\)/\1/' \
+	"$@"
