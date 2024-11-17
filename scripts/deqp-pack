@@ -8,14 +8,15 @@ if [ ! -d "$src_dir/external/vulkancts" ]; then
 	exit 1
 fi
 
-if [ "$#" -ne 2 ]; then
-	echo "usage: $0 <out-dir> <flavor>"
+if [ "$#" -ne 3 ]; then
+	echo "usage: $0 <out-dir> <x86_64|aarch64> <version>"
 	exit 1
 fi
 out_dir=$(realpath "$1")
-flavor="$2"
+arch="$2"
+version="$3"
 
-dist_name="deqp-$flavor"
+dist_name="deqp-$version-$arch"
 
 dist_out_exec="
 	external/vulkancts/modules/vulkan/deqp-vk
@@ -35,12 +36,8 @@ dist_out_data="
 "
 
 dist_src_data="
-	android/cts/main/vk-master
-	android/cts/main/vk-master.txt
-	android/cts/main/egl-master.txt
-	android/cts/main/gles2-master.txt
-	android/cts/main/gles3-master.txt
-	android/cts/main/gles31-master.txt
+	external/vulkancts/mustpass/main/vk-default.txt
+	external/vulkancts/mustpass/main/vk-default
 "
 
 echo "creating staging directory $dist_name..."
@@ -51,17 +48,11 @@ for i in $dist_out_exec $dist_out_data; do
 done
 
 for i in $dist_src_data; do
-	if [ ! -e "$src_dir/$i" ]; then
-		i="android/cts/master/${i#android/cts/main/}"
-		if [ ! -e "$src_dir/$i" ]; then
-			continue
-		fi
-	fi
 	ln -snf "$src_dir/$i" "$dist_name"
 done
 
 echo "stripping executables..."
-(cd "$out_dir" && strip -g $dist_out_exec)
+(cd "$out_dir" && $arch-linux-gnu-strip -g $dist_out_exec)
 
 echo "creating tarball..."
 tar -chf "$dist_name.tar.zst" --zstd "$dist_name"
