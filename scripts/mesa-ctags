@@ -2,6 +2,7 @@
 
 ctags -R \
 	--languages=-RpmMacros \
+	--langmap=c:+.h \
 	--regex-c='/^panvk_per_arch\(([[:alnum:]_]*)\)/\1/' \
 	--regex-c='/^GENX\(([[:alnum:]_]*)\)/\1/' \
 	"$@"
