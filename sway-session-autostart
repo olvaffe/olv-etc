@@ -8,7 +8,7 @@ dbus-update-activation-environment --systemd $gui_envs
 # SSH_AUTH_SOCK has been explicitly set in sway-session
 ssh-agent -a "$SSH_AUTH_SOCK"
 
-nm-applet --indicator &
+nm-applet &
 fcitx5 &
 
 swayidle -w \
