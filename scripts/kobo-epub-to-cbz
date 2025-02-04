@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-import xml.etree.ElementTree as ET
-from PIL import Image
 import argparse
 import os
 import re
+import xml.etree.ElementTree as ET
 import zipfile
+
+from PIL import Image
 
 
 class EBook:
