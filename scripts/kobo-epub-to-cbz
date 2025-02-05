@@ -1,0 +1,258 @@
+#!/usr/bin/env python
+
+import xml.etree.ElementTree as ET
+from PIL import Image
+import argparse
+import os
+import re
+import zipfile
+
+
+class EBook:
+    def __init__(self, filename):
+        self.filename = filename
+
+        self.series = None
+        self.volume = 0
+        self.authors = []
+        self.publisher = None
+        self.language = None
+
+        self._re_title = re.compile(r'^(.*?)(第)?(\d+)(集|冊)?$')
+
+    def set_title(self, title):
+        m = self._re_title.match(title)
+        if m:
+            self.series = m.group(1).strip()
+            self.volume = int(m.group(3))
+        else:
+            self.series = title
+
+    def set_creator(self, creator):
+        self.authors = [creator.replace(' ', '')]
+
+    def set_publisher(self, publisher):
+        self.publisher = publisher
+
+    def set_language(self, language):
+        # ignore language
+        self.language = 'zh-TW'
+
+    def copy_metadata(self, src):
+        self.series = src.series
+        self.volume = src.volume
+        self.authors = src.authors[:]
+        self.publisher = src.publisher
+        self.language = src.language
+
+    def _get_canonical_series(self):
+        return self.series.replace('/', ' ').replace('\0', ' ')
+
+    def get_canonical_dirname(self, dirname):
+        series = self._get_canonical_series()
+
+        return os.path.join(dirname, series)
+
+    def get_canonical_basename(self, suffix):
+        series = self._get_canonical_series()
+        vol = f' v{self.volume:02}' if self.volume else ''
+
+        return f'{series}{vol}{suffix}'
+
+
+class EPub(EBook):
+    NS_OD = '{urn:oasis:names:tc:opendocument:xmlns:container}'
+    NS_OPF = '{http://www.idpf.org/2007/opf}'
+    NS_DC = '{http://purl.org/dc/elements/1.1/}'
+
+    def __init__(self, filename):
+        super().__init__(filename)
+
+        self._zipfile = zipfile.ZipFile(filename)
+        self.init_metadata()
+
+    def init_metadata(self):
+        rootfile = self._parse_container()
+        self._parse_rootfile(rootfile)
+
+    def _parse_container(self):
+        with self._zipfile.open('META-INF/container.xml') as fp:
+            tree = ET.parse(fp)
+
+            rootfiles = tree.findall(f'./{self.NS_OD}rootfiles/{self.NS_OD}rootfile')
+            assert len(rootfiles) == 1
+
+            return rootfiles[0].get('full-path')
+
+    def _parse_rootfile(self, rootfile):
+        with self._zipfile.open(rootfile) as fp:
+            tree = ET.parse(fp)
+
+            self._parse_rootfile_metadata(tree)
+            items = self._parse_rootfile_manifest(tree)
+
+            self._dirname = os.path.dirname(rootfile)
+            self._hrefs = self._parse_rootfile_spine(tree, items)
+
+    def _parse_rootfile_metadata(self, tree):
+        metadata = tree.find(f'./{self.NS_OPF}metadata')
+        title = metadata.find(f'./{self.NS_DC}title')
+        creator = metadata.find(f'./{self.NS_DC}creator')
+        language = metadata.find(f'./{self.NS_DC}language')
+        publisher = metadata.find(f'./{self.NS_DC}publisher')
+
+        self.set_title(title.text)
+        self.set_creator(creator.text)
+        self.set_language(language.text)
+        if publisher:
+            self.set_publisher(publisher.text)
+
+    def _parse_rootfile_manifest(self, tree):
+        manifest = tree.find(f'./{self.NS_OPF}manifest')
+        items = manifest.findall(f'./{self.NS_OPF}item')
+
+        return items
+
+    def _parse_rootfile_spine(self, tree, items):
+        spine = tree.find(f'./{self.NS_OPF}spine')
+        itemrefs = spine.findall(f'./{self.NS_OPF}itemref')
+
+        item_map = {item.get('id'): item for item in items}
+        hrefs = []
+        for itemref in itemrefs:
+            item = item_map[itemref.get('idref')]
+
+            is_image = True
+            while not item.get('media-type').startswith('image/'):
+                fallback = item.get('fallback')
+                if fallback:
+                    item = item_map[fallback]
+                else:
+                    is_image = False
+                    break
+
+            if not is_image:
+                hrefs.clear()
+                break
+
+            hrefs.append(item.get('href'))
+
+        if not hrefs:
+            hrefs = [
+                item.get('href')
+                for item in items
+                if item.get('media-type').startswith('image/')
+            ]
+
+        return hrefs
+
+    def images(self):
+        for href in self._hrefs:
+            if href[0] != '/':
+                href = f'{self._dirname}/{href}'
+
+            with self._zipfile.open(href) as fp:
+                with Image.open(fp) as im:
+                    yield (href, im)
+
+
+class CBZ(EBook):
+    def __init__(self, filename):
+        super().__init__(filename)
+
+        self._zipfile = zipfile.ZipFile(filename, 'w')
+
+    def close(self):
+        self._add_metadata()
+        self._zipfile.close()
+
+    def add_image(self, name, img):
+        with self._zipfile.open(name, 'w') as fp:
+            img.save(fp, format='WebP')
+
+    def _add_metadata(self):
+        with self._zipfile.open('ComicInfo.xml', 'w') as fp:
+            xml = self._generate_comic_info()
+            fp.write(xml)
+
+    def _generate_comic_info(self):
+        tree = ET.Element('ComicInfo')
+
+        ET.SubElement(tree, 'Series').text = self.series
+        if self.volume:
+            ET.SubElement(tree, 'Volume').text = str(self.volume)
+        ET.SubElement(tree, 'Writer').text = ','.join(self.authors)
+        if self.publisher:
+            ET.SubElement(tree, 'Publisher').text = self.publisher
+        ET.SubElement(tree, 'LanguageISO').text = self.language
+
+        ET.SubElement(tree, 'Manga').text = 'YesAndRightToLeft'
+        ET.indent(tree)
+
+        return ET.tostring(tree, encoding='utf-8', xml_declaration=True)
+
+
+def convert_book(src_epub, dst_file):
+    dst_cbz = CBZ(dst_file)
+    dst_cbz.copy_metadata(src_epub)
+
+    for i, (href, img) in enumerate(src_epub.images()):
+        name = f'{i:03}'
+        if i == 0 and 'cover' in href:
+            name = f'{name}-cover'
+        name += '.webp'
+
+        dst_cbz.add_image(name, img)
+
+    dst_cbz.close()
+
+
+def convert_file(src_file, dst_dir):
+    src_epub = EPub(src_file)
+
+    dst_dir = src_epub.get_canonical_dirname(dst_dir)
+    os.makedirs(dst_dir, exist_ok=True)
+
+    try:
+        dst_symlink = src_epub.get_canonical_basename('.epub')
+        os.symlink(os.path.realpath(src_file), os.path.join(dst_dir, dst_symlink))
+    except FileExistsError:
+        pass
+
+    dst_name = src_epub.get_canonical_basename('.cbz')
+    dst_file = os.path.join(dst_dir, dst_name)
+
+    try:
+        with zipfile.ZipFile(dst_file) as zf:
+            if zipfile.Path(zf, 'ComicInfo.xml').exists():
+                print(f'skipping "{dst_file}"...')
+                return
+            else:
+                raise zipfile.BadZipFile
+    except zipfile.BadZipFile:
+        print(f'overwriting "{dst_file}"...')
+    except FileNotFoundError:
+        print(f'creating "{dst_file}"...')
+
+    dst_tmp = dst_file + '.tmp'
+    convert_book(src_epub, dst_tmp)
+    os.rename(dst_tmp, dst_file)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Convert EPUB to CBZ')
+    parser.add_argument('src_dir', help='path to source EPUB directory')
+    parser.add_argument('dst_dir', help='path to destination CBZ directory')
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    for root, _, files in os.walk(args.src_dir):
+        for file in [file for file in files if file.endswith('.epub')]:
+            src_file = os.path.join(root, file)
+            convert_file(src_file, args.dst_dir)
+
+
+if __name__ == '__main__':
+    main()
