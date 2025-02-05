@@ -19,6 +19,8 @@ class EBook:
         self.language = None
 
         self._re_title = re.compile(r'^(.*?)(第|\()?(\d+)(集|冊|\))?$')
+        self._re_author_prefix = re.compile(r'^.*[：)](.*)$')
+        self._re_author_suffix = re.compile(r'^(.*)[(].*$')
         self._sep_creator = ['／', '、']
 
     def set_title(self, title):
@@ -39,9 +41,15 @@ class EBook:
             self.authors = [creator]
 
         for i, author in enumerate(self.authors):
-            idx = author.rfind('：')
-            if idx >= 0:
-                self.authors[i] = author[idx + 1:]
+            m = self._re_author_prefix.match(author)
+            if m:
+                author = m.group(1)
+
+            m = self._re_author_suffix.match(author)
+            if m:
+                author = m.group(1)
+
+            self.authors[i] = author
 
     def set_publisher(self, publisher):
         self.publisher = publisher
