@@ -19,8 +19,8 @@ class EBook:
         self.language = None
 
         self._re_title = re.compile(r'^(.*?)(第|\()?(\d+)(集|冊|\))?$')
-        self._re_author_prefix = re.compile(r'^.*[：)](.*)$')
-        self._re_author_suffix = re.compile(r'^(.*)[(].*$')
+        self._re_author_prefix = re.compile(r'^.*[：)](.+)$')
+        self._re_author_suffix = re.compile(r'^(.+)[(].*$')
         self._sep_creator = ['／', '、']
 
     def set_title(self, title):
