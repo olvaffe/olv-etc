@@ -18,7 +18,8 @@ class EBook:
         self.publisher = None
         self.language = None
 
-        self._re_title = re.compile(r'^(.*?)(第)?(\d+)(集|冊)?$')
+        self._re_title = re.compile(r'^(.*?)(第|\()?(\d+)(集|冊|\))?$')
+        self._sep_creator = ['／', '、']
 
     def set_title(self, title):
         m = self._re_title.match(title)
@@ -29,7 +30,18 @@ class EBook:
             self.series = title
 
     def set_creator(self, creator):
-        self.authors = [creator.replace(' ', '')]
+        creator = creator.replace(' ', '')
+
+        for sep in self._sep_creator:
+            if sep in creator:
+                self.authors = creator.split(sep)
+        if not self.authors:
+            self.authors = [creator]
+
+        for i, author in enumerate(self.authors):
+            idx = author.rfind('：')
+            if idx >= 0:
+                self.authors[i] = author[idx + 1:]
 
     def set_publisher(self, publisher):
         self.publisher = publisher
@@ -104,7 +116,7 @@ class EPub(EBook):
         self.set_title(title.text)
         self.set_creator(creator.text)
         self.set_language(language.text)
-        if publisher:
+        if publisher is not None:
             self.set_publisher(publisher.text)
 
     def _parse_rootfile_manifest(self, tree):
