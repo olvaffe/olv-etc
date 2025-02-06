@@ -70,7 +70,7 @@ class EBook:
         self.language = src.language
 
     def _get_canonical_series(self):
-        return self.series.replace('/', ' ').replace('\0', ' ')
+        return self.series.replace('/', '_').replace('\0', '_')
 
     def get_canonical_dirname(self, dirname):
         series = self._get_canonical_series()
