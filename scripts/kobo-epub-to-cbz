@@ -19,10 +19,10 @@ class EBook:
         self.publisher = None
         self.language = None
 
-        self._re_title = re.compile(r'^(.*?)(第|\()?(\d+)(集|冊|\))?$')
+        self._re_title = re.compile(r'^(.*?)(第|-|\()?(\d+)(集|冊|完|\))?$')
         self._re_author_prefix = re.compile(r'^.*[：)](.+)$')
         self._re_author_suffix = re.compile(r'^(.+)[(].*$')
-        self._sep_creator = ['／', '、']
+        self._sep_creator = ['／', '、', '/', ' x ']
 
     def set_title(self, title):
         m = self._re_title.match(title)
@@ -32,9 +32,9 @@ class EBook:
         else:
             self.series = title
 
-    def set_creator(self, creator):
-        creator = creator.replace(' ', '')
+        self.series = self.series.replace('—', '-')
 
+    def set_creator(self, creator):
         for sep in self._sep_creator:
             if sep in creator:
                 self.authors = creator.split(sep)
@@ -42,6 +42,9 @@ class EBook:
             self.authors = [creator]
 
         for i, author in enumerate(self.authors):
+            author = author.replace(' ', '')
+            author = author.replace('　', '')
+
             m = self._re_author_prefix.match(author)
             if m:
                 author = m.group(1)
@@ -122,6 +125,10 @@ class EPub(EBook):
         language = metadata.find(f'./{self.NS_DC}language')
         publisher = metadata.find(f'./{self.NS_DC}publisher')
 
+        if title.text == 'CT0456' and creator.text == 'CT0456':
+            title.text = '異劍戰記  瓦倫迪歐 1'
+            creator.text = '七尾七希'
+
         self.set_title(title.text)
         self.set_creator(creator.text)
         self.set_language(language.text)
@@ -164,6 +171,10 @@ class EPub(EBook):
                 for item in items
                 if item.get('media-type').startswith('image/')
             ]
+
+            tmp = hrefs[:]
+            tmp.sort()
+            assert tmp == hrefs
 
         return hrefs
 
@@ -259,12 +270,26 @@ def convert_file(src_file, dst_dir):
     convert_book(src_epub, dst_tmp)
     os.rename(dst_tmp, dst_file)
 
+def probe_file(file):
+    epub = EPub(file)
+
+    print(f'{epub.filename}:')
+    print(f'  series: {epub.series}')
+    print(f'  volume: {epub.volume}')
+    print(f'  authors: {epub.authors}')
+    print(f'  publisher: {epub.publisher}')
+    print(f'  language: {epub.language}')
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert EPUB to CBZ')
     parser.add_argument('src_dir', help='path to source EPUB directory')
-    parser.add_argument('dst_dir', help='path to destination CBZ directory')
-    return parser.parse_args()
+    parser.add_argument('dst_dir', nargs='?', help='path to destination CBZ directory')
+    parser.add_argument('--metadata', action='store_true', help='show metadata and exit')
+
+    args = parser.parse_args()
+    assert args.metadata or args.dst_dir
+
+    return args
 
 
 def main():
@@ -272,7 +297,10 @@ def main():
     for root, _, files in os.walk(args.src_dir):
         for file in [file for file in files if file.endswith('.epub')]:
             src_file = os.path.join(root, file)
-            convert_file(src_file, args.dst_dir)
+            if args.metadata:
+                probe_file(src_file)
+            else:
+                convert_file(src_file, args.dst_dir)
 
 
 if __name__ == '__main__':
