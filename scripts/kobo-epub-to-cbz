@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
 import argparse
+import io
 import os
 import re
 import xml.etree.ElementTree as ET
 import zipfile
 
 from PIL import Image
+from concurrent.futures import ThreadPoolExecutor
 
 
 class EBook:
@@ -128,6 +130,12 @@ class EPub(EBook):
         if title.text == 'CT0456' and creator.text == 'CT0456':
             title.text = '異劍戰記  瓦倫迪歐 1'
             creator.text = '七尾七希'
+        elif title.text == 'BM0717' and creator.text == 'BM0717':
+            title.text = '學生會長是女僕！ 1'
+            creator.text = '藤原飛呂'
+        elif title.text == 'CH0631' and creator.text == 'CH0631':
+            title.text = '典藏版 Dorohedoro 異獸魔都 1'
+            creator.text = '林田球'
 
         self.set_title(title.text)
         self.set_creator(creator.text)
@@ -178,14 +186,15 @@ class EPub(EBook):
 
         return hrefs
 
-    def images(self):
-        for href in self._hrefs:
-            if href[0] != '/':
-                href = f'{self._dirname}/{href}'
+    def resource_count(self):
+        return len(self._hrefs)
 
-            with self._zipfile.open(href) as fp:
-                with Image.open(fp) as im:
-                    yield (href, im)
+    def read_resource(self, idx):
+        href = self._hrefs[idx]
+        if href[0] != '/':
+            href = f'{self._dirname}/{href}'
+
+        return (href, self._zipfile.read(href))
 
 
 class CBZ(EBook):
@@ -198,9 +207,8 @@ class CBZ(EBook):
         self._add_metadata()
         self._zipfile.close()
 
-    def add_image(self, name, img):
-        with self._zipfile.open(name, 'w') as fp:
-            img.save(fp, format='WebP')
+    def write_resource(self, name, res):
+        self._zipfile.writestr(name, res)
 
     def _add_metadata(self):
         with self._zipfile.open('ComicInfo.xml', 'w') as fp:
@@ -224,22 +232,47 @@ class CBZ(EBook):
         return ET.tostring(tree, encoding='utf-8', xml_declaration=True)
 
 
-def convert_book(src_epub, dst_file):
+def convert_resource(i, href, res):
+    name = f'{i:03}'
+    if i == 0 and 'cover' in href:
+        name = f'{name}-cover'
+    name += '.webp'
+
+    out = io.BytesIO()
+    with Image.open(io.BytesIO(res)) as img:
+        img.save(out, format='WebP')
+
+    return (name, out.getvalue())
+
+
+def convert_book(executor, src_epub, dst_file):
     dst_cbz = CBZ(dst_file)
     dst_cbz.copy_metadata(src_epub)
 
-    for i, (href, img) in enumerate(src_epub.images()):
-        name = f'{i:03}'
-        if i == 0 and 'cover' in href:
-            name = f'{name}-cover'
-        name += '.webp'
+    res_count = src_epub.resource_count()
 
-        dst_cbz.add_image(name, img)
+    job_max = os.cpu_count() * 2
+    jobs = [None] * job_max
+    for i in range(min(res_count, job_max)):
+        href, res = src_epub.read_resource(i)
+        jobs[i] = executor.submit(convert_resource, i, href, res)
+
+    for i in range(res_count):
+        result = jobs[i % job_max].result()
+
+        if i + job_max < res_count:
+            href, res = src_epub.read_resource(i + job_max)
+            jobs[i % job_max] = executor.submit(
+                convert_resource, i + job_max, href, res
+            )
+
+        name, res = result
+        dst_cbz.write_resource(name, res)
 
     dst_cbz.close()
 
 
-def convert_file(src_file, dst_dir):
+def convert_file(executor, src_file, dst_dir):
     src_epub = EPub(src_file)
 
     dst_dir = src_epub.get_canonical_dirname(dst_dir)
@@ -267,8 +300,9 @@ def convert_file(src_file, dst_dir):
         print(f'creating "{dst_file}"...')
 
     dst_tmp = dst_file + '.tmp'
-    convert_book(src_epub, dst_tmp)
+    convert_book(executor, src_epub, dst_tmp)
     os.rename(dst_tmp, dst_file)
+
 
 def probe_file(file):
     epub = EPub(file)
@@ -280,11 +314,14 @@ def probe_file(file):
     print(f'  publisher: {epub.publisher}')
     print(f'  language: {epub.language}')
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert EPUB to CBZ')
     parser.add_argument('src_dir', help='path to source EPUB directory')
     parser.add_argument('dst_dir', nargs='?', help='path to destination CBZ directory')
-    parser.add_argument('--metadata', action='store_true', help='show metadata and exit')
+    parser.add_argument(
+        '--metadata', action='store_true', help='show metadata and exit'
+    )
 
     args = parser.parse_args()
     assert args.metadata or args.dst_dir
@@ -294,13 +331,21 @@ def parse_args():
 
 def main():
     args = parse_args()
+    if not args.metadata:
+        executor = ThreadPoolExecutor(
+            max_workers=os.cpu_count(), thread_name_prefix='conv'
+        )
+
     for root, _, files in os.walk(args.src_dir):
         for file in [file for file in files if file.endswith('.epub')]:
             src_file = os.path.join(root, file)
             if args.metadata:
                 probe_file(src_file)
             else:
-                convert_file(src_file, args.dst_dir)
+                convert_file(executor, src_file, args.dst_dir)
+
+    if not args.metadata:
+        executor.shutdown()
 
 
 if __name__ == '__main__':
