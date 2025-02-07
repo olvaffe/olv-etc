@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+
+import argparse
+from datetime import datetime
+import json
+
+from bs4 import BeautifulSoup
+
+
+def parse_html(fp):
+    soup = BeautifulSoup(fp, 'html.parser')
+    title_tags = soup.select(
+        'table.purchase-history-table td.purchase-item-col-desp .purchase-item-title'
+    )
+    date_tags = soup.select(
+        'table.purchase-history-table td.purchase-item-col-order-date span.purchase-item-title'
+    )
+    price_tags = soup.select(
+        'table.purchase-history-table td.purchase-item-col-price span.purchase-item-title'
+    )
+
+    assert len(title_tags) == len(date_tags)
+    assert len(title_tags) == len(price_tags)
+
+    for title_tag, date_tag, price_tag in zip(title_tags, date_tags, price_tags):
+        title = title_tag.string
+        title = title.replace('"', '""')
+
+        href = title_tag.get('href', '')
+
+        date = date_tag.string
+        date = datetime.strptime(date, '%m/%d/%Y').date().isoformat()
+
+        price = price_tag.string
+        dollar = price.find('$')
+        if dollar >= 0:
+            price = price[dollar + 1 :]
+        price = price.replace(',', '')
+
+        print(f'"{title}",{date},{price},1.0,1.0,{price},{href}')
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Parse Kobo purchase.html')
+    parser.add_argument('filename', nargs='+', help='path to <purchase.html>')
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    for filename in args.filename:
+        with open(filename) as fp:
+            parse_html(fp)
+
+
+if __name__ == '__main__':
+    main()
