@@ -21,8 +21,8 @@ class EBook:
         self.publisher = None
         self.language = None
 
-        self._re_title = re.compile(r'^(.*?)(第|-|\()?(\d+)(集|冊|完|\))?$')
-        self._re_author_prefix = re.compile(r'^.*[：)](.+)$')
+        self._re_title = re.compile(r'^(.*?)(第|-|\()?(\d+)(集|冊|完|\)|（.）)?(完|END)?$')
+        self._re_author_prefix = re.compile(r'^.*[:：)](.+)$')
         self._re_author_suffix = re.compile(r'^(.+)[(].*$')
         self._sep_creator = ['／', '、', '/', ' x ']
 
@@ -35,6 +35,13 @@ class EBook:
             self.series = title
 
         self.series = self.series.replace('—', '-')
+        self.series = self.series.replace('SUPREME藍色巨星', 'SUPREME 藍色巨星')
+
+        if self.series.startswith('【') and self.series.endswith('】'):
+            self.series = self.series[1:-1]
+
+        if self.series.endswith('(漫)'):
+            self.series = self.series[:-3]
 
     def set_creator(self, creator):
         for sep in self._sep_creator:
