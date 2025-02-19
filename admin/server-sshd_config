@@ -1,0 +1,4 @@
+PasswordAuthentication no
+PermitRootLogin no
+KbdInteractiveAuthentication no
+UsePAM yes

@@ -1,0 +1,16 @@
+$ORIGIN lan.
+$TTL 86400
+
+@		IN	SOA	dns.lan.	olvaffe.gmail.com. (
+			20250219 ; serial
+			21600    ; refresh after 6 hours
+			3600     ; retry after 1 hour
+			604800   ; expire after 1 week
+			86400 )  ; minimum TTL of 1 day
+
+		IN	NS	dns.lan.
+
+npi		IN	A	192.168.87.1
+rpi		IN	A	192.168.87.10
+
+dns		IN	CNAME	npi

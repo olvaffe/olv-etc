@@ -1,0 +1,7 @@
+[Match]
+Name=enp0s1
+
+[Network]
+DHCP=yes
+UseDNS=no
+UseDomains=no

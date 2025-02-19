@@ -1,0 +1,22 @@
+[NetDev]
+Name=wg0
+Kind=wireguard
+
+# Peers' /etc/wireguard/wg0.conf should have
+#
+#   [Peer]
+#   PublicKey=XXX
+#   AllowedIPs=192.168.88.1/32
+#   Endpoint=XXX:51820
+#[WireGuard]
+#PrivateKey=XXX
+#ListenPort=51820
+
+# Peer's /etc/wireguard/wg0.conf should have
+#
+#   [Interface]
+#   PrivateKey=XXX
+#   Address=192.168.88.20/24
+#[WireGuardPeer]
+#PublicKey=XXX
+#AllowedIPs=192.168.88.20/32

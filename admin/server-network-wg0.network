@@ -1,0 +1,6 @@
+[Match]
+Name=wg0
+Kind=wireguard
+
+[Network]
+Address=192.168.88.1/24

@@ -1,0 +1,10 @@
+[Match]
+Type=ether
+
+[Network]
+DHCP=yes
+MulticastDNS=resolve
+LLMNR=no
+
+[DHCPv4]
+UseDomains=yes
