@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -e
+
+backup_dst="/root/backups"
+backup_srcs="
+	/etc
+	/opt/scripts
+	/var/log
+	/var/lib
+"
+backup_keep="4"
+
+tarball_shortname="$(hostname)-backup"
+tarball_timestamp="$(date +%Y%m%d)"
+tarball_suffix="tar.zst"
+tarball_fullname="$tarball_shortname-$tarball_timestamp.$tarball_suffix"
+
+backup() {
+	mkdir -p "$backup_dst"
+	echo "backing up to $backup_dst/$tarball_fullname"...
+	tar --zstd --sort=name -cf "$backup_dst/$tarball_fullname" $backup_srcs || true
+}
+
+cleanup() {
+	readarray -d' ' tarballs < <(echo "$backup_dst/$tarball_shortname-"*".$tarball_suffix")
+
+	drop_count=$((${#tarballs[@]} - $backup_keep))
+	if (($drop_count > 0)); then
+		echo "removing oldest $drop_count backup(s)..."
+		rm -f ${tarballs[@]:0:$drop_count}
+	fi
+}
+
+backup
+cleanup

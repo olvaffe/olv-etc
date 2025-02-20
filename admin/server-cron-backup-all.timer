@@ -1,0 +1,9 @@
+[Unit]
+Description=Backup everything weekly
+
+[Timer]
+OnStartupSec=1w
+OnUnitActiveSec=1w
+
+[Install]
+WantedBy=timers.target
