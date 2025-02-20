@@ -1,0 +1,9 @@
+[Unit]
+Description=Update Duck DNS records periodically
+
+[Timer]
+OnStartupSec=5m
+OnUnitActiveSec=1h
+
+[Install]
+WantedBy=timers.target

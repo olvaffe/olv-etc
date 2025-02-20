@@ -1,0 +1,6 @@
+[Unit]
+Description=Update Duck DNS records
+
+[Service]
+ExecStart=/opt/scripts/bin/duckdns
+User=notroot

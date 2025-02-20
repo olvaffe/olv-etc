@@ -1,0 +1,19 @@
+#!/bin/sh
+
+domains="XXX"
+token="XXX"
+
+duckdns="https://www.duckdns.org/update"
+
+ifconfig="https://ifconfig.me"
+ifconfig_err="Not found"
+
+ipv4=$(curl -s -4 "$ifconfig")
+if [ "$ipv4" = "$ifconfig_err" ]; then
+	ipv4=""
+fi
+
+status=$(curl -s "$duckdns?domains=$domains&token=$token&ip=$ipv4")
+
+echo "Public IPv4: $ipv4"
+echo "Update Status: $status"

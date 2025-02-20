@@ -12,7 +12,6 @@ Host x1
 	LocalForward 1234 localhost:1234
 
 Host home
-	AddressFamily inet
 	Hostname olv-home.duckdns.org
 	Port 51820
 
