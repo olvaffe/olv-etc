@@ -1,0 +1,61 @@
+#!/bin/sh
+
+if [ "$#" -lt 5 ]; then
+	echo "usage: $0 <author> <title> <volume|chapter> <pattern> <dirs...>"
+	exit 1
+fi
+
+author="$1"
+title="$2"
+type="$3"
+pattern="$4"
+shift 4
+
+comic_info() {
+	echo "<?xml version='1.0' encoding='utf-8'?>"
+	echo "<ComicInfo>"
+	echo "  <Series>$title</Series>"
+	if [ -n "$volume" ]; then
+		echo "  <Volume>$volume</Volume>"
+	fi
+	if [ -n "$chapter" ]; then
+		echo "  <Number>$chapter</Number>"
+	fi
+	echo "  <Writer>$author</Writer>"
+	echo "  <Manga>YesAndRightToLeft</Manga>"
+	echo "</ComicInfo>"
+}
+
+confirm="y"
+volume=""
+chapter=""
+for dir in "$@"; do
+	match=$(basename "$dir" | sed "s/$pattern/\1/")
+	number=$((10#$match)) || exit 1
+
+	case "$type" in
+		volume)
+			volume="$number"
+			archive=$(printf "$title v%02d" "$number")
+			;;
+		chapter)
+			chapter="$number"
+			archive=$(printf "$title c%03d" "$number")
+			;;
+		*)
+			echo "unknown type $type"
+			exit 1
+			;;
+	esac
+
+	if [ "$confirm" = "y" ]; then
+		echo "First archive is |$archive| by |$author|.  Is that correct?"
+		read yn
+		confirm="n"
+	fi
+
+	comic_info > "$dir/ComicInfo.xml"
+
+	echo "creating $archive.cbz..."
+	zip -r -j -0 -q "$archive.cbz" "$dir"
+done
