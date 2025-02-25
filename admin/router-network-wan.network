@@ -1,7 +1,5 @@
 [Match]
-Name=enp0s1
+Name=wan
 
 [Network]
 DHCP=yes
-UseDNS=no
-UseDomains=no

@@ -1,0 +1,6 @@
+[Match]
+Path=*0002:01:00.0
+
+[Link]
+Name=wan
+MACAddress=f8:8f:ca:12:34:56
