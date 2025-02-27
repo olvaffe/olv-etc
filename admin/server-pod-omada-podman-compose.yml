@@ -3,8 +3,8 @@ services:
     image: docker.io/mbentley/omada-controller:5.15
     container_name: omada
     volumes:
-      - /home/omada/omada-data:/opt/tplink/EAPController/data
-      - /home/omada/omada-logs:/opt/tplink/EAPController/logs
+      - /home/pod-omada/omada-data:/opt/tplink/EAPController/data
+      - /home/pod-omada/omada-logs:/opt/tplink/EAPController/logs
     ports:
       - "8088:8088"
       - "8043:8043"

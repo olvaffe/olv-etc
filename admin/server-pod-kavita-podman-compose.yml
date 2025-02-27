@@ -3,7 +3,7 @@ services:
     image: docker.io/jvmilazz0/kavita:latest
     container_name: kavita
     volumes:
-      - /home/kavita/kavita-config/:/kavita/config
+      - /home/pod-kavita/kavita-config/:/kavita/config
       - /srv/manga:/manga:ro
     ports:
       - "5000:5000"

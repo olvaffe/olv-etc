@@ -3,8 +3,8 @@ services:
     image: docker.io/jellyfin/jellyfin:latest
     container_name: jellyfin
     volumes:
-      - /home/jellyfin/jellyfin-config:/config
-      - /home/jellyfin/jellyfin-cache:/cache
+      - /home/pod-jellyfin/jellyfin-config:/config
+      - /home/pod-jellyfin/jellyfin-cache:/cache
       - /srv/media:/media:ro
     ports:
       - "8096:8096"

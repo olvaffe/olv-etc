@@ -6,7 +6,7 @@ Kind=wireguard
 #
 #   [Peer]
 #   PublicKey=XXX
-#   AllowedIPs=192.168.88.1/32
+#   AllowedIPs=192.168.87.10/32
 #   Endpoint=XXX:51820
 #[WireGuard]
 #PrivateKey=XXX
@@ -16,7 +16,7 @@ Kind=wireguard
 #
 #   [Interface]
 #   PrivateKey=XXX
-#   Address=192.168.88.20/24
+#   Address=192.168.87.20/24
 #[WireGuardPeer]
 #PublicKey=XXX
-#AllowedIPs=192.168.88.20/32
+#AllowedIPs=192.168.87.20/32
