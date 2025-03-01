@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+
+import argparse
+import urllib.request
+import sys
+
+STEVEN_BLACK_LIST = r'https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/gambling/hosts'
+EXEMPT_LIST = [
+        b'0.0.0.0',
+]
+
+def process_list(f):
+    sys.stdout.buffer.write(b'server:\n')
+
+    for line in f:
+        if not line.startswith(b'0.0.0.0 '):
+            continue
+
+        host = line[8:-1]
+
+        space = host.find(b' ')
+        if space >= 0:
+            host = host[:space]
+
+        if host in EXEMPT_LIST:
+            continue
+        elif b'"' in host:
+            continue
+
+        zone = b'\tlocal-zone: "%b" always_null\n' % host
+        sys.stdout.buffer.write(zone)
+
+def main():
+    parser = argparse.ArgumentParser(description='Convert Steven Black List for Unbound')
+    parser.add_argument('filename', nargs='?', help='path to downloded list')
+    args = parser.parse_args()
+
+    if args.filename:
+        with open(args.filename, 'rb') as f:
+            process_list(f)
+    else:
+        with urllib.request.urlopen(STEVEN_BLACK_LIST) as f:
+            process_list(f)
+
+if __name__ == '__main__':
+    main()
