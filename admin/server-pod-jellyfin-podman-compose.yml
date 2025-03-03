@@ -5,8 +5,8 @@ services:
     image: docker.io/jellyfin/jellyfin:latest
     container_name: jellyfin
     volumes:
-      - ${COMPOSE_PROJECT_DIR}/jellyfin-config:/config
-      - ${COMPOSE_PROJECT_DIR}/jellyfin-cache:/cache
+      - ./jellyfin-config:/config
+      - ./jellyfin-cache:/cache
       - /srv/media:/media:ro
     ports:
       - "8096:8096"

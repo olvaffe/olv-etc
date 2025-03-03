@@ -5,7 +5,7 @@ services:
     image: ghcr.io/home-assistant/home-assistant:stable
     container_name: ha
     volumes:
-      - ${COMPOSE_PROJECT_DIR}/ha-config:/config
+      - ./ha-config:/config
       - /etc/localtime:/etc/localtime:ro
       - /run/dbus:/run/dbus:ro
     network_mode: host

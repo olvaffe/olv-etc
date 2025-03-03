@@ -11,8 +11,8 @@ services:
         soft: 4096
         hard: 8192
     volumes:
-      - ${COMPOSE_PROJECT_DIR}/omada-data:/opt/tplink/EAPController/data
-      - ${COMPOSE_PROJECT_DIR}/omada-logs:/opt/tplink/EAPController/logs
+      - ./omada-data:/opt/tplink/EAPController/data
+      - ./omada-logs:/opt/tplink/EAPController/logs
     ports:
       - "8043:8043"
       - "8088:8088"
