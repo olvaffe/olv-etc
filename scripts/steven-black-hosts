@@ -7,6 +7,10 @@ import sys
 STEVEN_BLACK_LIST = r'https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/gambling/hosts'
 EXEMPT_LIST = [
         b'0.0.0.0',
+	    b'googleadservices.com',
+	    b'www.googleadservices.com',
+	    b'doubleclick.net',
+	    b'ad.doubleclick.net',
 ]
 
 def process_list(f):
