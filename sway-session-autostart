@@ -1,8 +1,7 @@
 #!/bin/sh
 
 # make sure systemd and dbus services will inherit the gui envs
-gui_envs="DISPLAY SWAYSOCK WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
-systemctl --user import-environment $gui_envs
+gui_envs="PATH DISPLAY SWAYSOCK WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
 dbus-update-activation-environment --systemd $gui_envs
 
 # SSH_AUTH_SOCK has been explicitly set in sway-session
