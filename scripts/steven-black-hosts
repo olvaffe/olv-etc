@@ -7,28 +7,30 @@ import sys
 STEVEN_BLACK_LIST = r'https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/gambling/hosts'
 EXEMPT_LIST = [
         b'0.0.0.0',
-	    b'googleadservices.com',
-	    b'www.googleadservices.com',
-	    b'doubleclick.net',
-	    b'ad.doubleclick.net',
+        b'awstrack.me',
+        b'doubleclick.net',
+        b'googleadservices.com',
 ]
+
+def is_exempted(host):
+    for suffix in EXEMPT_LIST:
+        if host.endswith(suffix):
+            return True
+    return False
 
 def process_list(f):
     sys.stdout.buffer.write(b'server:\n')
 
     for line in f:
-        if not line.startswith(b'0.0.0.0 '):
+        null_prefix = b'0.0.0.0 '
+        if not line.startswith(null_prefix):
             continue
 
-        host = line[8:-1]
+        begin = len(null_prefix)
+        end = line.find(b' ', begin)
+        host = line[begin:end]
 
-        space = host.find(b' ')
-        if space >= 0:
-            host = host[:space]
-
-        if host in EXEMPT_LIST:
-            continue
-        elif b'"' in host:
+        if is_exempted(host) or b'"' in host:
             continue
 
         zone = b'\tlocal-zone: "%b" always_null\n' % host
