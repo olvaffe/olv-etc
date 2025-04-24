@@ -275,6 +275,10 @@ arch_chroot_phase3_bootstrap() {
 
 	echo "root:test0000" | chroot "$sysroot" chpasswd
 
+	if [ "$machine" = "aarch64" ]; then
+		chroot "$sysroot" userdel -r alarm
+	fi
+
 	rm -f "$sysroot/pkglist.x86_64.txt"
 	rm -f "$sysroot/version"
 
@@ -326,8 +330,6 @@ arch_chroot_phase3_bootable() {
 
 	echo "PARTLABEL=arch-esp	/boot	vfat	defaults	0	2" > "$sysroot/etc/fstab"
 	echo "PARTLABEL=arch-root	/	ext4	defaults	0	1" >> "$sysroot/etc/fstab"
-
-	echo -e "[zram0]\nzram-size = ram" > "$sysroot/etc/systemd/zram-generator.conf"
 
 	rm -f "$sysroot/etc/resolv.conf"
 	for ty in ether wlan; do
