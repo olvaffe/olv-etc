@@ -1,0 +1,51 @@
+#!/bin/sh
+
+vmlinuz_name="vmlinuz"
+initrd_name="initrd.img"
+dtb_name="rk3568-nanopi-r5c.dtb"
+
+vmlinuz_src=$(realpath "/$vmlinuz_name")
+initrd_src=$(realpath "/$initrd_name")
+
+vmlinuz_ver="${vmlinuz_src#/boot/vmlinuz-}"
+initrd_ver="${initrd_src#/boot/initrd.img-}"
+
+if [ "$vmlinuz_ver" != "$initrd_ver" ]; then
+	echo "vmlinuz $vmlinuz_ver != initrd $initrd_ver"
+	exit 1
+fi
+
+dtb_src="/usr/lib/linux-image-$vmlinuz_ver/rockchip/$dtb_name"
+
+if ! [ -r "$vmlinuz_src" -a -r "$initrd_src" -a -r "$dtb_src" ]; then
+	echo "failed to read vmlinuz/initrd/dtb"
+	exit 1
+fi
+
+vmlinuz_dst="/boot/debian.kernel"
+initrd_dst="/boot/debian.initrd"
+dtb_dst="/boot/debian.dtb"
+
+if cmp -s "$vmlinuz_src" "$vmlinuz_dst" && \
+   cmp -s "$initrd_src" "$initrd_dst" && \
+   cmp -s "$dtb_src" "$dtb_dst"; then
+	echo "already $vmlinuz_ver"
+	exit 0
+fi
+
+if ! cp "$vmlinuz_src" "$vmlinuz_dst.new" || \
+   ! cp "$initrd_src" "$initrd_dst.new" || \
+   ! cp "$dtb_src" "$dtb_dst.new"; then
+	echo "failed to copy vmlinuz/initrd/dtb"
+	exit 1
+fi
+
+[ -f "$vmlinuz_dst" ] && mv "$vmlinuz_dst" "$vmlinuz_dst.old"
+[ -f "$initrd_dst" ] && mv "$initrd_dst" "$initrd_dst.old"
+[ -f "$dtb_dst" ] && mv "$dtb_dst" "$dtb_dst.old"
+
+mv "$vmlinuz_dst.new" "$vmlinuz_dst"
+mv "$initrd_dst.new" "$initrd_dst"
+mv "$dtb_dst.new" "$dtb_dst"
+
+echo "upreved to $vmlinuz_ver"
