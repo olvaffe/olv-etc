@@ -331,6 +331,8 @@ arch_chroot_phase3_bootable() {
 	echo "PARTLABEL=arch-esp	/boot	vfat	defaults	0	2" > "$sysroot/etc/fstab"
 	echo "PARTLABEL=arch-root	/	ext4	defaults	0	1" >> "$sysroot/etc/fstab"
 
+	echo "[zram0]" > "$sysroot/etc/systemd/zram-generator.conf"
+
 	rm -f "$sysroot/etc/resolv.conf"
 	for ty in ether wlan; do
 		echo -e "[Match]\nType=$ty\n\n[Network]\nDHCP=yes" > "$sysroot/etc/systemd/network/$ty.network"
