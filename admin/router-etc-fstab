@@ -1,0 +1,6 @@
+# /dev/mmcblk1p1, 1GB
+UUID=<UUID>	/boot	vfat	defaults	0	2
+# /dev/mmcblk1p2, 4GB
+UUID=<UUID>	/	ext4	defaults	0	1
+# /dev/mmcblk1p3, 8GB
+UUID=<UUID>	/var	ext4	defaults	0	2

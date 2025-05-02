@@ -1,0 +1,10 @@
+# /dev/sda1, 1GB
+UUID=<UUID>	/boot	vfat	defaults	0	2
+# /dev/sda2, 4GB
+UUID=<UUID>	/	ext4	defaults	0	1
+# /dev/sda3, 8GB
+UUID=<UUID>	/var	ext4	defaults	0	2
+# /dev/sda4, 32GB
+UUID=<UUID>	/home	ext4	defaults	0	2
+# /dev/sda5, rest
+UUID=<UUID>	/srv	ext4	defaults	0	2

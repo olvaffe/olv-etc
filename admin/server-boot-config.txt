@@ -1,0 +1,1 @@
+auto_initramfs=1

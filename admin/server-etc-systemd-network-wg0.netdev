@@ -5,18 +5,18 @@ Kind=wireguard
 # Peers' /etc/wireguard/wg0.conf should have
 #
 #   [Peer]
-#   PublicKey=XXX
+#   PublicKey=<KEY>
 #   AllowedIPs=192.168.87.10/32
-#   Endpoint=XXX:51820
-#[WireGuard]
-#PrivateKey=XXX
-#ListenPort=51820
+#   Endpoint=olv-home.duckdns.org:51820
+[WireGuardt]
+PrivateKey=<KEY>
+ListenPort=51820
 
 # Peer's /etc/wireguard/wg0.conf should have
 #
 #   [Interface]
-#   PrivateKey=XXX
+#   PrivateKey=<KEY>
 #   Address=192.168.87.20/24
-#[WireGuardPeer]
-#PublicKey=XXX
-#AllowedIPs=192.168.87.20/32
+[WireGuardPeer]
+PublicKey=<KEY>
+AllowedIPs=192.168.87.20/32

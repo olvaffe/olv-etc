@@ -1,6 +1,6 @@
 #!/bin/sh
 
-domains="XXX"
+domains="olv-home"
 token="XXX"
 
 duckdns="https://www.duckdns.org/update"
