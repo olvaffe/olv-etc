@@ -29,8 +29,8 @@ Host dut-1 lnx-1
 	LocalForward 39920 localhost:39920
 
 Host dut-2 lnx-2
-	# Monoprice USB-C White
-	Hostname my:test:net:work:2e0:4cff:fe68:4398
+	# HP USB-C Hub
+	Hostname my:test:net:work:3a7c:76ff:fe04:5f77
 	LocalForward 2202 localhost:22
 	LocalForward 12342 localhost:1234
 
