@@ -7,11 +7,17 @@ fi
 
 REPOS="
 	bionic
+	external/avb
+	external/drm_hwcomposer
+	external/minigbm
 	frameworks/av
 	frameworks/native
 	hardware/interfaces
 	hardware/libhardware
+	packages/modules/adb
 	system/core
+	system/libbase
+	system/logging
 "
 
 EXTRAS="
