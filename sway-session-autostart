@@ -1,11 +1,12 @@
 #!/bin/sh
 
-# make sure systemd and dbus services will inherit the gui envs
-gui_envs="PATH DISPLAY SWAYSOCK WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
-dbus-update-activation-environment --systemd $gui_envs
+dbus-update-activation-environment --systemd \
+	SWAYSOCK WAYLAND_DISPLAY DISPLAY
 
 # SSH_AUTH_SOCK has been explicitly set in sway-session
-#ssh-agent -a "$SSH_AUTH_SOCK"
+if [ "$SSH_AUTH_SOCK" != "$(gpgconf -L agent-ssh-socket)" ]; then
+	ssh-agent -a "$SSH_AUTH_SOCK"
+fi
 
 # pinentry-gtk only recognizes DISPLAY
 DISPLAY="$WAYLAND_DISPLAY" gpg-connect-agent UPDATESTARTUPTTY /bye

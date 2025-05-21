@@ -2,8 +2,7 @@
 
 exec </dev/null >"$HOME/.local/state/sway.log" 2>&1
 
-# init GUI envs so that they are inherited by sway and apps directly started
-# by sway (terminal, browser, and autostart)
+# init GUI envs so that they are inherited by systemd, dbus, and sway
 init_gui_envs() {
 	export XDG_CURRENT_DESKTOP="sway"
 
@@ -15,6 +14,12 @@ init_gui_envs() {
 	export GTK_IM_MODULE="fcitx"
 	export QT_IM_MODULE="fcitx"
 	export XMODIFIERS="@im=fcitx"
+
+	dbus-update-activation-environment --systemd \
+		PATH \
+		XDG_CURRENT_DESKTOP \
+		GDK_BACKEND QT_QPA_PLATFORM SDL_VIDEODRIVER \
+		GTK_IM_MODULE QT_IM_MODULE XMODIFIERS
 }
 
 # init SSH_AUTH_SOCK explicitly for sway, but start ssh-agent or gpg-agent
@@ -25,8 +30,8 @@ init_ssh_envs() {
 		eval $(ssh-agent -k)
 	fi
 
-	#export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/sway-ssh-agent.socket"
 	export SSH_AUTH_SOCK="$(gpgconf -L agent-ssh-socket)"
+	#export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/sway-ssh-agent.socket"
 }
 
 init_gui_envs
