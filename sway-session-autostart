@@ -5,7 +5,10 @@ gui_envs="PATH DISPLAY SWAYSOCK WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
 dbus-update-activation-environment --systemd $gui_envs
 
 # SSH_AUTH_SOCK has been explicitly set in sway-session
-ssh-agent -a "$SSH_AUTH_SOCK"
+#ssh-agent -a "$SSH_AUTH_SOCK"
+
+# pinentry-gtk only recognizes DISPLAY
+DISPLAY="$WAYLAND_DISPLAY" gpg-connect-agent UPDATESTARTUPTTY /bye
 
 nm-applet &
 fcitx5 &

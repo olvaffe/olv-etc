@@ -17,18 +17,16 @@ init_gui_envs() {
 	export XMODIFIERS="@im=fcitx"
 }
 
-# init SSH_AUTO_SOCK explicitly for sway, but start ssh-agent later in
-# autostart because ssh-agent might depend on sway to display prompts
-#
-# It would be better to init WAYLAND_DISPLAY explicitly for ssh-agent and
-# to start it right away, but sway does not support explicit WAYLAND_DISPLAY.
+# init SSH_AUTH_SOCK explicitly for sway, but start ssh-agent or gpg-agent
+# later in autostart because the agent might depend on sway to display prompts
 init_ssh_envs() {
 	# kill pre-existing ssh-agent that was started before sway
 	if [ -n "$SSH_AGENT_PID" ]; then
 		eval $(ssh-agent -k)
 	fi
 
-	export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/sway-ssh-agent.socket"
+	#export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/sway-ssh-agent.socket"
+	export SSH_AUTH_SOCK="$(gpgconf -L agent-ssh-socket)"
 }
 
 init_gui_envs
