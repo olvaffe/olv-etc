@@ -1,0 +1,6 @@
+# this is sourced by pinentry on arch linux
+
+# pinentry-gtk requires DISPLAY even under wayland
+if [ -n "$WAYLAND_DISPLAY" -a -z "$DISPLAY" ]; then
+	export DISPLAY="$WAYLAND_DISPLAY"
+fi
