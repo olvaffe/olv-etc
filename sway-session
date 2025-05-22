@@ -16,7 +16,6 @@ init_gui_envs() {
 	export XMODIFIERS="@im=fcitx"
 
 	dbus-update-activation-environment --systemd \
-		PATH \
 		XDG_CURRENT_DESKTOP \
 		GDK_BACKEND QT_QPA_PLATFORM SDL_VIDEODRIVER \
 		GTK_IM_MODULE QT_IM_MODULE XMODIFIERS

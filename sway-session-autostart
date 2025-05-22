@@ -1,7 +1,7 @@
 #!/bin/sh
 
-dbus-update-activation-environment --systemd \
-	SWAYSOCK WAYLAND_DISPLAY DISPLAY
+sway_envs="XDG_SESSION_TYPE SWAYSOCK WAYLAND_DISPLAY DISPLAY"
+dbus-update-activation-environment --systemd $sway_envs
 
 # SSH_AUTH_SOCK has been explicitly set in sway-session
 if [ "$SSH_AUTH_SOCK" != "$(gpgconf -L agent-ssh-socket)" ]; then
@@ -9,7 +9,7 @@ if [ "$SSH_AUTH_SOCK" != "$(gpgconf -L agent-ssh-socket)" ]; then
 fi
 
 # pinentry-gtk only recognizes DISPLAY
-DISPLAY="$WAYLAND_DISPLAY" gpg-connect-agent UPDATESTARTUPTTY /bye
+gpg-connect-agent UPDATESTARTUPTTY /bye
 
 nm-applet &
 fcitx5 &
