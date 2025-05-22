@@ -4,11 +4,11 @@ sway_envs="XDG_SESSION_TYPE SWAYSOCK WAYLAND_DISPLAY DISPLAY"
 dbus-update-activation-environment --systemd $sway_envs
 
 # SSH_AUTH_SOCK has been explicitly set in sway-session
-if [ "$SSH_AUTH_SOCK" != "$(gpgconf -L agent-ssh-socket)" ]; then
+if [ "$SSH_AUTH_SOCK" = "$(gpgconf -L agent-ssh-socket)" ]; then
+	gpg-connect-agent UPDATESTARTUPTTY /bye
+else
 	ssh-agent -a "$SSH_AUTH_SOCK"
 fi
-
-gpg-connect-agent UPDATESTARTUPTTY /bye
 
 nm-applet &
 fcitx5 &
