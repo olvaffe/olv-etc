@@ -9,9 +9,14 @@ esac
 [ -f "$HOME/.config/sh/paths.sh" ] && . "$HOME/.config/sh/paths.sh"
 [ -f "$HOME/.config/sh/aliases.sh" ] && . "$HOME/.config/sh/aliases.sh"
 
-[ -z "$WAYLAND_DISPLAY$DISPLAY" -a $(tty) = "/dev/tty1" ] && \
+[ -z "$WAYLAND_DISPLAY" -a $(tty) = "/dev/tty1" ] && \
 	command -v sway > /dev/null && \
 	exec sway-session
+
+if [ -z "$SSH_AUTH_SOCK" -a -z "$SSH_CONNECTION" ]; then
+	export SSH_AUTH_SOCK="$(gpgconf -L agent-ssh-socket)"
+	gpg-connect-agent UPDATESTARTUPTTY /bye > /dev/null
+fi
 
 HISTFILE="$HOME/.local/state/sh.history"
 HISTSIZE=64000

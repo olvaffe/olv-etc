@@ -8,7 +8,6 @@ if [ "$SSH_AUTH_SOCK" != "$(gpgconf -L agent-ssh-socket)" ]; then
 	ssh-agent -a "$SSH_AUTH_SOCK"
 fi
 
-# pinentry-gtk only recognizes DISPLAY
 gpg-connect-agent UPDATESTARTUPTTY /bye
 
 nm-applet &
