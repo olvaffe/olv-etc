@@ -6,7 +6,6 @@ order += "cpu_usage"
 order += "cpu_temperature 1"
 order += "battery 0"
 order += "volume master"
-#order += "path_exists VPN"
 order += "tztime TPE"
 order += "time"
 
@@ -28,10 +27,6 @@ volume master {
 	device = "pulse"
 	format = "♪: %volume"
 	format_muted = "♪: muted (%volume)"
-}
-
-path_exists VPN {
-	path = "/proc/sys/net/ipv4/conf/tun0"
 }
 
 tztime TPE {
