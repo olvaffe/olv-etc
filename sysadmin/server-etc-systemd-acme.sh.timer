@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily check for acme.sh
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=1h
+
+[Install]
+WantedBy=timers.target

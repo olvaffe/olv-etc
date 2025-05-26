@@ -1,3 +1,4 @@
+acme.sh
 btrfs-progs
 cnrdrvcups-ufr2-us
 containers-storage
@@ -6,13 +7,16 @@ curl
 dosfstools
 fdisk
 git
+hdparm
 htop
 iotop
+iperf
 iperf3
 iproute2
 iputils-ping
 iputils-tracepath
 ksmbd-tools
+ldnsutils
 less
 linux-image-arm64
 logrotate
@@ -20,6 +24,7 @@ man-db
 nginx
 openssh-server
 pciutils
+php-fpm
 podman
 podman-compose
 procps
@@ -29,6 +34,7 @@ systemd-journal-remote
 systemd-resolved
 systemd-timesyncd
 systemd-zram-generator
+tcpdump
 usbutils
 vim
 whiptail
