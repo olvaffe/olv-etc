@@ -1,0 +1,12 @@
+[Container]
+Image=ghcr.io/home-assistant/home-assistant:stable
+Timezone=local
+Volume=%h/ha-config:/config
+Volume=/run/dbus:/run/dbus:ro
+Network=host
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
