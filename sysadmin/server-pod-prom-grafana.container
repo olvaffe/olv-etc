@@ -1,0 +1,11 @@
+[Container]
+Pod=prom.pod
+Image=docker.io/grafana/grafana:latest
+Timezone=local
+Volume=%h/grafana-data:/var/lib/grafana
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
