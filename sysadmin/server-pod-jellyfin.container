@@ -1,5 +1,6 @@
 [Container]
 Image=docker.io/jellyfin/jellyfin:latest
+Timezone=local
 Volume=%h/jellyfin-config:/config
 Volume=%h/jellyfin-cache:/cache
 Volume=/srv/media:/media:ro

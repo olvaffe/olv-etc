@@ -1,0 +1,13 @@
+[Container]
+Image=docker.io/jvmilazz0/kavita:latest
+Timezone=local
+Volume=%h/kavita-config:/kavita/config
+Volume=/srv/manga:/manga:ro
+Volume=/srv/ebooks:/ebooks:ro
+PublishPort=5000:5000
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
