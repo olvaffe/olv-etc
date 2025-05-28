@@ -1,11 +1,10 @@
 [Container]
-ContainerName=jellyfin
 Image=docker.io/jellyfin/jellyfin:latest
 Volume=%h/jellyfin-config:/config
 Volume=%h/jellyfin-cache:/cache
 Volume=/srv/media:/media:ro
 PublishPort=8096:8096
-HealthInterval=disable
+HealthCmd=none
 
 [Service]
 Restart=always

@@ -61,15 +61,6 @@ server {
 
 server {
 	listen 443 ssl;
-	server_name jellyfin.olv.rip;
-
-	location / {
-		proxy_pass http://localhost:8096;
-	}
-}
-
-server {
-	listen 443 ssl;
 	server_name kavita.olv.rip;
 
 	location / {
