@@ -1,8 +1,0 @@
-[Unit]
-Description=Renew certificates using acme.sh
-After=network-online.target nss-lookup.target
-
-[Service]
-Type=oneshot
-SyslogIdentifier=acme.sh
-ExecStart=/usr/bin/acme.sh --home /etc/acme.sh --cron
