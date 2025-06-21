@@ -22,6 +22,7 @@ fi
 prepend_path "$HOME/android/sdk/build-tools/34.0.0"
 prepend_path "$HOME/android/sdk/platform-tools"
 prepend_path "$HOME/.cargo/bin"
+prepend_path "$HOME/.pip/bin"
 prepend_path "$HOME/.local/bin"
 
 unset -f append_path
