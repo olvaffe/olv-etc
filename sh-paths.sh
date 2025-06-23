@@ -19,7 +19,7 @@ else
 	append_path "$HOME/chromiumos/depot_tools"
 fi
 
-prepend_path "$HOME/android/sdk/build-tools/34.0.0"
+prepend_path "$HOME/android/sdk/build-tools/36.0.0"
 prepend_path "$HOME/android/sdk/platform-tools"
 prepend_path "$HOME/.cargo/bin"
 prepend_path "$HOME/.pip/bin"
