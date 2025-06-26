@@ -1,0 +1,122 @@
+#!/bin/sh
+
+pkg_base="
+	base
+	dosfstools
+	linux
+	linux-firmware
+	openssh
+	vim
+	wireless-regdb
+	zram-generator
+"
+
+pkg_cli="
+	android-tools
+	bc
+	ctags
+	dmidecode
+	git
+	htop
+	iw
+	ldns
+	lsof
+	man-db
+	man-pages
+	mesa-utils
+	nordvpn-bin
+	perf
+	picocom
+	rsync
+	strace
+	sudo
+	trace-cmd
+	unzip
+	usbutils
+	vulkan-tools
+	wget
+	wireguard-tools
+	zip
+"
+
+pkg_gui="
+	alacritty
+	brightnessctl
+	cups
+	fcitx5-chewing
+	fcitx5-configtool
+	fcitx5-gtk
+	google-chrome
+	grim
+	gtk4
+	i3status
+	mako
+	mpv
+	noto-fonts
+	noto-fonts-cjk
+	noto-fonts-emoji
+	pipewire-pulse
+	slurp
+	sway
+	swayidle
+	swayimg
+	wayland-utils
+	wl-clipboard
+	xdg-desktop-portal-gtk
+	xdg-desktop-portal-wlr
+"
+
+pkg_dev="
+	base-devel
+	ccache
+	clang
+	cmake
+	gdb
+	meson
+"
+
+pkg_cross="
+	aarch64-linux-gnu-gcc
+	qemu-user-static-binfmt
+"
+
+pkg_mesa_dev="
+	glslang
+	libclc
+	llvm
+	spirv-llvm-translator
+	vulkan-validation-layers
+"
+
+pkg_xps="
+	bcm20702a1-firmware
+	broadcom-wl-dkms
+	btrfs-progs
+	intel-ucode
+	linux-headers
+	sbctl
+	vulkan-intel
+	wpa_supplicant
+"
+
+pkg_all="$pkg_base $pkg_cli"
+
+host="$(uname -n)"
+case "$host" in
+	"xps")
+		pkg_all="$pkg_all $pkg_gui"
+		pkg_all="$pkg_all $pkg_dev $pkg_cross $pkg_mesa_dev"
+		pkg_all="$pkg_all $pkg_xps"
+		;;
+	*)
+		echo "unknown device: $host"
+		exit 1
+		;;
+esac
+
+qeq="$(pacman -Qeq)"
+if [ -n "$qeq" ]; then
+	pacman -Dq --asdeps $qeq
+fi
+
+pacman -Dq --asexplicit $pkg_all
