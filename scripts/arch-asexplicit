@@ -4,7 +4,7 @@ pkg_base="
 	base
 	dosfstools
 	linux
-	linux-firmware
+	linux-firmware-realtek
 	openssh
 	vim
 	wireless-regdb
