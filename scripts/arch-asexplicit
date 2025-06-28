@@ -2,43 +2,35 @@
 
 pkg_base="
 	base
-	btrfs-progs
-	dosfstools
-	linux
-	linux-firmware-realtek
+	bc
+	ctags
+	git
+	htop
+	lsof
+	man-db
+	man-pages
 	openssh
-	sbctl
+	rsync
+	strace
+	sudo
+	unzip
+	usbutils
 	vim
-	wireless-regdb
-	zram-generator
+	zip
 "
 
 pkg_cli="
 	android-tools
-	bc
-	ctags
 	dmidecode
-	git
-	htop
 	iw
 	ldns
-	lsof
-	man-db
-	man-pages
 	mesa-utils
 	nordvpn-bin
 	perf
 	picocom
-	rsync
-	strace
-	sudo
 	trace-cmd
-	unzip
-	usbutils
 	vulkan-tools
-	wget
 	wireguard-tools
-	zip
 "
 
 pkg_gui="
@@ -87,7 +79,17 @@ pkg_mesa_dev="
 	libclc
 	llvm
 	spirv-llvm-translator
-	vulkan-validation-layers
+"
+
+pkg_metal="
+	btrfs-progs
+	dosfstools
+	linux
+	linux-firmware-realtek
+	sbctl
+	systemd-ukify
+	wireless-regdb
+	zram-generator
 "
 
 pkg_t580="
@@ -106,19 +108,26 @@ pkg_xps="
 	wpa_supplicant
 "
 
-pkg_all="$pkg_base $pkg_cli"
+pkg_crostini="
+	cros-container-guest-tools-git
+"
+
+pkg_all="$pkg_base"
 
 host="$(uname -n)"
 case "$host" in
 	"t580")
-		pkg_all="$pkg_all $pkg_gui"
+		pkg_all="$pkg_all $pkg_cli $pkg_gui"
 		pkg_all="$pkg_all $pkg_dev $pkg_cross $pkg_mesa_dev"
-		pkg_all="$pkg_all $pkg_t580"
+		pkg_all="$pkg_all $pkg_metal $pkg_t580"
 		;;
 	"xps")
-		pkg_all="$pkg_all $pkg_gui"
+		pkg_all="$pkg_all $pkg_cli $pkg_gui"
 		pkg_all="$pkg_all $pkg_dev $pkg_cross $pkg_mesa_dev"
-		pkg_all="$pkg_all $pkg_xps"
+		pkg_all="$pkg_all $pkg_metal $pkg_xps"
+		;;
+	"crostini")
+		pkg_all="$pkg_all $pkg_crostini"
 		;;
 	*)
 		echo "unknown device: $host"
