@@ -6,18 +6,18 @@ GENERAL_OPTS="
 
 MACHINE_OPTS="
 	-machine q35,pflash0=my-efi,pflash1=my-efivars
-	-cpu Broadwell
+	-cpu host
 	-accel kvm
 	-smp 2
 	-m 2G
 	-nodefaults"
 
 EFI_OPTS="
-	-blockdev driver=file,node-name=my-efi,read-only=on,filename=pc-bios/edk2-x86_64-code.fd
-	-blockdev driver=file,node-name=my-efivars,filename=arch-efivars.fd"
+	-blockdev driver=file,node-name=my-efi,read-only=on,filename=OVMF_CODE.secboot.4m.fd
+	-blockdev driver=file,node-name=my-efivars,filename=OVMF_VARS.4m.fd"
 
 DISPLAY_OPTS="
-	-device virtio-vga
+	-device virtio-vga-gl
 	-display sdl,gl=on"
 
 INPUT_OPTS="
@@ -37,13 +37,13 @@ NETWORK_OPTS="
 	-netdev user,id=my-net,hostfwd=tcp::2222-:22"
 
 BLOCK_OPTS="
-	-device ide-hd,drive=my-drive
-	-blockdev driver=file,node-name=my-image,filename=arch.qcow2
-	-blockdev driver=qcow2,node-name=my-drive,file=my-image"
+	-device virtio-blk-pci,drive=my-drive
+	-blockdev driver=file,node-name=my-image,filename=test.img
+	-blockdev driver=raw,node-name=my-drive,file=my-image"
 
 export SDL_VIDEO_ALLOW_SCREENSAVER=1
 
-./x86_64-softmmu/qemu-system-x86_64 \
+qemu-system-x86_64 \
 	$GENERAL_OPTS \
 	$MACHINE_OPTS \
 	$EFI_OPTS \
