@@ -1,6 +1,6 @@
 #!/bin/sh
 
-pkg_base="
+cli_base="
 	base
 	bc
 	ctags
@@ -19,7 +19,7 @@ pkg_base="
 	zip
 "
 
-pkg_cli="
+cli_extra="
 	android-tools
 	dmidecode
 	iw
@@ -33,34 +33,38 @@ pkg_cli="
 	wireguard-tools
 "
 
-pkg_gui="
+gui_base="
 	alacritty
 	brightnessctl
 	cups
 	fcitx5-chewing
 	fcitx5-configtool
 	fcitx5-gtk
-	google-chrome
-	grim
-	gtk4
 	i3status
 	mako
-	mpv
 	noto-fonts
 	noto-fonts-cjk
 	noto-fonts-emoji
 	pipewire-pulse
-	slurp
 	sway
 	swayidle
-	swayimg
-	wayland-utils
-	wl-clipboard
+	swaylock
 	xdg-desktop-portal-gtk
 	xdg-desktop-portal-wlr
 "
 
-pkg_dev="
+gui_extra="
+	google-chrome
+	grim
+	gtk4
+	mpv
+	slurp
+	swayimg
+	wayland-utils
+	wl-clipboard
+"
+
+dev_base="
 	base-devel
 	ccache
 	clang
@@ -69,19 +73,19 @@ pkg_dev="
 	meson
 "
 
-pkg_cross="
-	aarch64-linux-gnu-gcc
-	qemu-user-static-binfmt
-"
-
-pkg_mesa_dev="
+dev_mesa="
 	glslang
 	libclc
 	llvm
 	spirv-llvm-translator
 "
 
-pkg_metal="
+dev_cross="
+	aarch64-linux-gnu-gcc
+	qemu-user-static-binfmt
+"
+
+hw_metal="
 	btrfs-progs
 	dosfstools
 	linux
@@ -92,14 +96,14 @@ pkg_metal="
 	zram-generator
 "
 
-pkg_t580="
+hw_t580="
 	linux-firmware-intel
 	intel-ucode
 	iwd
 	vulkan-intel
 "
 
-pkg_xps="
+hw_xps="
 	bcm20702a1-firmware
 	broadcom-wl-dkms
 	intel-ucode
@@ -108,26 +112,27 @@ pkg_xps="
 	wpa_supplicant
 "
 
-pkg_crostini="
+hw_crostini="
 	cros-container-guest-tools-git
 "
 
-pkg_all="$pkg_base"
+pkgs="$cli_base"
 
 host="$(uname -n)"
 case "$host" in
 	"t580")
-		pkg_all="$pkg_all $pkg_cli $pkg_gui"
-		pkg_all="$pkg_all $pkg_dev $pkg_cross $pkg_mesa_dev"
-		pkg_all="$pkg_all $pkg_metal $pkg_t580"
+		pkgs="$pkgs $cli_extra"
+		pkgs="$pkgs $gui_base $gui_extra"
+		pkgs="$pkgs $dev_base $dev_mesa $dev_cross"
+		pkgs="$pkgs $hw_metal $hw_t580"
 		;;
 	"xps")
-		pkg_all="$pkg_all $pkg_cli $pkg_gui"
-		pkg_all="$pkg_all $pkg_dev $pkg_cross $pkg_mesa_dev"
-		pkg_all="$pkg_all $pkg_metal $pkg_xps"
+		pkgs="$pkgs $cli_extra $gui_base $gui_extra"
+		pkgs="$pkgs $dev_base $dev_mesa $dev_cross"
+		pkgs="$pkgs $hw_metal $hw_xps"
 		;;
 	"crostini")
-		pkg_all="$pkg_all $pkg_crostini"
+		pkgs="$pkgs $hw_crostini"
 		;;
 	*)
 		echo "unknown device: $host"
@@ -135,9 +140,11 @@ case "$host" in
 		;;
 esac
 
+#pacman -S --needed $pkgs
+
 qeq="$(pacman -Qeq)"
 if [ -n "$qeq" ]; then
 	pacman -Dq --asdeps $qeq
 fi
 
-pacman -Dq --asexplicit $pkg_all
+pacman -Dq --asexplicit $pkgs
