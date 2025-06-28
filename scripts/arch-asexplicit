@@ -1,76 +1,92 @@
 #!/bin/sh
 
-cli_base="
+cli_min="
 	base
 	bc
-	ctags
-	git
 	htop
 	lsof
-	man-db
-	man-pages
 	openssh
-	rsync
 	strace
 	sudo
+	vim
+"
+
+cli_base="
+	ctags
+	git
+	man-db
+	man-pages
+	rsync
 	unzip
 	usbutils
-	vim
 	zip
+"
+
+cli_std="
+	dmidecode
+	iw
+	ldns
+	picocom
+	trace-cmd
+	wireguard-tools
 "
 
 cli_extra="
 	android-tools
-	dmidecode
-	iw
-	ldns
 	mesa-utils
 	nordvpn-bin
 	perf
-	picocom
-	trace-cmd
 	vulkan-tools
-	wireguard-tools
+"
+
+gui_min="
+	alacritty
+	i3status
+	noto-fonts
+	polkit
+	sway
 "
 
 gui_base="
-	alacritty
 	brightnessctl
-	cups
-	fcitx5-chewing
-	fcitx5-configtool
-	fcitx5-gtk
-	i3status
-	mako
-	noto-fonts
-	noto-fonts-cjk
-	noto-fonts-emoji
-	pipewire-pulse
-	sway
-	swayidle
-	swaylock
-	xdg-desktop-portal-gtk
-	xdg-desktop-portal-wlr
-"
-
-gui_extra="
-	google-chrome
 	grim
-	gtk4
-	mpv
+	mako
+	pipewire-pulse
 	slurp
+	swayidle
 	swayimg
+	swaylock
 	wayland-utils
 	wl-clipboard
 "
 
-dev_base="
+gui_std="
+	fcitx5-chewing
+	fcitx5-configtool
+	fcitx5-gtk
+	google-chrome
+	gtk4
+	noto-fonts-cjk
+	noto-fonts-emoji
+"
+
+gui_extra="
+	cups
+	mpv
+	xdg-desktop-portal-gtk
+	xdg-desktop-portal-wlr
+"
+
+dev_min="
 	base-devel
 	ccache
-	clang
-	cmake
 	gdb
 	meson
+"
+
+dev_base="
+	clang
+	cmake
 "
 
 dev_mesa="
@@ -116,19 +132,20 @@ hw_crostini="
 	cros-container-guest-tools-git
 "
 
-pkgs="$cli_base"
+pkgs="$cli_min $cli_base"
 
 host="$(uname -n)"
 case "$host" in
 	"t580")
-		pkgs="$pkgs $cli_extra"
-		pkgs="$pkgs $gui_base $gui_extra"
-		pkgs="$pkgs $dev_base $dev_mesa $dev_cross"
+		pkgs="$pkgs $cli_std $cli_extra"
+		pkgs="$pkgs $gui_min $gui_base $gui_std $gui_extra"
+		pkgs="$pkgs $dev_min $dev_base $dev_mesa $dev_cross"
 		pkgs="$pkgs $hw_metal $hw_t580"
 		;;
 	"xps")
-		pkgs="$pkgs $cli_extra $gui_base $gui_extra"
-		pkgs="$pkgs $dev_base $dev_mesa $dev_cross"
+		pkgs="$pkgs $cli_std $cli_extra"
+		pkgs="$pkgs $gui_min $gui_base $gui_std $gui_extra"
+		pkgs="$pkgs $dev_min $dev_base $dev_mesa $dev_cross"
 		pkgs="$pkgs $hw_metal $hw_xps"
 		;;
 	"crostini")
@@ -140,11 +157,10 @@ case "$host" in
 		;;
 esac
 
-#pacman -S --needed $pkgs
-
 qeq="$(pacman -Qeq)"
 if [ -n "$qeq" ]; then
 	pacman -Dq --asdeps $qeq
 fi
 
+#pacman -S --needed $pkgs
 pacman -Dq --asexplicit $pkgs
