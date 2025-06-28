@@ -2,10 +2,12 @@
 
 pkg_base="
 	base
+	btrfs-progs
 	dosfstools
 	linux
 	linux-firmware-realtek
 	openssh
+	sbctl
 	vim
 	wireless-regdb
 	zram-generator
@@ -88,13 +90,18 @@ pkg_mesa_dev="
 	vulkan-validation-layers
 "
 
+pkg_t580="
+	linux-firmware-intel
+	intel-ucode
+	iwd
+	vulkan-intel
+"
+
 pkg_xps="
 	bcm20702a1-firmware
 	broadcom-wl-dkms
-	btrfs-progs
 	intel-ucode
 	linux-headers
-	sbctl
 	vulkan-intel
 	wpa_supplicant
 "
@@ -103,6 +110,11 @@ pkg_all="$pkg_base $pkg_cli"
 
 host="$(uname -n)"
 case "$host" in
+	"t580")
+		pkg_all="$pkg_all $pkg_gui"
+		pkg_all="$pkg_all $pkg_dev $pkg_cross $pkg_mesa_dev"
+		pkg_all="$pkg_all $pkg_t580"
+		;;
 	"xps")
 		pkg_all="$pkg_all $pkg_gui"
 		pkg_all="$pkg_all $pkg_dev $pkg_cross $pkg_mesa_dev"
