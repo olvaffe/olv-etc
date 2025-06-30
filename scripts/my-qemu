@@ -2,53 +2,58 @@
 
 GENERAL_OPTS="
 	-name my-vm,debug-threads=on
-	-mon my-serial"
+	-mon my-serial
+"
 
 MACHINE_OPTS="
-	-machine q35,pflash0=my-efi,pflash1=my-efivars
+	-machine q35,pflash0=my-efi,pflash1=my-efivars,i8042=off
 	-cpu host
 	-accel kvm
 	-smp 2
 	-m 2G
-	-nodefaults"
+	-nodefaults
+"
 
 EFI_OPTS="
 	-blockdev driver=file,node-name=my-efi,read-only=on,filename=OVMF_CODE.secboot.4m.fd
-	-blockdev driver=file,node-name=my-efivars,filename=OVMF_VARS.4m.fd"
+	-blockdev driver=file,node-name=my-efivars,filename=OVMF_VARS.4m.fd
+"
 
-DISPLAY_OPTS="
+UI_OPTS="
 	-device virtio-vga-gl
-	-display sdl,gl=on"
-
-INPUT_OPTS="
 	-device virtio-keyboard
-	-device virtio-mouse"
+	-device virtio-mouse
+	-display sdl,gl=on
+"
 
 SERIAL_OPTS="
 	-device virtio-serial
-	-device virtserialport,chardev=my-serial
-	-chardev stdio,id=my-serial,mux=on"
+	-device virtconsole,chardev=my-serial
+	-chardev stdio,id=my-serial,signal=off,mux=on
+"
 
 # also ttyS0
-SERIAL_OPTS="$SERIAL_OPTS -device pci-serial,chardev=my-serial"
+#SERIAL_OPTS="$SERIAL_OPTS -device pci-serial,chardev=my-serial"
 
 NETWORK_OPTS="
 	-device virtio-net,netdev=my-net
-	-netdev user,id=my-net,hostfwd=tcp::2222-:22"
+	-netdev user,id=my-net,hostfwd=tcp::2222-:22
+"
 
 BLOCK_OPTS="
-	-device virtio-blk-pci,drive=my-drive
+	-device virtio-blk,drive=my-drive
 	-blockdev driver=file,node-name=my-image,filename=test.img
-	-blockdev driver=raw,node-name=my-drive,file=my-image"
+	-blockdev driver=raw,node-name=my-drive,file=my-image
+"
 
 export SDL_VIDEO_ALLOW_SCREENSAVER=1
 
+#gdb --args \
 qemu-system-x86_64 \
 	$GENERAL_OPTS \
 	$MACHINE_OPTS \
 	$EFI_OPTS \
-	$DISPLAY_OPTS \
-	$INPUT_OPTS \
+	$UI_OPTS \
 	$SERIAL_OPTS \
 	$NETWORK_OPTS \
 	$BLOCK_OPTS \
