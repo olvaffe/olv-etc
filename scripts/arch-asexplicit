@@ -105,12 +105,19 @@ dev_cross="
 hw_metal="
 	btrfs-progs
 	dosfstools
-	linux
 	linux-firmware-realtek
-	sbctl
-	systemd-ukify
 	wireless-regdb
 	zram-generator
+"
+
+hw_x86="
+	linux
+	sbctl
+	systemd-ukify
+"
+
+hw_arm="
+	archlinuxarm-keyring
 "
 
 hw_t580="
@@ -129,6 +136,11 @@ hw_xps="
 	wpa_supplicant
 "
 
+hw_opi="
+	seatd
+	vulkan-tools
+"
+
 hw_crostini="
 	cros-container-guest-tools-git
 "
@@ -141,13 +153,19 @@ case "$host" in
 		pkgs="$pkgs $cli_min $cli_base $cli_std $cli_extra"
 		pkgs="$pkgs $gui_min $gui_base $gui_std $gui_extra"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa $dev_cross"
-		pkgs="$pkgs $hw_metal $hw_t580"
+		pkgs="$pkgs $hw_metal $hw_x86 $hw_t580"
 		;;
 	"xps")
 		pkgs="$pkgs $cli_min $cli_base $cli_std $cli_extra"
 		pkgs="$pkgs $gui_min $gui_base $gui_std $gui_extra"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa $dev_cross"
-		pkgs="$pkgs $hw_metal $hw_xps"
+		pkgs="$pkgs $hw_metal $hw_x86 $hw_xps"
+		;;
+	"opi")
+		pkgs="$pkgs $cli_min $cli_base"
+		pkgs="$pkgs $gui_min"
+		pkgs="$pkgs $dev_min $dev_base $dev_mesa"
+		pkgs="$pkgs $hw_metal $hw_arm $hw_opi"
 		;;
 	"crostini")
 		pkgs="$pkgs $cli_min $cli_base"
