@@ -1,45 +1,53 @@
 #!/bin/sh
 
+# ~750M
 cli_min="
 	base
-	bc
-	htop
-	lsof
-	openssh
-	strace
 	sudo
 	vim
 "
 
+# ~250M
 cli_base="
+	bc
 	ctags
 	git
+	lsof
 	man-db
 	man-pages
+	openssh
 	python
-	rsync
+	strace
 	unzip
 	usbutils
 	zip
 "
 
+# ~50M
 cli_std="
-	dmidecode
+	htop
 	iw
 	ldns
 	picocom
+	rsync
 	trace-cmd
+	vulkan-tools
 	wireguard-tools
 "
 
+# ~400M
 cli_extra="
 	android-tools
 	mesa-utils
-	nordvpn-bin
 	perf
-	vulkan-tools
 "
 
+# ~100M
+cli_aur="
+	nordvpn-bin
+"
+
+# ~200M
 gui_min="
 	alacritty
 	i3status
@@ -48,11 +56,11 @@ gui_min="
 	sway
 "
 
+# ~150M
 gui_base="
 	brightnessctl
 	grim
 	mako
-	pipewire-pulse
 	slurp
 	swayidle
 	swayimg
@@ -61,16 +69,18 @@ gui_base="
 	wl-clipboard
 "
 
+# ~850M
 gui_std="
 	fcitx5-chewing
 	fcitx5-configtool
 	fcitx5-gtk
-	google-chrome
 	gtk4
 	noto-fonts-cjk
 	noto-fonts-emoji
+	pipewire-pulse
 "
 
+# ~300M
 gui_extra="
 	cups
 	mpv
@@ -78,18 +88,26 @@ gui_extra="
 	xdg-desktop-portal-wlr
 "
 
+# ~400M
+gui_aur="
+	google-chrome
+"
+
+# ~350M
 dev_min="
 	base-devel
 	ccache
-	gdb
 	meson
 "
 
+# ~450M
 dev_base="
 	clang
 	cmake
+	gdb
 "
 
+# ~250M
 dev_mesa="
 	glslang
 	libclc
@@ -97,11 +115,13 @@ dev_mesa="
 	spirv-llvm-translator
 "
 
+# ~600M
 dev_cross="
 	aarch64-linux-gnu-gcc
 	qemu-user-static-binfmt
 "
 
+# ~50M
 hw_metal="
 	btrfs-progs
 	dosfstools
@@ -110,16 +130,19 @@ hw_metal="
 	zram-generator
 "
 
+# ~200M
 hw_x86="
 	linux
 	sbctl
 	systemd-ukify
 "
 
+# ~0M
 hw_arm="
 	archlinuxarm-keyring
 "
 
+# ~150M
 hw_t580="
 	linux-firmware-intel
 	intel-ucode
@@ -127,6 +150,7 @@ hw_t580="
 	vulkan-intel
 "
 
+# ~350M
 hw_xps="
 	bcm20702a1-firmware
 	broadcom-wl-dkms
@@ -136,9 +160,9 @@ hw_xps="
 	wpa_supplicant
 "
 
+# ~0M
 hw_opi="
 	seatd
-	vulkan-tools
 "
 
 hw_crostini="
@@ -150,19 +174,19 @@ pkgs=""
 host="$(uname -n)"
 case "$host" in
 	"t580")
-		pkgs="$pkgs $cli_min $cli_base $cli_std $cli_extra"
-		pkgs="$pkgs $gui_min $gui_base $gui_std $gui_extra"
+		pkgs="$pkgs $cli_min $cli_base $cli_std $cli_extra $cli_aur"
+		pkgs="$pkgs $gui_min $gui_base $gui_std $gui_extra $gui_aur"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa $dev_cross"
 		pkgs="$pkgs $hw_metal $hw_x86 $hw_t580"
 		;;
 	"xps")
-		pkgs="$pkgs $cli_min $cli_base $cli_std $cli_extra"
-		pkgs="$pkgs $gui_min $gui_base $gui_std $gui_extra"
+		pkgs="$pkgs $cli_min $cli_base $cli_std $cli_extra $cli_aur"
+		pkgs="$pkgs $gui_min $gui_base $gui_std $gui_extra $gui_aur"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa $dev_cross"
 		pkgs="$pkgs $hw_metal $hw_x86 $hw_xps"
 		;;
 	"opi")
-		pkgs="$pkgs $cli_min $cli_base"
+		pkgs="$pkgs $cli_min $cli_base $cli_std"
 		pkgs="$pkgs $gui_min"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa"
 		pkgs="$pkgs $hw_metal $hw_arm $hw_opi"
