@@ -1,13 +1,15 @@
 #!/bin/sh
 
-# ~750M
+# ~800M
 cli_min="
 	base
+	btrfs-progs
+	dosfstools
 	sudo
 	vim
 "
 
-# ~250M
+# ~200M
 cli_base="
 	bc
 	git
@@ -21,7 +23,7 @@ cli_base="
 	usbutils
 "
 
-# ~50M
+# ~100M
 cli_std="
 	ctags
 	iw
@@ -37,7 +39,7 @@ cli_std="
 	zip
 "
 
-# ~400M
+# ~450M
 cli_extra="
 	android-tools
 	mesa-utils
@@ -125,8 +127,6 @@ dev_cross="
 
 # ~50M
 hw_metal="
-	btrfs-progs
-	dosfstools
 	zram-generator
 "
 

@@ -1,6 +1,9 @@
 #!/bin/sh
 
 cli_min="
+	btrfs-progs
+	dosfstools
+	fdisk
 	sudo
 	vim
 	whiptail
@@ -117,7 +120,6 @@ dev_mesa="
 	libxcb-shm0-dev
 	libxrandr-dev
 	libxshmfence-dev
-	spirv-tools
 "
 
 dev_cross="
@@ -128,9 +130,6 @@ dev_cross="
 "
 
 hw_metal="
-	btrfs-progs
-	dosfstools
-	fdisk
 	systemd-zram-generator
 "
 
