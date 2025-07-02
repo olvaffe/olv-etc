@@ -1,6 +1,13 @@
 #!/bin/sh
 
-# ~800M
+# Assuming 4 types of devices
+#
+#  - workstations
+#  - duts
+#  - containers
+#  - servers
+
+# for bootstrapping (~800M)
 cli_min="
 	base
 	btrfs-progs
@@ -9,7 +16,7 @@ cli_min="
 	vim
 "
 
-# ~200M
+# for all devices (~200M)
 cli_base="
 	bc
 	git
@@ -23,35 +30,31 @@ cli_base="
 	usbutils
 "
 
-# ~100M
+# for all except servers (~100M)
 cli_std="
 	ctags
-	iw
 	man-pages
-	msmtp
-	picocom
+	python
 	strace
 	tmux
 	trace-cmd
 	unzip
 	vulkan-tools
-	wireguard-tools
 	zip
 "
 
-# ~450M
-cli_extra="
+# for workstations (~550M)
+cli_full="
 	android-tools
 	mesa-utils
-	perf
-"
-
-# ~100M
-cli_aur="
+	msmtp
 	nordvpn-bin
+	perf
+	picocom
+	wireguard-tools
 "
 
-# ~200M
+# for gui testing (~200M)
 gui_min="
 	alacritty
 	i3status
@@ -60,7 +63,7 @@ gui_min="
 	sway
 "
 
-# ~150M
+# for simple use (~150M)
 gui_base="
 	brightnessctl
 	grim
@@ -73,45 +76,41 @@ gui_base="
 	wl-clipboard
 "
 
-# ~850M
+# for real use (~1250M)
 gui_std="
 	fcitx5-chewing
 	fcitx5-configtool
 	fcitx5-gtk
+	google-chrome
 	gtk4
 	noto-fonts-cjk
 	noto-fonts-emoji
 	pipewire-pulse
 "
 
-# ~300M
-gui_extra="
+# for optional features (~300M)
+gui_full="
 	cups
 	mpv
 	xdg-desktop-portal-gtk
 	xdg-desktop-portal-wlr
 "
 
-# ~400M
-gui_aur="
-	google-chrome
-"
-
-# ~350M
+# for compile (~350M)
 dev_min="
 	base-devel
 	ccache
+	cmake
 	meson
 "
 
-# ~450M
+# for development (~450M)
 dev_base="
 	clang
-	cmake
 	gdb
 "
 
-# ~250M
+# for mesa (~250M)
 dev_mesa="
 	glslang
 	libclc
@@ -119,7 +118,7 @@ dev_mesa="
 	spirv-llvm-translator
 "
 
-# ~600M
+# for cross-compile (~600M)
 dev_cross="
 	aarch64-linux-gnu-gcc
 	qemu-user-static-binfmt
@@ -129,47 +128,46 @@ hw_metal="
 	zram-generator
 "
 
-hw_chromebook="
-	linux-firmware-realtek
-	seatd
-	vboot-utils
-"
-
 hw_x86="
 	linux
-	linux-firmware-realtek
 	sbctl
 	systemd-ukify
+"
+
+hw_intel="
+	linux-firmware-intel
+	intel-ucode
+	vulkan-intel
+"
+
+hw_wifi="
+	iw
+	iwd
 	wireless-regdb
+"
+
+hw_xps="
+	bcm20702a1-firmware
+	broadcom-wl-dkms
+	linux-headers
+	wpa_supplicant
 "
 
 hw_arm="
 	archlinuxarm-keyring
 "
 
-hw_t580="
-	linux-firmware-intel
-	intel-ucode
-	iwd
-	vulkan-intel
-"
-
-hw_xps="
-	bcm20702a1-firmware
-	broadcom-wl-dkms
-	intel-ucode
-	linux-headers
-	vulkan-intel
-	wpa_supplicant
-"
-
-hw_opi="
+hw_dut="
 	seatd
+"
+
+hw_cros="
+	linux-firmware-realtek
+	vboot-utils
 "
 
 hw_crostini="
 	cros-container-guest-tools-git
-	python
 "
 
 pkgs=""
@@ -177,31 +175,37 @@ pkgs=""
 host="$(uname -n)"
 case "$host" in
 	"t580")
-		pkgs="$pkgs $cli_min $cli_base $cli_std $cli_extra $cli_aur"
-		pkgs="$pkgs $gui_min $gui_base $gui_std $gui_extra $gui_aur"
+		pkgs="$pkgs $cli_min $cli_base $cli_std $cli_full"
+		pkgs="$pkgs $gui_min $gui_base $gui_std $gui_full"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa $dev_cross"
-		pkgs="$pkgs $hw_metal $hw_x86 $hw_t580"
+
+		pkgs="$pkgs $hw_metal $hw_x86 $hw_intel $hw_wifi"
 		;;
 	"xps")
-		pkgs="$pkgs $cli_min $cli_base $cli_std $cli_extra $cli_aur"
-		pkgs="$pkgs $gui_min $gui_base $gui_std $gui_extra $gui_aur"
+		pkgs="$pkgs $cli_min $cli_base $cli_std $cli_full"
+		pkgs="$pkgs $gui_min $gui_base $gui_std $gui_full"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa $dev_cross"
-		pkgs="$pkgs $hw_metal $hw_x86 $hw_xps"
+
+		pkgs="$pkgs $hw_metal $hw_x86 $hw_intel $hw_wifi"
+		pkgs="$pkgs $hw_xps"
 		;;
 	"opi")
 		pkgs="$pkgs $cli_min $cli_base $cli_std"
 		pkgs="$pkgs $gui_min"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa"
-		pkgs="$pkgs $hw_metal $hw_arm $hw_opi"
+
+		pkgs="$pkgs $hw_metal $hw_arm $hw_dut"
 		;;
 	"navi")
 		pkgs="$pkgs $cli_min $cli_base $cli_std"
 		pkgs="$pkgs $gui_min"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa"
-		pkgs="$pkgs $hw_metal $hw_chromebook $hw_arm"
+
+		pkgs="$pkgs $hw_metal $hw_arm $hw_dut $hw_cros"
 		;;
 	"crostini")
-		pkgs="$pkgs $cli_min $cli_base"
+		pkgs="$pkgs $cli_min $cli_base $cli_std"
+
 		pkgs="$pkgs $hw_crostini"
 		;;
 	*)

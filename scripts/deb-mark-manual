@@ -1,5 +1,13 @@
 #!/bin/sh
 
+# Assuming 4 types of devices
+#
+#  - workstations
+#  - duts
+#  - containers
+#  - servers
+
+# for bootstrapping
 cli_min="
 	btrfs-progs
 	dosfstools
@@ -9,6 +17,7 @@ cli_min="
 	whiptail
 "
 
+# for all devices
 cli_base="
 	bc
 	curl
@@ -29,13 +38,10 @@ cli_base="
 	usbutils
 "
 
+# for all except servers
 cli_std="
-	git-email
-	iw
 	manpages
 	manpages-dev
-	msmtp
-	picocom
 	python3-venv
 	strace
 	systemd-container
@@ -44,16 +50,21 @@ cli_std="
 	universal-ctags
 	unzip
 	vulkan-tools
-	wireguard-tools
 	zip
 "
 
-cli_extra="
+# for workstations
+cli_full="
 	adb
-	mesa-utils
+	git-email
 	linux-perf
+	mesa-utils
+	msmtp
+	picocom
+	wireguard-tools
 "
 
+# for gui testing
 gui_min="
 	alacritty
 	fonts-noto-core
@@ -62,6 +73,7 @@ gui_min="
 	sway
 "
 
+# for simple use
 gui_base="
 	brightnessctl
 	grim
@@ -74,36 +86,42 @@ gui_base="
 	wl-clipboard
 "
 
+# for real use
 gui_std="
 	fcitx5
 	fcitx5-chewing
 	fonts-noto-cjk
 	fonts-noto-color-emoji
+	google-chrome-stable
 	libgtk-4-1
 	pipewire-pulse
 "
 
-gui_extra="
+# for optional features
+gui_full="
 	cups
 	mpv
 	xdg-desktop-portal-gtk
 	xdg-desktop-portal-wlr
 "
 
+# for compile
 dev_min="
 	build-essential
 	ccache
+	cmake
 	meson
 	pkgconf
 "
 
+# for development
 dev_base="
 	clang
 	clang-format
-	cmake
 	gdb
 "
 
+# for mesa
 dev_mesa="
 	glslang-tools
 	libclang-cpp-dev
@@ -120,8 +138,10 @@ dev_mesa="
 	libxcb-shm0-dev
 	libxrandr-dev
 	libxshmfence-dev
+	llvm-dev
 "
 
+# for cross-compile
 dev_cross="
 	debootstrap
 	gcc-aarch64-linux-gnu
@@ -134,9 +154,20 @@ hw_metal="
 "
 
 hw_x86="
-	firmware-realtek
 	linux-image-amd64
 	systemd-ukify
+"
+
+hw_intel="
+	firmware-intel-graphics
+	firmware-iwlwifi
+	intel-microcode
+	mesa-vulkan-drivers
+"
+
+hw_wifi="
+	iw
+	iwd
 	wireless-regdb
 "
 
