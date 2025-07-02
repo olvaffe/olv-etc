@@ -125,12 +125,16 @@ dev_cross="
 	qemu-user-static-binfmt
 "
 
-# ~50M
 hw_metal="
 	zram-generator
 "
 
-# ~200M
+hw_chromebook="
+	linux-firmware-realtek
+	seatd
+	vboot-utils
+"
+
 hw_x86="
 	linux
 	linux-firmware-realtek
@@ -139,12 +143,10 @@ hw_x86="
 	wireless-regdb
 "
 
-# ~0M
 hw_arm="
 	archlinuxarm-keyring
 "
 
-# ~150M
 hw_t580="
 	linux-firmware-intel
 	intel-ucode
@@ -152,7 +154,6 @@ hw_t580="
 	vulkan-intel
 "
 
-# ~350M
 hw_xps="
 	bcm20702a1-firmware
 	broadcom-wl-dkms
@@ -162,7 +163,6 @@ hw_xps="
 	wpa_supplicant
 "
 
-# ~0M
 hw_opi="
 	seatd
 "
@@ -193,6 +193,12 @@ case "$host" in
 		pkgs="$pkgs $gui_min"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa"
 		pkgs="$pkgs $hw_metal $hw_arm $hw_opi"
+		;;
+	"navi")
+		pkgs="$pkgs $cli_min $cli_base $cli_std"
+		pkgs="$pkgs $gui_min"
+		pkgs="$pkgs $dev_min $dev_base $dev_mesa"
+		pkgs="$pkgs $hw_metal $hw_chromebook $hw_arm"
 		;;
 	"crostini")
 		pkgs="$pkgs $cli_min $cli_base"
