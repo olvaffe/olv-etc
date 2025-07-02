@@ -1,0 +1,169 @@
+#!/bin/sh
+
+cli_min="
+	sudo
+	vim
+	whiptail
+"
+
+cli_base="
+	bc
+	curl
+	git
+	htop
+	iputils-ping
+	iputils-tracepath
+	ldnsutils
+	logrotate
+	lsof
+	man-db
+	openssh-client
+	openssh-server
+	pciutils
+	rsync
+	systemd-resolved
+	systemd-timesyncd
+	usbutils
+"
+
+cli_std="
+	git-email
+	iw
+	manpages
+	manpages-dev
+	msmtp
+	picocom
+	python3-venv
+	strace
+	systemd-container
+	trace-cmd
+	universal-ctags
+	unzip
+	vulkan-tools
+	wireguard-tools
+	zip
+"
+
+cli_extra="
+	adb
+	mesa-utils
+	linux-perf
+"
+
+gui_min="
+	alacritty
+	fonts-noto-core
+	i3status
+	polkitd
+	sway
+"
+
+gui_base="
+	brightnessctl
+	grim
+	mako-notifier
+	slurp
+	swayidle
+	swayimg
+	swaylock
+	wayland-utils
+	wl-clipboard
+"
+
+gui_std="
+	fcitx5
+	fcitx5-chewing
+	fonts-noto-cjk
+	fonts-noto-color-emoji
+	libgtk-4-1
+	pipewire-pulse
+"
+
+gui_extra="
+	cups
+	mpv
+	xdg-desktop-portal-gtk
+	xdg-desktop-portal-wlr
+"
+
+dev_min="
+	build-essential
+	ccache
+	meson
+	pkgconf
+"
+
+dev_base="
+	clang
+	clang-format
+	cmake
+	gdb
+"
+
+dev_mesa="
+	glslang-tools
+	libclang-cpp-dev
+	libclang-dev
+	libclc-19-dev
+	libdrm-dev
+	libllvmspirvlib-19-dev
+	libwayland-dev
+	spirv-tools
+"
+
+dev_cross="
+	debootstrap
+	gcc-aarch64-linux-gnu
+	g++-aarch64-linux-gnu
+	qemu-user-binfmt
+"
+
+hw_metal="
+	btrfs-progs
+	dosfstools
+	fdisk
+	systemd-zram-generator
+"
+
+hw_x86="
+	firmware-realtek
+	linux-image-amd64
+	systemd-ukify
+	wireless-regdb
+"
+
+hw_arm="
+	linux-image-arm64
+"
+
+hw_rpi="
+	cnrdrvcups-ufr2-us
+	containers-storage
+	ksmbd-tools
+	nginx
+	php-fpm
+	podman
+	systemd-journal-remote
+"
+
+pkgs=""
+
+host="$(uname -n)"
+case "$host" in
+	"rpi")
+		pkgs="$pkgs $cli_min $cli_base"
+		pkgs="$pkgs $hw_metal $hw_arm $hw_rpi"
+		;;
+	*)
+		echo "unknown device: $host"
+		exit 1
+		;;
+esac
+
+manual="$(apt-mark showmanual)"
+if [ -n "$manual" ]; then
+	apt-mark auto $manual > /dev/null
+fi
+
+apt install $pkgs
+apt-mark manual $pkgs | grep -v ' set to manually installed\.$'
