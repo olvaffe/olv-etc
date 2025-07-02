@@ -109,6 +109,14 @@ dev_mesa="
 	libdrm-dev
 	libllvmspirvlib-19-dev
 	libwayland-dev
+	libx11-xcb-dev
+	libxcb1-dev
+	libxcb-dri3-dev
+	libxcb-present-dev
+	libxcb-randr0-dev
+	libxcb-shm0-dev
+	libxrandr-dev
+	libxshmfence-dev
 	spirv-tools
 "
 
