@@ -29,6 +29,7 @@ cli_std="
 	msmtp
 	picocom
 	strace
+	tmux
 	trace-cmd
 	unzip
 	vulkan-tools

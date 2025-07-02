@@ -36,6 +36,7 @@ cli_std="
 	python3-venv
 	strace
 	systemd-container
+	tmux
 	trace-cmd
 	universal-ctags
 	unzip
@@ -146,6 +147,21 @@ hw_rpi="
 	systemd-journal-remote
 "
 
+hw_npi="
+	firmware-realtek
+	iproute2
+	iputils-ping
+	kea-dhcp4-server
+	less
+	logrotate
+	nftables
+	openssh-server
+	procps
+	systemd-journal-remote
+	systemd-timesyncd
+	unbound
+"
+
 pkgs=""
 
 host="$(uname -n)"
@@ -153,6 +169,10 @@ case "$host" in
 	"rpi")
 		pkgs="$pkgs $cli_min $cli_base"
 		pkgs="$pkgs $hw_metal $hw_arm $hw_rpi"
+		;;
+	"npi")
+		pkgs="$pkgs $cli_min"
+		pkgs="$pkgs $hw_metal $hw_arm $hw_npi"
 		;;
 	*)
 		echo "unknown device: $host"
@@ -165,5 +185,5 @@ if [ -n "$manual" ]; then
 	apt-mark auto $manual > /dev/null
 fi
 
-apt install $pkgs
+#apt install $pkgs
 apt-mark manual $pkgs | grep -v ' set to manually installed\.$'
