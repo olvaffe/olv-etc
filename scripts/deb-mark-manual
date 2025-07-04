@@ -108,8 +108,10 @@ gui_full="
 # for compile
 dev_min="
 	build-essential
+	bison
 	ccache
 	cmake
+	flex
 	meson
 	pkgconf
 "
