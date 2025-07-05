@@ -8,6 +8,7 @@ STEVEN_BLACK_LIST = r'https://raw.githubusercontent.com/StevenBlack/hosts/master
 EXEMPT_LIST = [
         b'0.0.0.0',
         b'awstrack.me',
+        b'discord.com',
         b'doubleclick.net',
         b'googleadservices.com',
 ]
