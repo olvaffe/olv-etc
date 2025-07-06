@@ -11,7 +11,9 @@
 cli_min="
 	btrfs-progs
 	dosfstools
+	e2fsprogs
 	fdisk
+	init
 	sudo
 	vim
 	whiptail
@@ -23,18 +25,20 @@ cli_base="
 	curl
 	git
 	htop
+	iproute2
 	iputils-ping
 	iputils-tracepath
 	ldnsutils
+	less
 	logrotate
 	lsof
 	man-db
 	openssh-client
 	openssh-server
 	pciutils
+	procps
 	rsync
 	systemd-resolved
-	systemd-timesyncd
 	usbutils
 "
 
@@ -192,13 +196,11 @@ hw_npi="
 	iproute2
 	iputils-ping
 	kea-dhcp4-server
-	less
 	logrotate
 	nftables
 	openssh-server
 	procps
 	systemd-journal-remote
-	systemd-timesyncd
 	unbound
 "
 
