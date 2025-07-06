@@ -7,7 +7,7 @@
 #  - containers
 #  - servers
 
-# for bootstrapping
+# for bootstrapping (~300M)
 cli_min="
 	btrfs-progs
 	dosfstools
@@ -19,7 +19,7 @@ cli_min="
 	whiptail
 "
 
-# for all devices
+# for all devices (~200M)
 cli_base="
 	bc
 	curl
@@ -42,7 +42,7 @@ cli_base="
 	usbutils
 "
 
-# for all except servers
+# for all except servers (~300M)
 cli_std="
 	manpages
 	manpages-dev
@@ -57,7 +57,7 @@ cli_std="
 	zip
 "
 
-# for workstations
+# for workstations (~400M)
 cli_full="
 	adb
 	git-email
@@ -68,7 +68,7 @@ cli_full="
 	wireguard-tools
 "
 
-# for gui testing
+# for gui testing (~100M)
 gui_min="
 	alacritty
 	fonts-noto-core
@@ -77,7 +77,7 @@ gui_min="
 	sway
 "
 
-# for simple use
+# for simple use (~150M)
 gui_base="
 	brightnessctl
 	grim
@@ -90,7 +90,7 @@ gui_base="
 	wl-clipboard
 "
 
-# for real use
+# for real use (~1000M)
 gui_std="
 	fcitx5
 	fcitx5-chewing
@@ -101,7 +101,7 @@ gui_std="
 	pipewire-pulse
 "
 
-# for optional features
+# for optional features (~450M)
 gui_full="
 	cups
 	mpv
@@ -109,7 +109,7 @@ gui_full="
 	xdg-desktop-portal-wlr
 "
 
-# for compile
+# for compile (~400M)
 dev_min="
 	build-essential
 	bison
@@ -120,14 +120,14 @@ dev_min="
 	pkgconf
 "
 
-# for development
+# for development (~750M)
 dev_base="
 	clang
 	clang-format
 	gdb
 "
 
-# for mesa
+# for mesa (~400M)
 dev_mesa="
 	glslang-tools
 	libclang-cpp-dev
@@ -147,7 +147,7 @@ dev_mesa="
 	llvm-dev
 "
 
-# for cross-compile
+# for cross-compile (~750M)
 dev_cross="
 	debootstrap
 	gcc-aarch64-linux-gnu
