@@ -184,6 +184,7 @@ hw_arm="
 hw_rpi="
 	cnrdrvcups-ufr2-us
 	containers-storage
+	hdparm
 	ksmbd-tools
 	nginx
 	php-fpm
