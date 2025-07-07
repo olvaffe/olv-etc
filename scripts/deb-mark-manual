@@ -186,6 +186,7 @@ hw_rpi="
 	containers-storage
 	hdparm
 	ksmbd-tools
+	msmtp
 	nginx
 	php-fpm
 	podman
