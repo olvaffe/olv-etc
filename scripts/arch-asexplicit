@@ -124,11 +124,11 @@ dev_cross="
 	qemu-user-static-binfmt
 "
 
-hw_metal="
+kernel_common="
 	zram-generator
 "
 
-hw_x86="
+kernel_x86="
 	linux
 	sbctl
 	systemd-ukify
@@ -146,10 +146,18 @@ hw_amd="
 	vulkan-radeon
 "
 
+hw_arm="
+	archlinuxarm-keyring
+"
+
 hw_wifi="
 	iw
 	iwd
 	wireless-regdb
+"
+
+hw_usbnet="
+	linux-firmware-realtek
 "
 
 hw_xps="
@@ -159,20 +167,19 @@ hw_xps="
 	wpa_supplicant
 "
 
-hw_arm="
-	archlinuxarm-keyring
-"
-
 hw_dut="
 	seatd
 "
 
-hw_cros="
-	linux-firmware-realtek
+cros_x86="
+	cgpt-bin
+"
+
+cros_arm="
 	vboot-utils
 "
 
-hw_crostini="
+cros_crostini="
 	cros-container-guest-tools-git
 "
 
@@ -185,41 +192,47 @@ case "$host" in
 		pkgs="$pkgs $gui_min $gui_base $gui_std $gui_full"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa $dev_cross"
 
-		pkgs="$pkgs $hw_metal $hw_x86 $hw_intel $hw_wifi"
+		pkgs="$pkgs $kernel_common $kernel_x86"
+		pkgs="$pkgs $hw_intel $hw_wifi"
 		;;
 	"xps")
 		pkgs="$pkgs $cli_min $cli_base $cli_std $cli_full"
 		pkgs="$pkgs $gui_min $gui_base $gui_std $gui_full"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa $dev_cross"
 
-		pkgs="$pkgs $hw_metal $hw_x86 $hw_intel $hw_wifi"
-		pkgs="$pkgs $hw_xps"
+		pkgs="$pkgs $kernel_common $kernel_x86"
+		pkgs="$pkgs $hw_intel $hw_wifi $hw_xps"
 		;;
 	"opi")
 		pkgs="$pkgs $cli_min $cli_base $cli_std"
 		pkgs="$pkgs $gui_min"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa"
 
-		pkgs="$pkgs $hw_metal $hw_arm $hw_dut"
+		pkgs="$pkgs $kernel_common"
+		pkgs="$pkgs $hw_arm $hw_dut"
 		;;
 	"navi")
 		pkgs="$pkgs $cli_min $cli_base $cli_std"
 		pkgs="$pkgs $gui_min"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa"
 
-		pkgs="$pkgs $hw_metal $hw_arm $hw_dut $hw_cros"
+		pkgs="$pkgs $kernel_common"
+		pkgs="$pkgs $hw_arm $hw_usbnet $hw_dut"
+		pkgs="$pkgs $cros_arm"
 		;;
 	"skyrim")
 		pkgs="$pkgs $cli_min $cli_base $cli_std"
 		pkgs="$pkgs $gui_min"
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa"
 
-		pkgs="$pkgs $hw_metal $hw_amd $hw_dut $hw_cros"
+		pkgs="$pkgs $kernel_common"
+		pkgs="$pkgs $hw_amd $hw_usbnet $hw_dut"
+		pkgs="$pkgs $cros_x86"
 		;;
 	"crostini")
 		pkgs="$pkgs $cli_min $cli_base $cli_std"
 
-		pkgs="$pkgs $hw_crostini"
+		pkgs="$pkgs $cros_crostini"
 		;;
 	*)
 		echo "unknown device: $host"

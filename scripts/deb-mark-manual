@@ -155,13 +155,17 @@ dev_cross="
 	qemu-user-binfmt
 "
 
-hw_metal="
+kernel_common="
 	systemd-zram-generator
 "
 
-hw_x86="
+kernel_x86="
 	linux-image-amd64
 	systemd-ukify
+"
+
+kernel_arm="
+	linux-image-arm64
 "
 
 hw_intel="
@@ -177,8 +181,8 @@ hw_wifi="
 	wireless-regdb
 "
 
-hw_arm="
-	linux-image-arm64
+hw_usbnet="
+	firmware-realtek
 "
 
 hw_rpi="
@@ -213,11 +217,15 @@ host="$(uname -n)"
 case "$host" in
 	"rpi")
 		pkgs="$pkgs $cli_min $cli_base"
-		pkgs="$pkgs $hw_metal $hw_arm $hw_rpi"
+
+		pkgs="$pkgs $kernel_common $kernel_arm"
+		pkgs="$pkgs $hw_rpi"
 		;;
 	"npi")
 		pkgs="$pkgs $cli_min"
-		pkgs="$pkgs $hw_metal $hw_arm $hw_npi"
+
+		pkgs="$pkgs $kernel_common $kernel_arm"
+		pkgs="$pkgs $hw_npi"
 		;;
 	*)
 		echo "unknown device: $host"
