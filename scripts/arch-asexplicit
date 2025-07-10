@@ -18,13 +18,11 @@ cli_min="
 
 # for all devices (~200M)
 cli_base="
-	bc
 	git
 	htop
 	ldns
 	logrotate
 	lsof
-	man-db
 	openssh
 	rsync
 	usbutils
@@ -32,7 +30,9 @@ cli_base="
 
 # for all except servers (~100M)
 cli_std="
+	bc
 	ctags
+	man-db
 	man-pages
 	python
 	strace

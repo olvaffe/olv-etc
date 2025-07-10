@@ -21,7 +21,6 @@ cli_min="
 
 # for all devices (~200M)
 cli_base="
-	bc
 	curl
 	git
 	htop
@@ -32,7 +31,6 @@ cli_base="
 	less
 	logrotate
 	lsof
-	man-db
 	openssh-client
 	openssh-server
 	pciutils
@@ -44,8 +42,11 @@ cli_base="
 
 # for all except servers (~300M)
 cli_std="
+	bc
+	man-db
 	manpages
 	manpages-dev
+	ncal
 	python3-venv
 	strace
 	systemd-container
