@@ -140,6 +140,12 @@ hw_intel="
 	vulkan-intel
 "
 
+hw_amd="
+	amd-ucode
+	linux-firmware-amdgpu
+	vulkan-radeon
+"
+
 hw_wifi="
 	iw
 	iwd
@@ -202,6 +208,13 @@ case "$host" in
 		pkgs="$pkgs $dev_min $dev_base $dev_mesa"
 
 		pkgs="$pkgs $hw_metal $hw_arm $hw_dut $hw_cros"
+		;;
+	"skyrim")
+		pkgs="$pkgs $cli_min $cli_base $cli_std"
+		pkgs="$pkgs $gui_min"
+		pkgs="$pkgs $dev_min $dev_base $dev_mesa"
+
+		pkgs="$pkgs $hw_metal $hw_amd $hw_dut $hw_cros"
 		;;
 	"crostini")
 		pkgs="$pkgs $cli_min $cli_base $cli_std"
