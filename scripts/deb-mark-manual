@@ -19,14 +19,12 @@ cli_min="
 	whiptail
 "
 
-# for all devices (~200M)
+# for all devices (~100M)
 cli_base="
 	curl
-	git
 	htop
 	iproute2
 	iputils-ping
-	iputils-tracepath
 	ldnsutils
 	less
 	logrotate
@@ -40,9 +38,10 @@ cli_base="
 	usbutils
 "
 
-# for all except servers (~300M)
+# for all except servers (~400M)
 cli_std="
 	bc
+	git
 	man-db
 	manpages
 	manpages-dev
@@ -185,6 +184,7 @@ hw_arm="
 hw_rpi="
 	cnrdrvcups-ufr2-us
 	containers-storage
+	git
 	hdparm
 	ksmbd-tools
 	msmtp

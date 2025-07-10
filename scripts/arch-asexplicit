@@ -16,9 +16,8 @@ cli_min="
 	vim
 "
 
-# for all devices (~200M)
+# for all devices (~50M)
 cli_base="
-	git
 	htop
 	ldns
 	logrotate
@@ -28,10 +27,11 @@ cli_base="
 	usbutils
 "
 
-# for all except servers (~100M)
+# for all except servers (~300M)
 cli_std="
 	bc
 	ctags
+	git
 	man-db
 	man-pages
 	python
