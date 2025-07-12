@@ -11,6 +11,7 @@ EXEMPT_LIST = [
         b'discord.com',
         b'doubleclick.net',
         b'googleadservices.com',
+        b'schoolmessenger.com',
 ]
 
 def is_exempted(host):
