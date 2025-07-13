@@ -1,6 +1,9 @@
 [core]
 	editor = vim
 
+[advice]
+	detachedHead = false
+
 [alias]
 	# work with remotes
 	fa = fetch --prune --all
@@ -16,7 +19,6 @@
 	ch = checkout origin/HEAD
 	ct = checkout -t
 	c- = checkout @{-1}
-	topic = checkout --no-track origin/HEAD -b
 
 	# work with commits
 	cp = cherry-pick
@@ -34,6 +36,10 @@
 
 [credential]
 	helper = store
+
+[format]
+	coverLetter = auto
+	coverFromDescription = auto
 
 [init]
 	defaultBranch = main
@@ -56,9 +62,6 @@
 [user]
 	name = Chia-I Wu
 	email = olvaffe@gmail.com
-
-[advice]
-	detachedHead = false
 
 [url "https://gitlab.freedesktop.org/"]
 	insteadOf = git@gitlab.freedesktop.org:
