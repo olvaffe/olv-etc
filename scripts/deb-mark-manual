@@ -194,8 +194,10 @@ hw_rpi="
 	msmtp
 	nginx
 	php-fpm
+	python3-venv
 	podman
 	systemd-journal-remote
+	zip
 "
 
 hw_npi="
