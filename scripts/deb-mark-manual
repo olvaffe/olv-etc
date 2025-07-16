@@ -197,6 +197,7 @@ hw_rpi="
 	python3-venv
 	podman
 	systemd-journal-remote
+	tmux
 	zip
 "
 

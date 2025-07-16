@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ "$#" -lt 5 ]; then
 	echo "usage: $0 <author> <title> <volume|chapter> <pattern> <dirs...>"
