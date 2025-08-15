@@ -1,0 +1,56 @@
+#!/bin/sh
+
+set -e
+
+if [ -z "$ANDROID_BUILD_TOP" ]; then
+	echo "lunch first"
+	exit 1
+fi
+
+adb_serial="localhost"
+fastboot_serial="tcp:localhost"
+
+cmd="$1"
+shift
+
+android_kernel_pack() {
+	targets="
+		bootimage
+		system_dlkmimage
+		vendorbootimage
+		vendor_dlkmimage
+	"
+
+	echo "packing images..."
+	m $targets
+}
+
+android_kernel_flash() {
+	echo "rebooting to fastbootd..."
+	adb -s "$adb_serial" reboot fastboot
+
+	echo "waiting for fastbootd..."
+	fastboot -s "$fastboot_serial" set_active a
+
+	echo "flashing images..."
+	fastboot -s "$fastboot_serial" flash boot_a "${ANDROID_PRODUCT_OUT}/boot.img"
+	fastboot -s "$fastboot_serial" flash system_dlkm "${ANDROID_PRODUCT_OUT}/system_dlkm.img"
+	fastboot -s "$fastboot_serial" flash vendor_boot_a "${ANDROID_PRODUCT_OUT}/vendor_boot.img"
+	fastboot -s "$fastboot_serial" flash vendor_dlkm "${ANDROID_PRODUCT_OUT}/vendor_dlkm.img"
+
+	echo "rebooting..."
+	fastboot -s "$fastboot_serial" reboot
+}
+
+case "$cmd" in
+	pack)
+		android_kernel_pack "$@"
+		;;
+	flash)
+		android_kernel_flash "$@"
+		;;
+	*)
+		echo "unknown command"
+		exit 1
+		;;
+esac
