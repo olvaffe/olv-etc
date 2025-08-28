@@ -25,10 +25,12 @@ android_kernel_pack() {
 	m $targets
 }
 
-android_kernel_flash() {
-	echo "rebooting to fastbootd..."
+android_kernel_reboot() {
+	echo "rebooting to fastboot..."
 	adb -s "$adb_serial" reboot fastboot
+}
 
+android_kernel_flash() {
 	echo "waiting for fastbootd..."
 	fastboot -s "$fastboot_serial" set_active a
 
@@ -45,6 +47,9 @@ android_kernel_flash() {
 case "$cmd" in
 	pack)
 		android_kernel_pack "$@"
+		;;
+	reboot)
+		android_kernel_reboot "$@"
 		;;
 	flash)
 		android_kernel_flash "$@"
