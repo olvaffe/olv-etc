@@ -27,9 +27,11 @@ def parse_html(fp):
         title = title.replace('"', '""')
 
         href = title_tag.get('href', '')
+        if href:
+            href = 'https://www.kobo.com' + href
 
         date = date_tag.string
-        date = datetime.strptime(date, '%m/%d/%Y').date().isoformat()
+        date = datetime.strptime(date, '%Y/%m/%d').date().isoformat()
 
         price = price_tag.string
         dollar = price.find('$')

@@ -133,6 +133,7 @@ class EPub(EBook):
         creator = metadata.find(f'./{self.NS_DC}creator')
         language = metadata.find(f'./{self.NS_DC}language')
         publisher = metadata.find(f'./{self.NS_DC}publisher')
+        identifier = metadata.find(f'./{self.NS_DC}identifier')
 
         if title.text == 'CT0456' and creator.text == 'CT0456':
             title.text = '異劍戰記  瓦倫迪歐 1'
@@ -143,6 +144,8 @@ class EPub(EBook):
         elif title.text == 'CH0631' and creator.text == 'CH0631':
             title.text = '典藏版 Dorohedoro 異獸魔都 1'
             creator.text = '林田球'
+        elif title.text == 'Dr.STONE 新石紀 25' and identifier.text == 'urn:uuid:e20beaaf-d7f0-4589-a105-90fd7a0ec734':
+            title.text = 'Dr.STONE 新石紀 26'
 
         self.set_title(title.text)
         self.set_creator(creator.text)
