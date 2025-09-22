@@ -146,6 +146,11 @@ hw_amd="
 	vulkan-radeon
 "
 
+hw_qcom="
+	linux-firmware-qcom
+	vulkan-freedreno
+"
+
 hw_arm="
 	archlinuxarm-keyring
 "
@@ -202,6 +207,14 @@ case "$host" in
 
 		pkgs="$pkgs $kernel_common $kernel_x86"
 		pkgs="$pkgs $hw_intel $hw_wifi $hw_xps"
+		;;
+	"s15")
+		pkgs="$pkgs $cli_min $cli_base $cli_std"
+		pkgs="$pkgs $gui_min"
+		pkgs="$pkgs $dev_min $dev_base $dev_mesa"
+
+		pkgs="$pkgs $kernel_common"
+		pkgs="$pkgs $hw_arm $hw_qcom $hw_wifi $hw_dut"
 		;;
 	"opi")
 		pkgs="$pkgs $cli_min $cli_base $cli_std"
