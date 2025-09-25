@@ -4,6 +4,8 @@ Host ct
 	LocalForward 5900 localhost:5900
 	# reverse ssh
 	RemoteForward 2200 localhost:22
+	# reverse adb over usb
+	RemoteForward 5037 localhost:5037
 	# reverse fastboot
 	RemoteForward 5554 100.107.238.184:5554
 	# reverse adb
