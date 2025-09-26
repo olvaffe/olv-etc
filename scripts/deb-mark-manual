@@ -21,6 +21,7 @@ cli_min="
 
 # for all devices (~100M)
 cli_base="
+	$cli_min
 	curl
 	htop
 	iproute2
@@ -40,8 +41,10 @@ cli_base="
 
 # for all except servers (~400M)
 cli_std="
+	$cli_base
 	bc
 	git
+	linux-perf
 	man-db
 	manpages
 	manpages-dev
@@ -59,9 +62,9 @@ cli_std="
 
 # for workstations (~400M)
 cli_full="
+	$cli_std
 	adb
 	git-email
-	linux-perf
 	mesa-utils
 	msmtp
 	picocom
@@ -71,27 +74,29 @@ cli_full="
 # for gui testing (~100M)
 gui_min="
 	alacritty
+	brightnessctl
 	fonts-noto-core
 	i3status
 	polkitd
 	sway
+	swayidle
+	wayland-utils
 "
 
 # for simple use (~150M)
 gui_base="
-	brightnessctl
+	$gui_min
 	grim
 	mako-notifier
 	slurp
-	swayidle
 	swayimg
 	swaylock
-	wayland-utils
 	wl-clipboard
 "
 
 # for real use (~1000M)
 gui_std="
+	$gui_base
 	fcitx5
 	fcitx5-chewing
 	fonts-noto-cjk
@@ -103,6 +108,7 @@ gui_std="
 
 # for optional features (~450M)
 gui_full="
+	$gui_std
 	cups
 	mpv
 	xdg-desktop-portal-gtk
@@ -122,6 +128,7 @@ dev_min="
 
 # for development (~750M)
 dev_base="
+	$dev_min
 	clang
 	clang-format
 	gdb
@@ -160,12 +167,17 @@ kernel_common="
 "
 
 kernel_x86="
+	$kernel_common
 	linux-image-amd64
-	systemd-ukify
 "
 
 kernel_arm="
+	$kernel_common
 	linux-image-arm64
+"
+
+hw_uefi="
+	systemd-ukify
 "
 
 hw_intel="
@@ -219,16 +231,10 @@ pkgs=""
 host="$(uname -n)"
 case "$host" in
 	"rpi")
-		pkgs="$pkgs $cli_min $cli_base"
-
-		pkgs="$pkgs $kernel_common $kernel_arm"
-		pkgs="$pkgs $hw_rpi"
+		pkgs="$pkgs $cli_base $kernel_arm $hw_rpi"
 		;;
 	"npi")
-		pkgs="$pkgs $cli_min"
-
-		pkgs="$pkgs $kernel_common $kernel_arm"
-		pkgs="$pkgs $hw_npi"
+		pkgs="$pkgs $cli_min $kernel_arm $hw_npi"
 		;;
 	*)
 		echo "unknown device: $host"
