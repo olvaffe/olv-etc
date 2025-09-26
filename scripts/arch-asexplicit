@@ -140,8 +140,12 @@ kernel_x86="
 	linux
 "
 
-kernel_arm="
+kernel_custom="
 	$kernel_common
+"
+
+hw_arm="
+	archlinuxarm-keyring
 "
 
 hw_uefi="
@@ -161,10 +165,6 @@ hw_amd="
 	vulkan-radeon
 "
 
-hw_arm="
-	archlinuxarm-keyring
-"
-
 hw_qcom="
 	linux-firmware-qcom
 	vulkan-freedreno
@@ -180,15 +180,15 @@ hw_usbnet="
 	linux-firmware-realtek
 "
 
+hw_dut="
+	seatd
+"
+
 hw_xps="
 	bcm20702a1-firmware
 	broadcom-wl-dkms
 	linux-headers
 	wpa_supplicant
-"
-
-hw_dut="
-	seatd
 "
 
 cros_x86="
@@ -207,53 +207,37 @@ pkgs=""
 
 host="$(uname -n)"
 case "$host" in
-	"t580")
+	"t580"|"xps")
 		pkgs="$pkgs $cli_full $gui_full"
 		pkgs="$pkgs $dev_base $dev_mesa $dev_cross"
-
 		pkgs="$pkgs $kernel_x86"
 		pkgs="$pkgs $hw_uefi $hw_intel $hw_wifi"
-		;;
-	"xps")
-		pkgs="$pkgs $cli_full $gui_full"
-		pkgs="$pkgs $dev_base $dev_mesa $dev_cross"
 
-		pkgs="$pkgs $kernel_x86"
-		pkgs="$pkgs $hw_uefi $hw_intel $hw_wifi $hw_xps"
+		if [ "$host" = "xps" ]; then
+			pkgs="$pkgs $hw_xps"
+		fi
 		;;
-	"s15")
+	"s15"|"opi"|"navi")
 		pkgs="$pkgs $cli_std $gui_min"
 		pkgs="$pkgs $dev_base $dev_mesa"
-
-		pkgs="$pkgs $kernel_arm"
-		pkgs="$pkgs $hw_arm $hw_qcom $hw_wifi $hw_dut"
-		;;
-	"opi")
-		pkgs="$pkgs $cli_std $gui_min"
-		pkgs="$pkgs $dev_base $dev_mesa"
-
-		pkgs="$pkgs $kernel_arm"
-		pkgs="$pkgs $hw_arm $hw_dut"
-		;;
-	"navi")
-		pkgs="$pkgs $cli_std $gui_min"
-		pkgs="$pkgs $dev_base $dev_mesa"
-
-		pkgs="$pkgs $kernel_arm"
+		pkgs="$pkgs $kernel_custom"
 		pkgs="$pkgs $hw_arm $hw_usbnet $hw_dut"
-		pkgs="$pkgs $cros_arm"
+
+		if [ "$host" = "s15" ]; then
+			pkgs="$pkgs $hw_uefi $hw_qcom $hw_wifi"
+		elif [ "$host" = "navi" ]; then
+			pkgs="$pkgs $cros_arm"
+		fi
 		;;
 	"skyrim")
 		pkgs="$pkgs $cli_std $gui_min"
 		pkgs="$pkgs $dev_base $dev_mesa"
-
-		pkgs="$pkgs $kernel_arm"
+		pkgs="$pkgs $kernel_custom"
 		pkgs="$pkgs $hw_amd $hw_usbnet $hw_dut"
 		pkgs="$pkgs $cros_x86"
 		;;
 	"crostini")
 		pkgs="$pkgs $cli_std"
-
 		pkgs="$pkgs $cros_crostini"
 		;;
 	*)
