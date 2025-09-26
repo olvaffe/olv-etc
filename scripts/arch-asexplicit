@@ -217,7 +217,7 @@ case "$host" in
 			pkgs="$pkgs $hw_xps"
 		fi
 		;;
-	"s15"|"opi"|"navi")
+	"s15"|"purwa"|"opi"|"navi")
 		pkgs="$pkgs $cli_std $gui_min"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_custom"
@@ -225,6 +225,8 @@ case "$host" in
 
 		if [ "$host" = "s15" ]; then
 			pkgs="$pkgs $hw_uefi $hw_qcom $hw_wifi"
+		elif [ "$host" = "purwa" ]; then
+			pkgs="$pkgs $hw_uefi $hw_qcom"
 		elif [ "$host" = "navi" ]; then
 			pkgs="$pkgs $cros_arm"
 		fi
