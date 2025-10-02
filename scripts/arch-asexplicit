@@ -217,7 +217,27 @@ case "$host" in
 			pkgs="$pkgs $hw_xps"
 		fi
 		;;
-	"s15"|"purwa"|"opi"|"navi"|"corsola"|"cherry")
+	"brya"|"skyrim")
+		pkgs="$pkgs $cli_std $gui_min"
+		pkgs="$pkgs $dev_base $dev_mesa"
+		pkgs="$pkgs $kernel_custom"
+		pkgs="$pkgs $hw_usbnet $hw_dut"
+		pkgs="$pkgs $cros_x86"
+
+		if [ "$host" = "brya" ]; then
+			pkgs="$pkgs $hw_intel"
+		elif [ "$host" = "skyrim" ]; then
+			pkgs="$pkgs $hw_amd"
+		fi
+		;;
+	"navi"|"corsola"|"cherry")
+		pkgs="$pkgs $cli_std $gui_min"
+		pkgs="$pkgs $dev_base $dev_mesa"
+		pkgs="$pkgs $kernel_custom"
+		pkgs="$pkgs $hw_arm $hw_usbnet $hw_dut"
+		pkgs="$pkgs $cros_arm"
+		;;
+	"s15"|"purwa"|"opi")
 		pkgs="$pkgs $cli_std $gui_min"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_custom"
@@ -227,16 +247,7 @@ case "$host" in
 			pkgs="$pkgs $hw_uefi $hw_qcom $hw_wifi"
 		elif [ "$host" = "purwa" ]; then
 			pkgs="$pkgs $hw_uefi $hw_qcom"
-		elif [ "$host" = "navi" -o "$host" = "corsola" -o "$host" = "cherry" ]; then
-			pkgs="$pkgs $cros_arm"
 		fi
-		;;
-	"skyrim")
-		pkgs="$pkgs $cli_std $gui_min"
-		pkgs="$pkgs $dev_base $dev_mesa"
-		pkgs="$pkgs $kernel_custom"
-		pkgs="$pkgs $hw_amd $hw_usbnet $hw_dut"
-		pkgs="$pkgs $cros_x86"
 		;;
 	"crostini")
 		pkgs="$pkgs $cli_std"
