@@ -125,6 +125,12 @@ dev_mesa="
 	spirv-llvm-translator
 "
 
+# dtc and vboot-minimal-git are for cros kernel
+dev_kernel="
+	dtc
+	vboot-minimal-git
+"
+
 # for cross-compile (~600M)
 dev_cross="
 	aarch64-linux-gnu-gcc
@@ -209,7 +215,7 @@ host="$(uname -n)"
 case "$host" in
 	"t580"|"xps")
 		pkgs="$pkgs $cli_full $gui_full"
-		pkgs="$pkgs $dev_base $dev_mesa $dev_cross"
+		pkgs="$pkgs $dev_base $dev_mesa $dev_kernel $dev_cross"
 		pkgs="$pkgs $kernel_x86"
 		pkgs="$pkgs $hw_uefi $hw_intel $hw_wifi"
 
