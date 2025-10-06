@@ -154,6 +154,15 @@ dev_mesa="
 	llvm-dev
 "
 
+# all except libelf-dev are for cros kernel
+dev_kernel="
+	cgpt
+	device-tree-compiler
+	libelf-dev
+	lz4
+	vboot-kernel-utils
+"
+
 # for cross-compile (~750M)
 dev_cross="
 	debootstrap
