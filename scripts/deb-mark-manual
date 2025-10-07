@@ -65,6 +65,7 @@ cli_full="
 	$cli_std
 	adb
 	git-email
+	jq
 	mesa-utils
 	msmtp
 	picocom

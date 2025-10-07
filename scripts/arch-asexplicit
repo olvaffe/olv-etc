@@ -50,6 +50,7 @@ cli_std="
 cli_full="
 	$cli_std
 	android-tools
+	jq
 	mesa-utils
 	msmtp
 	nordvpn-bin
