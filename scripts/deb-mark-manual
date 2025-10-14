@@ -44,6 +44,7 @@ cli_std="
 	$cli_base
 	bc
 	git
+	linux-cpupower
 	linux-perf
 	man-db
 	manpages

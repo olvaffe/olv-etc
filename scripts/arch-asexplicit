@@ -41,6 +41,7 @@ cli_std="
 	strace
 	tmux
 	trace-cmd
+	turbostat
 	unzip
 	vulkan-tools
 	zip
