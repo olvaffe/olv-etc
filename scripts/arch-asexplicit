@@ -41,7 +41,6 @@ cli_std="
 	strace
 	tmux
 	trace-cmd
-	turbostat
 	unzip
 	vulkan-tools
 	zip
@@ -152,6 +151,10 @@ kernel_custom="
 	$kernel_common
 "
 
+hw_x86="
+	  turbostat
+"
+
 hw_arm="
 	archlinuxarm-keyring
 "
@@ -219,7 +222,7 @@ case "$host" in
 		pkgs="$pkgs $cli_full $gui_full"
 		pkgs="$pkgs $dev_base $dev_mesa $dev_kernel $dev_cross"
 		pkgs="$pkgs $kernel_x86"
-		pkgs="$pkgs $hw_uefi $hw_intel $hw_wifi"
+		pkgs="$pkgs $hw_x86 $hw_uefi $hw_intel $hw_wifi"
 
 		if [ "$host" = "xps" ]; then
 			pkgs="$pkgs $hw_xps"
@@ -229,7 +232,7 @@ case "$host" in
 		pkgs="$pkgs $cli_std $gui_min"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_custom"
-		pkgs="$pkgs $hw_usbnet $hw_dut"
+		pkgs="$pkgs $hw_x86 $hw_usbnet $hw_dut"
 		pkgs="$pkgs $cros_x86"
 
 		if [ "$host" = "brya" ]; then

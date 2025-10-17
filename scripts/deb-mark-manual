@@ -44,7 +44,6 @@ cli_std="
 	$cli_base
 	bc
 	git
-	linux-cpupower
 	linux-perf
 	man-db
 	manpages
@@ -185,6 +184,10 @@ kernel_x86="
 kernel_arm="
 	$kernel_common
 	linux-image-arm64
+"
+
+hw_x86="
+	linux-cpupower
 "
 
 hw_uefi="
