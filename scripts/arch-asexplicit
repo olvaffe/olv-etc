@@ -241,12 +241,16 @@ case "$host" in
 			pkgs="$pkgs $hw_amd"
 		fi
 		;;
-	"navi"|"corsola"|"cherry")
+	"navi"|"corsola"|"cherry"|"trogdor")
 		pkgs="$pkgs $cli_std $gui_min"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_custom"
 		pkgs="$pkgs $hw_arm $hw_usbnet $hw_dut"
 		pkgs="$pkgs $cros_arm"
+
+		if [ "$host" = "trogdor" ]; then
+			pkgs="$pkgs $hw_qcom"
+		fi
 		;;
 	"s15"|"purwa"|"opi")
 		pkgs="$pkgs $cli_std $gui_min"
