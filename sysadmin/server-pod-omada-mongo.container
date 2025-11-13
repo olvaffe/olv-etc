@@ -1,0 +1,14 @@
+[Container]
+Pod=omada.pod
+Image=docker.io/mongo:4.4.18
+Timezone=local
+Volume=%h/mongo-db:/data/db
+Volume=%h/mongo-configdb:/data/configdb
+Volume=%h/mongo-omada.js:/docker-entrypoint-initdb.d/omada.js
+Environment=MONGO_INITDB_DATABASE="omada"
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

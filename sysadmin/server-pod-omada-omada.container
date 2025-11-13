@@ -1,15 +1,12 @@
 [Container]
-Image=docker.io/mbentley/omada-controller:latest
+Pod=omada.pod
+Image=docker.io/mbentley/omada-controller:6.0
 Timezone=local
 Ulimit=nofile=4096:8192
 Volume=%h/omada-data:/opt/tplink/EAPController/data
 Volume=%h/omada-logs:/opt/tplink/EAPController/logs
-PublishPort=8043:8043
-PublishPort=8088:8088
-PublishPort=8843:8843
-PublishPort=27001:27001/udp
-PublishPort=29810:29810/udp
-PublishPort=29811-29816:29811-29816
+Environment=MONGO_EXTERNAL="true"
+Environment=EAP_MONGOD_URI="mongodb://omada:0m4d4@systemd-mongo:27017/omada"
 HealthCmd=none
 StopTimeout=60
 
