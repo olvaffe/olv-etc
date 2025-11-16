@@ -199,6 +199,15 @@ hw_dut="
 	seatd
 "
 
+hw_ridge="
+	bluez
+	bluez-utils
+	evemu
+	pavucontrol
+	steam
+	xorg-xwayland
+"
+
 hw_xps="
 	bcm20702a1-firmware
 	broadcom-wl-dkms
@@ -228,7 +237,7 @@ case "$host" in
 		pkgs="$pkgs $hw_x86 $hw_uefi $hw_wifi"
 
 		if [ "$host" = "ridge" ]; then
-			pkgs="$pkgs $hw_amd $hw_mtk"
+			pkgs="$pkgs $hw_amd $hw_mtk $hw_ridge"
 		elif [ "$host" = "t580" ]; then
 			pkgs="$pkgs $hw_intel"
 		elif [ "$host" = "xps" ]; then
