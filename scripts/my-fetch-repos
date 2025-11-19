@@ -1,9 +1,8 @@
 #!/bin/sh
 
 git_repos="
-	android/main
+	android/android-latest-release
 	chromiumos
-	chromiumos/chromium/src
 	projects/linux
 "
 fetched_repos=""
