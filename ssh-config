@@ -59,4 +59,6 @@ Host my:test:net:work:*
 Host *
 	ControlMaster auto
 	ControlPath ~/.ssh/control-%r@%h:%p
-	ControlPersist 10
+	ControlPersist 60
+	ServerAliveCountMax 2
+	ServerAliveInterval 10
