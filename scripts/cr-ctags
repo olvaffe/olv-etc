@@ -19,6 +19,7 @@ PROJECTS="base
 	  sandbox
 	  services
 	  skia
+	  third_party/angle
 	  third_party/khronos
 	  third_party/libdrm
 	  third_party/minigbm
