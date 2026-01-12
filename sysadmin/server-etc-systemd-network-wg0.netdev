@@ -8,7 +8,7 @@ Kind=wireguard
 #   PublicKey=<KEY>
 #   AllowedIPs=192.168.87.10/32
 #   Endpoint=olv.rip:51820
-[WireGuardt]
+[WireGuard]
 PrivateKey=<KEY>
 ListenPort=51820
 
