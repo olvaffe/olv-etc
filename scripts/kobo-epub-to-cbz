@@ -36,11 +36,15 @@ class EBook:
 
         self.series = self.series.replace('—', '-')
         self.series = self.series.replace('SUPREME藍色巨星', 'SUPREME 藍色巨星')
+        if self.series == 'real':
+            self.series = 'REAL'
 
         if self.series.startswith('【') and self.series.endswith('】'):
             self.series = self.series[1:-1]
 
         if self.series.endswith('(漫)'):
+            self.series = self.series[:-3]
+        elif self.series.endswith('　全集'):
             self.series = self.series[:-3]
 
     def set_creator(self, creator):
