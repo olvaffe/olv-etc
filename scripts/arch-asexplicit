@@ -245,14 +245,14 @@ case "$host" in
 			pkgs="$pkgs $hw_intel $hw_xps"
 		fi
 		;;
-	"brya"|"skyrim")
+	"rex"|"brya"|"skyrim")
 		pkgs="$pkgs $cli_std $gui_min"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_custom"
 		pkgs="$pkgs $hw_x86 $hw_usbnet $hw_dut"
 		pkgs="$pkgs $cros_x86"
 
-		if [ "$host" = "brya" ]; then
+		if [ "$host" = "rex" -o "$host" = "brya" ]; then
 			pkgs="$pkgs $hw_intel"
 		elif [ "$host" = "skyrim" ]; then
 			pkgs="$pkgs $hw_amd"
