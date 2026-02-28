@@ -1,0 +1,75 @@
+#!/bin/bash
+
+set -e
+
+die() {
+	echo "$@"
+	exit 1
+}
+
+[ $# -ge 3 -a $# -le 4 ] || die "usage: $0 <linux-tarzst-pkg> <sysroot> <name> [<dtb>]"
+
+tarball="$1"
+sysroot="$2"
+name="$3"
+dtb="$4"
+
+# linux-<release>-<arch>.tar.zst
+tmp=$(basename "$tarball")
+tmp="${tmp%.*}"
+src_dir="${tmp%.tar}"
+
+tmp="${src_dir#linux-}"
+release="${tmp%-*}"
+arch="${tmp#"$release"-}"
+
+if [ "$arch" = "arm64" -o "$arch" = "riscv" ]; then
+	[ -n "$dtb" ] || die "$arch requires a dtb"
+fi
+
+src_dir="/tmp/$src_dir"
+src_kernel="boot/vmlinuz-$release"
+src_modules="lib/modules/$release"
+src_dtb="boot/dtbs/$release/$dtb.dtb"
+[ -n "$dtb" ] || src_dtb=""
+
+dst_dir="/"
+dst_kernel="boot/$name.vmlinuz"
+dst_modules="lib/modules/$release"
+dst_dtb="boot/$name.dtb"
+
+# validate
+[ -w "$(dirname "$src_dir")" ] || die "cannot write $src_dir"
+[ -w "$(dirname "$dst_dir/$dst_kernel")" ] ||
+	die "cannot write $dst_dir/$dst_kernel"
+[ -w "$(dirname "$dst_dir/$dst_modules")" ] || \
+	die "cannot write $dst_dir/$dst_modules"
+[ -w "$(dirname "$dst_dir/$dst_dtb")" ] || \
+	die "cannot write $dst_dir/$dst_dtb"
+
+echo "unpacking $tarball to $src_dir..."
+
+mkdir -p "$src_dir"
+tar -xf "$tarball" -C "$src_dir" "$src_kernel" "$src_modules" "$src_dtb"
+
+echo "copying from $src_dir to $dst_dir..."
+
+cp "$src_dir/$src_kernel" "$dst_dir/$dst_kernel.new"
+rm -rf "$dst_dir/$dst_modules.new"
+cp -r "$src_dir/$src_modules" "$dst_dir/$dst_modules.new"
+if [ -n "$dtb" ]; then
+	cp "$src_dir/$src_dtb" "$dst_dir/$dst_dtb.new"
+fi
+
+echo "removing $src_dir..."
+
+rm -rf "$src_dir"
+
+echo "updating $dst_dir..."
+
+mv "$dst_dir/$dst_kernel.new" "$dst_dir/$dst_kernel"
+rm -rf "$dst_dir/$dst_modules"
+mv "$dst_dir/$dst_modules.new" "$dst_dir/$dst_modules"
+if [ -n "$dtb" ]; then
+	mv "$dst_dir/$dst_dtb.new" "$dst_dir/$dst_dtb"
+fi
