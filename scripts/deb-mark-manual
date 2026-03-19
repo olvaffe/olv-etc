@@ -240,6 +240,10 @@ hw_npi="
 	unbound
 "
 
+cros_crostini="
+	cros-guest-tools
+"
+
 pkgs=""
 
 host="$(uname -n)"
@@ -249,6 +253,10 @@ case "$host" in
 		;;
 	"npi")
 		pkgs="$pkgs $cli_min $kernel_arm $hw_npi"
+		;;
+	"penguin")
+		pkgs="$pkgs $cli_std"
+		pkgs="$pkgs $cros_crostini"
 		;;
 	*)
 		echo "unknown device: $host"
