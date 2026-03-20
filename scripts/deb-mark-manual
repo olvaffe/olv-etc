@@ -45,6 +45,7 @@ cli_std="
 	bc
 	git
 	linux-perf
+	locales
 	man-db
 	manpages
 	manpages-dev
