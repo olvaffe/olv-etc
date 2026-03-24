@@ -4,3 +4,9 @@ Name=wan
 [Network]
 DHCP=yes
 IPv6AcceptRA=yes
+
+[DHCPv4]
+UseDNS=no
+
+[DHCPv6]
+UseDNS=no
