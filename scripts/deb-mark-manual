@@ -60,7 +60,7 @@ cli_full="
 	wireguard-tools
 "
 
-# for terminal (~500M) / 1081
+# for terminal (~500M)
 gui_min="
 	alacritty
 	fonts-noto-core

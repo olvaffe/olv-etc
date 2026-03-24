@@ -1,87 +1,76 @@
 #!/bin/sh
 
-# Assuming 4 types of devices
-#
-#  - workstations
-#  - duts
-#  - containers
-#  - servers
-
-# for bootstrapping (~800M)
+# for rescue (~700M)
 cli_min="
 	base
 	btrfs-progs
 	dosfstools
-	sudo
 	vim
 "
 
-# for all devices (~50M)
+# for all devices including servers (~50M)
 cli_base="
 	$cli_min
 	htop
 	ldns
+	less
 	logrotate
-	lsof
 	openssh
 	rsync
+	sudo
 	usbutils
 "
 
-# for all except servers (~300M)
+# for workstations, vms, and duts (~250M)
 cli_std="
 	$cli_base
 	bc
-	ctags
 	git
+	lsof
 	man-db
 	man-pages
-	perf
 	python
 	strace
 	tmux
-	trace-cmd
 	unzip
-	vulkan-tools
 	zip
 "
 
-# for workstations (~550M)
+# for workstations (~150M)
 cli_full="
 	$cli_std
-	android-tools
 	jq
-	mesa-utils
 	msmtp
 	nordvpn-bin
 	picocom
 	wireguard-tools
 "
 
-# for gui testing (~200M)
+# for terminal (~550M)
 gui_min="
 	alacritty
-	brightnessctl
 	i3status
+	mesa-utils
 	noto-fonts
 	polkit
 	sway
-	swayidle
+	vulkan-tools
 	wayland-utils
 "
 
-# for simple use (~150M)
+# for basic use (~150M)
 gui_base="
 	$gui_min
+	brightnessctl
 	grim
-	mako
 	slurp
+	swayidle
 	swayimg
 	swaylock
 	wl-clipboard
 "
 
-# for real use (~1250M)
+# for real use (~1000M)
 gui_std="
 	$gui_base
 	fcitx5-chewing
@@ -89,6 +78,7 @@ gui_std="
 	fcitx5-gtk
 	google-chrome
 	gtk4
+	mako
 	noto-fonts-cjk
 	noto-fonts-emoji
 	pipewire-pulse
@@ -103,19 +93,36 @@ gui_full="
 	xdg-desktop-portal-wlr
 "
 
-# for compile (~350M)
+# for tooling (~350M)
 dev_min="
+	ctags
+	gdb
+	perf
+	trace-cmd
+"
+
+# for development (~750M)
+dev_base="
+	$dev_min
 	base-devel
 	ccache
+	clang
 	cmake
 	meson
 "
 
-# for development (~450M)
-dev_base="
-	$dev_min
-	clang
-	gdb
+# for cross-compile (~600M)
+dev_cross="
+	aarch64-linux-gnu-gcc
+	qemu-user-static
+	qemu-user-static-binfmt
+"
+
+# for kernel (~50M)
+# all are for cros kernel
+dev_kernel="
+	dtc
+	vboot-minimal-git
 "
 
 # for mesa (~250M)
@@ -124,18 +131,6 @@ dev_mesa="
 	libclc
 	llvm
 	spirv-llvm-translator
-"
-
-# dtc and vboot-minimal-git are for cros kernel
-dev_kernel="
-	dtc
-	vboot-minimal-git
-"
-
-# for cross-compile (~600M)
-dev_cross="
-	aarch64-linux-gnu-gcc
-	qemu-user-static-binfmt
 "
 
 kernel_common="
@@ -233,7 +228,7 @@ host="$(uname -n)"
 case "$host" in
 	"ridge"|"t580"|"xps")
 		pkgs="$pkgs $cli_full $gui_full"
-		pkgs="$pkgs $dev_base $dev_mesa $dev_kernel $dev_cross"
+		pkgs="$pkgs $dev_base $dev_cross $dev_kernel $dev_mesa"
 		pkgs="$pkgs $kernel_x86"
 		pkgs="$pkgs $hw_x86 $hw_uefi $hw_wifi"
 
@@ -246,7 +241,7 @@ case "$host" in
 		fi
 		;;
 	"rex"|"brya"|"skyrim")
-		pkgs="$pkgs $cli_std $gui_min"
+		pkgs="$pkgs $cli_std $gui_base"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_custom"
 		pkgs="$pkgs $hw_x86 $hw_usbnet $hw_dut"
@@ -259,7 +254,7 @@ case "$host" in
 		fi
 		;;
 	"navi"|"corsola"|"cherry"|"trogdor")
-		pkgs="$pkgs $cli_std $gui_min"
+		pkgs="$pkgs $cli_std $gui_base"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_custom"
 		pkgs="$pkgs $hw_arm $hw_usbnet $hw_dut"
@@ -270,7 +265,7 @@ case "$host" in
 		fi
 		;;
 	"s15"|"hamoa"|"purwa"|"opi")
-		pkgs="$pkgs $cli_std $gui_min"
+		pkgs="$pkgs $cli_std $gui_base"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_custom"
 		pkgs="$pkgs $hw_arm $hw_usbnet $hw_dut"
