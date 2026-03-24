@@ -1,25 +1,16 @@
 #!/bin/sh
 
-# Assuming 4 types of devices
-#
-#  - workstations
-#  - duts
-#  - containers
-#  - servers
-
-# for bootstrapping (~300M)
+# for rescue (~300M)
 cli_min="
 	btrfs-progs
 	dosfstools
 	e2fsprogs
 	fdisk
 	init
-	sudo
 	vim
-	whiptail
 "
 
-# for all devices (~100M)
+# for all devices including servers (~100M)
 cli_base="
 	$cli_min
 	curl
@@ -29,74 +20,71 @@ cli_base="
 	ldnsutils
 	less
 	logrotate
-	lsof
 	openssh-client
 	openssh-server
 	pciutils
 	procps
 	rsync
+	sudo
 	systemd-resolved
 	usbutils
+	whiptail
 "
 
-# for all except servers (~400M)
+# for workstations, vms, and duts (~200M)
 cli_std="
 	$cli_base
 	bc
 	git
-	linux-perf
 	locales
+	lsof
 	man-db
 	manpages
-	manpages-dev
 	ncal
+	python3
 	python3-venv
 	strace
-	systemd-container
 	tmux
-	trace-cmd
-	universal-ctags
 	unzip
-	vulkan-tools
 	zip
 "
 
-# for workstations (~400M)
+# for workstations (~50M)
 cli_full="
 	$cli_std
-	adb
 	git-email
 	jq
-	mesa-utils
 	msmtp
 	picocom
+	systemd-container
 	wireguard-tools
 "
 
-# for gui testing (~100M)
+# for terminal (~500M) / 1081
 gui_min="
 	alacritty
-	brightnessctl
 	fonts-noto-core
 	i3status
+	mesa-utils
 	polkitd
 	sway
-	swayidle
+	vulkan-tools
 	wayland-utils
 "
 
-# for simple use (~150M)
+# for basic use (~150M)
 gui_base="
 	$gui_min
+	brightnessctl
 	grim
-	mako-notifier
 	slurp
+	swayidle
 	swayimg
 	swaylock
 	wl-clipboard
 "
 
-# for real use (~1000M)
+# for real use (~1100M)
 gui_std="
 	$gui_base
 	fcitx5
@@ -105,10 +93,11 @@ gui_std="
 	fonts-noto-color-emoji
 	google-chrome-stable
 	libgtk-4-1
+	mako-notifier
 	pipewire-pulse
 "
 
-# for optional features (~450M)
+# for optional features (~500M)
 gui_full="
 	$gui_std
 	cups
@@ -117,27 +106,49 @@ gui_full="
 	xdg-desktop-portal-wlr
 "
 
-# for compile (~400M)
+# for tooling (~100M)
 dev_min="
+	gdb
+	linux-perf
+	manpages-dev
+	trace-cmd
+	universal-ctags
+"
+
+# for development (~700M)
+dev_base="
+	$dev_min
 	build-essential
-	bison
 	ccache
+	clang-format
 	cmake
-	flex
 	meson
 	pkgconf
 "
 
-# for development (~750M)
-dev_base="
-	$dev_min
-	clang
-	clang-format
-	gdb
+# for cross-compile (~800M)
+dev_cross="
+	debootstrap
+	gcc-aarch64-linux-gnu
+	g++-aarch64-linux-gnu
+	qemu-user
+	qemu-user-binfmt
 "
 
-# for mesa (~400M)
+# for kernel (~100M)
+# all except libelf-dev are for cros kernel
+dev_kernel="
+	cgpt
+	device-tree-compiler
+	libelf-dev
+	lz4
+	vboot-kernel-utils
+"
+
+# for mesa (~1000M)
 dev_mesa="
+	bison
+	flex
 	glslang-tools
 	libclang-cpp-dev
 	libclang-dev
@@ -154,23 +165,6 @@ dev_mesa="
 	libxrandr-dev
 	libxshmfence-dev
 	llvm-dev
-"
-
-# all except libelf-dev are for cros kernel
-dev_kernel="
-	cgpt
-	device-tree-compiler
-	libelf-dev
-	lz4
-	vboot-kernel-utils
-"
-
-# for cross-compile (~750M)
-dev_cross="
-	debootstrap
-	gcc-aarch64-linux-gnu
-	g++-aarch64-linux-gnu
-	qemu-user-binfmt
 "
 
 kernel_common="
@@ -221,6 +215,7 @@ hw_rpi="
 	msmtp
 	nginx
 	php-fpm
+	python3
 	python3-venv
 	podman
 	systemd-journal-remote
@@ -230,13 +225,8 @@ hw_rpi="
 
 hw_npi="
 	firmware-realtek
-	iproute2
-	iputils-ping
 	kea-dhcp4-server
-	logrotate
 	nftables
-	openssh-server
-	procps
 	systemd-journal-remote
 	unbound
 "
@@ -253,7 +243,7 @@ case "$host" in
 		pkgs="$pkgs $cli_base $kernel_arm $hw_rpi"
 		;;
 	"npi")
-		pkgs="$pkgs $cli_min $kernel_arm $hw_npi"
+		pkgs="$pkgs $cli_base $kernel_arm $hw_npi"
 		;;
 	"penguin")
 		pkgs="$pkgs $cli_std"
