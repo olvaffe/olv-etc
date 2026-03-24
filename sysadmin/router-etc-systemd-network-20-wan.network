@@ -10,3 +10,6 @@ UseDNS=no
 
 [DHCPv6]
 UseDNS=no
+
+[IPv6AcceptRA]
+UseDNS=no

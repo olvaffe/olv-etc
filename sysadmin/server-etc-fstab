@@ -4,7 +4,7 @@ UUID=<UUID>	/boot	vfat	defaults	0	2
 UUID=<UUID>	/	ext4	defaults	0	1
 # /dev/sda3, size 8GB, used 2.0GB
 UUID=<UUID>	/var	ext4	defaults	0	2
-# /dev/sda4, size 32GB, used 8.3GB
+# /dev/sda4, size 32GB, used 9.6GB
 UUID=<UUID>	/home	ext4	defaults	0	2
-# /dev/sda5, rest
+# /dev/sda5, rest, used 480GB
 UUID=<UUID>	/srv	ext4	defaults	0	2
