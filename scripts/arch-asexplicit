@@ -46,27 +46,27 @@ cli_full="
 	wireguard-tools
 "
 
-# for terminal (~550M)
+# for terminal (~450M)
 gui_min="
 	alacritty
 	i3status
-	mesa-utils
 	noto-fonts
 	polkit
 	sway
-	vulkan-tools
-	wayland-utils
 "
 
-# for basic use (~150M)
+# for basic use (~250M)
 gui_base="
 	$gui_min
 	brightnessctl
 	grim
+	mesa-utils
 	slurp
 	swayidle
 	swayimg
 	swaylock
+	vulkan-tools
+	wayland-utils
 	wl-clipboard
 "
 
