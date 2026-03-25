@@ -21,16 +21,22 @@ init_gui_envs() {
 		GTK_IM_MODULE QT_IM_MODULE XMODIFIERS
 }
 
-# init SSH_AUTH_SOCK explicitly for sway, but start ssh-agent or gpg-agent
-# later in autostart because the agent might depend on sway to display prompts
+# init SSH_AUTH_SOCK for the same reason
 init_ssh_envs() {
 	# kill pre-existing ssh-agent that was started before sway
 	if [ -n "$SSH_AGENT_PID" ]; then
 		eval $(ssh-agent -k)
 	fi
 
-	export SSH_AUTH_SOCK="$(gpgconf -L agent-ssh-socket)"
-	#export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/sway-ssh-agent.socket"
+	# Set SSH_AUTH_SOCK and let systemd socket activation start the
+	# respective service. Prefer gpg-agent unless ssh-agent is customized.
+	if [ -e "/usr/bin/ssh-agent.openssh" ]; then
+		export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/openssh_agent"
+	else
+		export SSH_AUTH_SOCK="$(gpgconf -L agent-ssh-socket)"
+	fi
+
+	dbus-update-activation-environment --systemd SSH_AUTH_SOCK
 }
 
 init_gui_envs
