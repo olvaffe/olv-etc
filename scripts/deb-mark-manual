@@ -246,8 +246,7 @@ case "$host" in
 		pkgs="$pkgs $cli_base $kernel_arm $hw_npi"
 		;;
 	"penguin")
-		pkgs="$pkgs $cli_std"
-		pkgs="$pkgs $cros_crostini"
+		pkgs="$pkgs $cli_std $dev_min $cros_crostini"
 		;;
 	*)
 		echo "unknown device: $host"

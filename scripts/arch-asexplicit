@@ -277,8 +277,7 @@ case "$host" in
 		fi
 		;;
 	"crostini")
-		pkgs="$pkgs $cli_std"
-		pkgs="$pkgs $cros_crostini"
+		pkgs="$pkgs $cli_std $dev_min $cros_crostini"
 		;;
 	*)
 		echo "unknown device: $host"
