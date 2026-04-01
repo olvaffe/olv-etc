@@ -3,10 +3,10 @@
 sway_envs="XDG_SESSION_TYPE SWAYSOCK WAYLAND_DISPLAY DISPLAY"
 dbus-update-activation-environment --systemd $sway_envs
 
-fcitx5 &
+fcitx5 -d
 
-exec swayidle -w \
+swayidle -w \
     timeout 300 'swaylock -f -c 000000' \
     timeout 330 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
     before-sleep 'swaylock -f -c 000000' \
-    after-resume 'swaymsg "output * enable"'
+    after-resume 'swaymsg "output * enable"' &
