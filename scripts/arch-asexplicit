@@ -77,7 +77,6 @@ gui_std="
 	fcitx5-configtool
 	fcitx5-gtk
 	google-chrome
-	gtk4
 	mako
 	noto-fonts-cjk
 	noto-fonts-emoji

@@ -2,44 +2,25 @@
 
 exec </dev/null >"$HOME/.local/state/sway.log" 2>&1
 
-# init GUI envs so that they are inherited by systemd, dbus, and sway
-init_gui_envs() {
-	export XDG_CURRENT_DESKTOP="sway"
+XDG_CURRENT_DESKTOP="sway"
+envs="XDG_CURRENT_DESKTOP"
 
-	export GDK_BACKEND="wayland,x11"
-	export QT_QPA_PLATFORM="wayland;xcb"
-	export SDL_VIDEODRIVER="wayland,x11"
+# kill pre-existing ssh-agent that was started before sway
+if [ -n "$SSH_AGENT_PID" ]; then
+	eval $(ssh-agent -k)
+fi
 
-	# https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland
-	export GTK_IM_MODULE="fcitx"
-	export QT_IM_MODULE="fcitx"
-	export XMODIFIERS="@im=fcitx"
+# Set SSH_AUTH_SOCK and let systemd socket activation start the
+# respective service. Prefer gpg-agent unless ssh-agent is customized.
+if [ -e "/usr/bin/ssh-agent.openssh" ]; then
+	SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/openssh_agent"
+else
+	SSH_AUTH_SOCK="$(gpgconf -L agent-ssh-socket)"
+fi
+envs="$envs SSH_AUTH_SOCK"
 
-	dbus-update-activation-environment --systemd \
-		XDG_CURRENT_DESKTOP \
-		GDK_BACKEND QT_QPA_PLATFORM SDL_VIDEODRIVER \
-		GTK_IM_MODULE QT_IM_MODULE XMODIFIERS
-}
-
-# init SSH_AUTH_SOCK for the same reason
-init_ssh_envs() {
-	# kill pre-existing ssh-agent that was started before sway
-	if [ -n "$SSH_AGENT_PID" ]; then
-		eval $(ssh-agent -k)
-	fi
-
-	# Set SSH_AUTH_SOCK and let systemd socket activation start the
-	# respective service. Prefer gpg-agent unless ssh-agent is customized.
-	if [ -e "/usr/bin/ssh-agent.openssh" ]; then
-		export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/openssh_agent"
-	else
-		export SSH_AUTH_SOCK="$(gpgconf -L agent-ssh-socket)"
-	fi
-
-	dbus-update-activation-environment --systemd SSH_AUTH_SOCK
-}
-
-init_gui_envs
-init_ssh_envs
+# export envs to sway, systemd, and dbus
+export $envs
+dbus-update-activation-environment --systemd $envs
 
 exec sway

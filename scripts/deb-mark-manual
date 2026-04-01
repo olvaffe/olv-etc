@@ -92,7 +92,6 @@ gui_std="
 	fonts-noto-cjk
 	fonts-noto-color-emoji
 	google-chrome-stable
-	libgtk-4-1
 	mako-notifier
 	pipewire-pulse
 "
