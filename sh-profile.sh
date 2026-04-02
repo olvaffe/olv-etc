@@ -25,7 +25,7 @@ dbus-update-activation-environment --systemd PATH SSH_AUTH_SOCK
 	exec sway-session
 
 if [ "$SSH_AUTH_SOCK" = "$(gpgconf -L agent-ssh-socket)" ]; then
-	gpg-connect-agent UPDATESTARTUPTTY /bye
+	gpg-connect-agent UPDATESTARTUPTTY /bye > /dev/null
 fi
 
 [ -f "$HOME/.config/sh/rc.sh" ] && . "$HOME/.config/sh/rc.sh"
