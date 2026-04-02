@@ -2,25 +2,8 @@
 
 exec </dev/null >"$HOME/.local/state/sway.log" 2>&1
 
-XDG_CURRENT_DESKTOP="sway"
-envs="XDG_CURRENT_DESKTOP"
-
-# kill pre-existing ssh-agent that was started before sway
-if [ -n "$SSH_AGENT_PID" ]; then
-	eval $(ssh-agent -k)
-fi
-
-# Set SSH_AUTH_SOCK and let systemd socket activation start the
-# respective service. Prefer gpg-agent unless ssh-agent is customized.
-if [ -e "/usr/bin/ssh-agent.openssh" ]; then
-	SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/openssh_agent"
-else
-	SSH_AUTH_SOCK="$(gpgconf -L agent-ssh-socket)"
-fi
-envs="$envs SSH_AUTH_SOCK"
-
-# export envs to sway, systemd, and dbus
-export $envs
-dbus-update-activation-environment --systemd $envs
+# export XDG_CURRENT_DESKTOP to sway, systemd, and dbus
+export XDG_CURRENT_DESKTOP="sway"
+dbus-update-activation-environment --systemd XDG_CURRENT_DESKTOP
 
 exec sway
