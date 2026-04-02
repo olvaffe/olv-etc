@@ -7,12 +7,11 @@ die() {
 	exit 1
 }
 
-[ $# -ge 3 -a $# -le 4 ] || die "usage: $0 <linux-tarzst-pkg> <sysroot> <name> [<dtb>]"
+[ $# -ge 2 -a $# -le 3 ] || die "usage: $0 <linux-tarzst-pkg> <name> [<dtb>]"
 
 tarball="$1"
-sysroot="$2"
-name="$3"
-dtb="$4"
+name="$2"
+dtb="$3"
 
 # linux-<release>-<arch>.tar.zst
 tmp=$(basename "$tarball")
@@ -47,12 +46,12 @@ dst_dtb="boot/$name.dtb"
 [ -w "$(dirname "$dst_dir/$dst_dtb")" ] || \
 	die "cannot write $dst_dir/$dst_dtb"
 
-echo "unpacking $tarball to $src_dir..."
+echo "unpacking to temp dir..."
 
 mkdir -p "$src_dir"
 tar -xf "$tarball" -C "$src_dir" "$src_kernel" "$src_modules" "$src_dtb"
 
-echo "copying from $src_dir to $dst_dir..."
+echo "copying to final dir..."
 
 cp "$src_dir/$src_kernel" "$dst_dir/$dst_kernel.new"
 rm -rf "$dst_dir/$dst_modules.new"
@@ -61,11 +60,11 @@ if [ -n "$dtb" ]; then
 	cp "$src_dir/$src_dtb" "$dst_dir/$dst_dtb.new"
 fi
 
-echo "removing $src_dir..."
+echo "removing temp dir..."
 
 rm -rf "$src_dir"
 
-echo "updating $dst_dir..."
+echo "updating..."
 
 mv "$dst_dir/$dst_kernel.new" "$dst_dir/$dst_kernel"
 rm -rf "$dst_dir/$dst_modules"
