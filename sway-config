@@ -10,8 +10,8 @@ set $up k
 set $right l
 
 # preferred terminal/browser
-set $term alacritty
-set $browser google-chrome-stable --password-store=basic
+set $term systemd-run --user alacritty
+set $browser systemd-run --user google-chrome-stable --password-store=basic
 
 #xwayland disable
 

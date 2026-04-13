@@ -2,6 +2,7 @@
 
 sway_envs="XDG_SESSION_TYPE SWAYSOCK WAYLAND_DISPLAY DISPLAY"
 dbus-update-activation-environment --systemd $sway_envs
+systemd-notify --ready
 
 fcitx5 -d
 

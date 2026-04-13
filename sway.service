@@ -1,0 +1,13 @@
+[Unit]
+Description=Sway
+PartOf=graphical-session.target
+Before=graphical-session.target
+
+[Service]
+Slice=session.slice
+Type=notify
+NotifyAccess=all
+ExecStartPre=/usr/bin/dbus-update-activation-environment --systemd XDG_CURRENT_DESKTOP=sway
+ExecStart=/usr/bin/sway
+ExecStopPost=/usr/bin/systemctl --user unset-environment XDG_SESSION_TYPE SWAYSOC= WAYLAND_DISPLAY DISPLAY
+ExecStopPost=/usr/bin/systemctl --user unset-environment XDG_CURRENT_DESKTOP

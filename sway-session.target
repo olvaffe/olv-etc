@@ -1,0 +1,6 @@
+[Unit]
+Description=Sway Session
+Before=graphical-session.target
+BindsTo=graphical-session.target
+
+BindsTo=sway.service

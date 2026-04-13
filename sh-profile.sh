@@ -22,7 +22,7 @@ dbus-update-activation-environment --systemd PATH SSH_AUTH_SOCK
 
 [ -z "$WAYLAND_DISPLAY" -a $(tty) = "/dev/tty1" ] && \
 	command -v sway > /dev/null && \
-	exec sway-session
+	exec systemctl --user --wait start sway-session.target
 
 if [ "$SSH_AUTH_SOCK" = "$(gpgconf -L agent-ssh-socket)" ]; then
 	gpg-connect-agent UPDATESTARTUPTTY /bye > /dev/null

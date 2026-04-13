@@ -1,9 +1,0 @@
-#!/bin/sh
-
-exec </dev/null >"$HOME/.local/state/sway.log" 2>&1
-
-# export XDG_CURRENT_DESKTOP to sway, systemd, and dbus
-export XDG_CURRENT_DESKTOP="sway"
-dbus-update-activation-environment --systemd XDG_CURRENT_DESKTOP
-
-exec sway
