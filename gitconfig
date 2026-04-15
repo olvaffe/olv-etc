@@ -44,9 +44,6 @@
 [init]
 	defaultBranch = main
 
-[http]
-	cookiefile = ~/.config/git/cookies.txt
-
 [pull]
 	ff = only
 
