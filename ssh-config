@@ -22,12 +22,12 @@ Host home
 Host dut-priv lnx-priv
 	Hostname 192.168.0.2
 
-#Host my:test:net:work:*
-#	ProxyCommand /usr/bin/ssh-helper %h %p
+Match host 11:22:33:44:* !localnetwork 11:22:33:44::/64
+	ProxyCommand /usr/bin/ssh-helper %h %p
 
 Host dut-1 lnx-1
 	# servo
-	Hostname my:test:net:work:8a54:1fff:fe0f:9291
+	Hostname 11:22:33:44:8a54:1fff:fe0f:9291
 	# sslh
 	LocalForward 2201 localhost:22
 	# renderdoc
@@ -35,11 +35,11 @@ Host dut-1 lnx-1
 
 Host dut-2 lnx-2
 	# UNITEK USB-A Black
-	Hostname my:test:net:work:2e0:4cff:fe68:166
+	Hostname 11:22:33:44:2e0:4cff:fe68:166
 	LocalForward 2202 localhost:22
 
 Host lnx-opi
-	Hostname my:test:net:work:f487:cff:fe32:d5d5
+	Hostname 11:22:33:44:f487:cff:fe32:d5d5
 
 Host dut-*
 	User root
