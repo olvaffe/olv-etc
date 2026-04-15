@@ -13,8 +13,6 @@ create_xdg_base_dirs() {
 	xdg_dirs="
 		.cache
 		.config
-		.local/bin
-		.local/lib
 		.local/share
 		.local/state
 	"
@@ -67,7 +65,7 @@ install "ssh-config" ".ssh/config"
 install "sway-config" ".config/sway/config"
 install "sway.service" ".config/systemd/user/sway.service"
 install "sway-session.target" ".config/systemd/user/sway-session.target"
-install "sway-session-autostart" ".local/bin/sway-session-autostart"
+install "sway-session-autostart" ".config/sway/sway-session-autostart"
 install "systemd-fetch-repos.service" ".config/systemd/user/fetch-repos.service"
 install "systemd-fetch-repos.timer" ".config/systemd/user/fetch-repos.timer"
 install "tmux.conf" ".config/tmux/tmux.conf"

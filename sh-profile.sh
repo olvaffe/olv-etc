@@ -1,7 +1,5 @@
 # sh-profile.sh
 
-[ -f "$HOME/.config/sh/paths.sh" ] && . "$HOME/.config/sh/paths.sh"
-
 # kill pre-existing ssh-agent
 if [ -n "$SSH_AGENT_PID" ]; then
 	eval $(ssh-agent -k) > /dev/null
@@ -18,7 +16,7 @@ if [ -z "$SSH_AUTH_SOCK" ]; then
 	export SSH_AUTH_SOCK
 fi
 
-dbus-update-activation-environment --systemd PATH SSH_AUTH_SOCK
+dbus-update-activation-environment --systemd SSH_AUTH_SOCK
 
 [ -z "$WAYLAND_DISPLAY" -a $(tty) = "/dev/tty1" ] && \
 	command -v sway > /dev/null && \
