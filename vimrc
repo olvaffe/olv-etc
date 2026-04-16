@@ -3,8 +3,8 @@ filetype on
 filetype plugin on
 filetype indent on
 
-set viminfofile=~/.vim/viminfo
-set directory=~/.vim
+set viminfofile=~/.config/vim/viminfo
+set mouse=
 
 " color settings
 syntax on
