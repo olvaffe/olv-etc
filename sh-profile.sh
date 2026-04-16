@@ -26,4 +26,4 @@ if [ "$SSH_AUTH_SOCK" = "$(gpgconf -L agent-ssh-socket)" ]; then
 	gpg-connect-agent UPDATESTARTUPTTY /bye > /dev/null
 fi
 
-[ -f "$HOME/.config/sh/rc.sh" ] && . "$HOME/.config/sh/rc.sh"
+[ -f "$HOME/olv-etc/sh-rc.sh" ] && . "$HOME/olv-etc/sh-rc.sh"

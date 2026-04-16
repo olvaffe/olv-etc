@@ -13,12 +13,12 @@ cpu_usage {
 	format ="CPU: %usage"
 }
 
-# /sys/class/thermal/thermal_zone%d
+# /sys/class/thermal/thermal_zone%d/temp
 cpu_temperature 1 {
 	format = "T: %degrees °C"
 }
 
-# /sys/class/power_supply/BAT%d
+# /sys/class/power_supply/BAT%d/uevent
 battery 0 {
 	format = "%status %percentage"
 }
@@ -30,7 +30,7 @@ volume master {
 }
 
 tztime TPE {
-	timezone = Asia/Taipei
+	timezone = "Asia/Taipei"
 	format = "TPE: %H:%M"
 }
 

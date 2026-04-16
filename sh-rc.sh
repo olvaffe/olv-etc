@@ -3,8 +3,8 @@
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
-[ -f "$HOME/.config/sh/paths.sh" ] && . "$HOME/.config/sh/paths.sh"
-[ -f "$HOME/.config/sh/aliases.sh" ] && . "$HOME/.config/sh/aliases.sh"
+[ -f "$HOME/olv-etc/sh-paths.sh" ] && . "$HOME/olv-etc/sh-paths.sh"
+[ -f "$HOME/olv-etc/sh-aliases.sh" ] && . "$HOME/olv-etc/sh-aliases.sh"
 
 HISTFILE="$HOME/.local/state/sh.history"
 HISTSIZE=64000
