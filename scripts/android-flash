@@ -1,0 +1,36 @@
+#!/bin/sh
+
+set -e
+
+if [ $# -ne 3 ]; then
+	echo "$0 <remote> <src> <dst>"
+	exit
+fi
+
+remote="$1"
+src="$2"
+dst="$3"
+
+sudo -v
+
+mtime=$(ssh "$remote" stat -L -c %Y "$src")
+size=$(ssh "$remote" stat -L -c %s "$src")
+
+mtime=$(date -d "@$mtime" '+%H:%M %m/%d')
+size=$(numfmt --to=iec "$size")
+echo "flashing $remote $src to "$dst"..."
+echo "  mtime $mtime"
+echo "  size $size"
+[ -b "$dst" ] || echo "  $dst is not a block device"
+
+case "$src" in
+	*.gz)
+		ssh "$remote" cat "$src" | zcat | sudo tee "$dst" > /dev/null
+		;;
+	*.zst)
+		ssh "$remote" cat "$src" | sudo zstd -dfo "$dst"
+		;;
+	*)
+		ssh "$remote" zstd -cf "$src" | sudo zstd -dfo "$dst"
+		;;
+esac
