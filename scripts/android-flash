@@ -25,7 +25,7 @@ echo "  size $size"
 
 case "$src" in
 	*.gz)
-		ssh "$remote" cat "$src" | zcat | sudo tee "$dst" > /dev/null
+		ssh "$remote" cat "$src" | zcat | sudo dd of="$dst" bs=4M conv=nocreat,fsync status=progress
 		;;
 	*.zst)
 		ssh "$remote" cat "$src" | sudo zstd -dfo "$dst"
