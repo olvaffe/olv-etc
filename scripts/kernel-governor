@@ -21,22 +21,26 @@ else
 fi
 
 cpufreq_gov=""
+rpm_gov=""
 devfreq_gov=""
 amdgpu_gov=""
 
 case "$gov" in
 	performance)
 		cpufreq_gov="performance"
+		rpm_gov="on"
 		devfreq_gov="performance"
 		amdgpu_gov="profile_peak"
 		;;
 	powersave)
 		cpufreq_gov="powersave"
+		rpm_gov="auto"
 		devfreq_gov="powersave"
 		amdgpu_gov="low"
 		;;
 	ondemand|schedutil)
 		cpufreq_gov="$gov"
+		rpm_gov="auto"
 		devfreq_gov="simple_ondemand"
 		amdgpu_gov="auto"
 
@@ -54,7 +58,11 @@ esac
 cpufreq_set() {
 	sysfs_cpufreq="/sys/devices/system/cpu/cpufreq"
 
-	for sysfs_gov in $sysfs_cpufreq/policy*/scaling_governor; do
+	for sysfs_pol in $sysfs_cpufreq/policy*; do
+		[ -d "$sysfs_pol" ] || continue
+
+		sysfs_gov="$sysfs_pol/scaling_governor"
+
 		if [ "$act" = "set" -o "$act" = "cpu" ]; then
 			echo "$cpufreq_gov" > "$sysfs_gov"
 		fi
@@ -63,28 +71,67 @@ cpufreq_set() {
 	done
 }
 
-devfreq_set() {
-	if [ "$devfreq_gov" = "performance" ]; then
-		suspend_delay="-1"
-	else
-		suspend_delay="66"
+rpm_set() {
+	sysfs_dev="$1"
+	sysfs_gov="$1/power/control"
+
+	if [ "$act" = "set" -o "$act" = "gpu" ]; then
+		echo "$rpm_gov" > "$sysfs_gov"
 	fi
 
+	echo "$sysfs_gov: $(cat $sysfs_gov)"
+}
+
+devfreq_set() {
 	sysfs_devfreq="/sys/class/devfreq"
 
 	for sysfs_gpu in $sysfs_devfreq/*.gpu; do
 		[ -d "$sysfs_gpu" ] || continue
 
+		rpm_set "$sysfs_gpu"
+
 		sysfs_gov="$sysfs_gpu/governor"
-		sysfs_sus="$sysfs_gpu/device/power/autosuspend_delay_ms"
 
 		if [ "$act" = "set" -o "$act" = "gpu" ]; then
 			echo "$devfreq_gov" > "$sysfs_gov"
-			echo "$suspend_delay" > "$sysfs_sus"
 		fi
 
 		echo "$sysfs_gov: $(cat $sysfs_gov)"
-		echo "$sysfs_sus: $(cat $sysfs_sus)"
+	done
+}
+
+xe_set() {
+	sysfs_drm="/sys/class/drm"
+
+	for sysfs_card in $sysfs_drm/card*; do
+		[ -d "$sysfs_card" ] || continue
+
+		sysfs_min="$sysfs_card/device/tile0/gt0/freq0/min_freq"
+		[ -f "$sysfs_min" ] || continue
+
+		sysfs_max="$sysfs_card/device/tile0/gt0/freq0/max_freq"
+		sysfs_rp0="$sysfs_card/device/tile0/gt0/freq0/rp0_freq"
+		sysfs_rpe="$sysfs_card/device/tile0/gt0/freq0/rpe_freq"
+
+		if [ "$act" = "set" -o "$act" = "gpu" ]; then
+			case "$devfreq_gov" in
+				performance)
+					cp "$sysfs_rp0" "$sysfs_max"
+					cp "$sysfs_rp0" "$sysfs_min"
+					;;
+				powersave)
+					cp "$sysfs_rpe" "$sysfs_min"
+					cp "$sysfs_rpe" "$sysfs_max"
+					;;
+				*)
+					cp "$sysfs_rpe" "$sysfs_min"
+					cp "$sysfs_rp0" "$sysfs_max"
+					;;
+			esac
+		fi
+
+		echo "$sysfs_min: $(cat $sysfs_min)"
+		echo "$sysfs_max: $(cat $sysfs_max)"
 	done
 }
 
@@ -143,5 +190,6 @@ amdgpu_set() {
 
 cpufreq_set
 devfreq_set
+xe_set
 i915_set
 amdgpu_set

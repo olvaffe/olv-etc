@@ -271,7 +271,7 @@ arch_chroot_phase3_bootstrap() {
 		chroot "$sysroot" pacman -R --noconfirm $remove_packages
 	done
 
-	chroot "$sysroot" pacman -Syu --needed --noconfirm inetutils vim
+	chroot "$sysroot" pacman -Syu --needed --noconfirm vim
 
 	echo "root:test0000" | chroot "$sysroot" chpasswd
 
@@ -283,7 +283,6 @@ arch_chroot_phase3_bootstrap() {
 	rm -f "$sysroot/version"
 
 	[ -n "$bootable" ] && touch "$sysroot/arch-chroot-phase3-bootable"
-	#touch /arch-chroot-phase3-dev
 
 	rm -f "$sysroot/arch-chroot-phase3-bootstrap"
 
@@ -293,7 +292,7 @@ arch_chroot_phase3_bootstrap() {
 
 arch_chroot_phase3_hostname() {
 	echo "phase3: setting hostname..."
-	chroot "$sysroot" hostname "$hostname"
+	chroot "$sysroot" hostnamectl hostname "$hostname"
 }
 
 arch_chroot_phase3_bootable() {
@@ -304,11 +303,8 @@ arch_chroot_phase3_bootable() {
 	echo "phase3: performing bootable setup..."
 
 	chroot "$sysroot" pacman -S --needed --noconfirm \
-		linux-firmware linux-firmware-qcom \
-		zram-generator dosfstools sudo \
-		iwd openssh \
-		git \
-		sway polkit noto-fonts i3status alacritty
+		dosfstools openssh sudo git iwd \
+		zram-generator
 
 	if [ "$machine" = "x86_64" ]; then
 		chroot "$sysroot" pacman -S --needed --noconfirm base-devel
@@ -335,7 +331,7 @@ arch_chroot_phase3_bootable() {
 
 	rm -f "$sysroot/etc/resolv.conf"
 	for ty in ether wlan; do
-		echo -e "[Match]\nType=$ty\n\n[Network]\nDHCP=yes" > "$sysroot/etc/systemd/network/$ty.network"
+		echo -e "[Match]\nType=$ty\n\n[Network]\nDHCP=yes" > "$sysroot/etc/systemd/network/60-$ty.network"
 	done
 
 	chroot "$sysroot" systemctl enable systemd-resolved systemd-networkd sshd
@@ -347,40 +343,6 @@ arch_chroot_phase3_bootable() {
 	echo "olv:test0000" | chroot "$sysroot" chpasswd
 
 	rm -f "$sysroot/arch-chroot-phase3-bootable"
-}
-
-arch_chroot_phase3_dev() {
-	if [ ! -f "$sysroot/arch-chroot-phase3-dev" ]; then
-		return
-	fi
-
-	echo "phase3: performing dev setup..."
-
-	chroot "$sysroot" pacman -S --needed --noconfirm \
-		base-devel ccache git ctags meson \
-		man-db man-pages \
-		strace \
-		python-mako python-jinja \
-		mesa mesa-utils \
-		glslang vulkan-tools vulkan-headers \
-		wayland-utils wayland-protocols \
-		xorg-xwayland xorg-xev
-
-	home="/root"
-	chroot "$sysroot" git clone --recurse-submodules "https://github.com/olvaffe/olv-etc.git" "$home/olv-etc" || true
-	HOME="$home" chroot "$sysroot" "$home/olv-etc/create-links"
-
-	projects="
-		https://chromium.googlesource.com/chromiumos/platform2
-		https://gitlab.freedesktop.org/mesa/mesa.git
-	"
-	mkdir -p "$sysroot$home/projects"
-	for proj in $projects; do
-		dst=$(basename "$proj" .git)
-		chroot "$sysroot" git clone "$proj" "$home/projects/$dst" || true
-	done
-
-	rm -f "$sysroot/arch-chroot-phase3-dev"
 }
 
 arch_chroot_phase3_chroot() {
@@ -403,7 +365,6 @@ arch_chroot_phase3() {
 
 	# these are optional
 	arch_chroot_phase3_bootable
-	arch_chroot_phase3_dev
 
 	arch_chroot_phase3_chroot
 }
