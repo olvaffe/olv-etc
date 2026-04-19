@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# lldb-server should have been started
+#
+#  $ adb shell /data/local/tmp/lldb-server gdbserver :1234 <executable>
+#  $ adb shell /data/local/tmp/lldb-server gdbserver --attach :1234 <pid>
+#
+# The binary is available at
+#
+#  - $NDK/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/$VER/lib/linux/$ARCH/lldb-server
+#  - $AOSP/prebuilts/clang/host/linux-x86/$VER/runtimes_ndk_cxx/$ARCH/lldb-server
+#    - ./build/soong/scripts/get_clang_version.py to get clang version
+#
+# The target should be the native executable or "/system/bin/app_process64"
+# for an apk. If an apk wants to wait for lldb,
+#
+#  - adb shell am set-debug-app -w $PKG
+#  - adb shell am start $PKG/$ACT
+#  - after lldb connects,
+#    - adb forward tcp:12345 jdwp:$(adb shell pidof $PKG)
+#    - jdb -attach localhost:12345
+#
+# Prefer development/scripts/lldbclient.py in general.
+
+PORT=1234
+
+if [ -z "$ANDROID_PRODUCT_OUT" ]; then
+	echo "environment not set up"
+	exit 1
+fi
+
+symbols_dir="$ANDROID_PRODUCT_OUT/symbols"
+
+art1=""
+art2=""
+art3=""
+art4=""
+for i in "$@"; do
+	[ $(basename "$i") = "app_process64" ] || continue
+
+	art1="settings set plugin.jit-loader.gdb.enable off"
+	art2="process handle --notify false --pass true --stop false SIGSEGV SIGBUS"
+	art3="b art_sigsegv_fault"
+	art4="b art_sigbus_fault"
+done
+
+adb forward tcp:$PORT tcp:$PORT
+
+lldb \
+	-o "settings append target.source-map '' '$ANDROID_BUILD_TOP'" \
+	-o "target modules search-paths add '/' '$symbols_dir'" \
+	-o "$art1" -o "$art2" -o "$art3" -o "$art4" \
+	-o "gdb-remote $PORT" \
+	"$@"
