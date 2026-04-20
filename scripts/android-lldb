@@ -17,6 +17,7 @@
 # To help lldb find the JNI libraries in an apk,
 #
 #  - settings append target.exec-search-paths <jni-library-dir>
+#    (this must be before gdb-remote)
 #
 # If an apk wants to wait for lldb,
 #
