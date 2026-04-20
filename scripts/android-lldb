@@ -12,7 +12,13 @@
 #    - ./build/soong/scripts/get_clang_version.py to get clang version
 #
 # The target should be the native executable or "/system/bin/app_process64"
-# for an apk. If an apk wants to wait for lldb,
+# for an apk.
+#
+# To help lldb find the JNI libraries in an apk,
+#
+#  - settings append target.exec-search-paths <jni-library-dir>
+#
+# If an apk wants to wait for lldb,
 #
 #  - adb shell am set-debug-app -w $PKG
 #  - adb shell am start $PKG/$ACT
