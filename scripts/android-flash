@@ -29,8 +29,10 @@ case "$src" in
 		;;
 	*.zst)
 		ssh "$remote" cat "$src" | sudo zstd -dfo "$dst"
+		sync "$dst"
 		;;
 	*)
 		ssh "$remote" zstd -cf "$src" | sudo zstd -dfo "$dst"
+		sync "$dst"
 		;;
 esac
