@@ -7,6 +7,7 @@ cli_min="
 	e2fsprogs
 	fdisk
 	init
+	udev
 	vim
 "
 
@@ -53,6 +54,7 @@ cli_std="
 cli_full="
 	$cli_std
 	git-email
+	gnupg
 	jq
 	msmtp
 	picocom
@@ -231,7 +233,12 @@ hw_npi="
 "
 
 cros_crostini="
-	cros-guest-tools
+	cros-garcon
+	cros-port-listener
+	cros-sommelier
+	cros-sommelier-config
+	cros-wayland
+	gnupg
 "
 
 pkgs=""
