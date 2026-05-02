@@ -111,6 +111,7 @@ gui_full="
 dev_min="
 	gdb
 	linux-perf
+	make
 	manpages-dev
 	trace-cmd
 	universal-ctags
