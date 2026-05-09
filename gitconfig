@@ -56,6 +56,13 @@
 	suppressFrom = yes
 	confirm = always
 
+[b4]
+	send-endpoint-web = https://lkml.kernel.org/_b4_submit
+
+[patatt]
+	signingkey = ed25519:20260508
+	selector = 20260508
+
 [user]
 	name = Chia-I Wu
 	email = olvaffe@gmail.com
