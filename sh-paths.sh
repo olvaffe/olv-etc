@@ -13,9 +13,8 @@ append_path() {
 
 prepend_path "$HOME/android/sdk/build-tools/36.0.0"
 prepend_path "$HOME/android/sdk/platform-tools"
+prepend_path "$HOME/.local/share/venv/bin"
 prepend_path "$HOME/.cargo/bin"
-prepend_path "$HOME/.pip/bin"
-prepend_path "$HOME/.local/bin"
 
 append_path "$HOME/chromiumos/depot_tools"
 
