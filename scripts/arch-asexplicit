@@ -40,7 +40,6 @@ cli_std="
 cli_full="
 	$cli_std
 	jq
-	msmtp
 	nordvpn-bin
 	picocom
 	wireguard-tools

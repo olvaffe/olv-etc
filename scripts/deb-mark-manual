@@ -53,10 +53,8 @@ cli_std="
 # for workstations (~50M)
 cli_full="
 	$cli_std
-	git-email
 	gnupg
 	jq
-	msmtp
 	picocom
 	systemd-container
 	wireguard-tools
@@ -210,7 +208,6 @@ hw_usbnet="
 
 hw_rpi="
 	cnrdrvcups-ufr2-us
-	containers-storage
 	git
 	hdparm
 	ksmbd-tools
