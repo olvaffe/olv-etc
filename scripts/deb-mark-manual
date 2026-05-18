@@ -165,6 +165,7 @@ dev_mesa="
 	libxrandr-dev
 	libxshmfence-dev
 	llvm-dev
+	spirv-tools-dev
 "
 
 kernel_common="
