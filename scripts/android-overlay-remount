@@ -3,7 +3,12 @@
 # before adb remount works..
 
 OV_TMPFS="/data/overlay-remount"
-OV_REMOUNTS="/system/bin /system/lib64 /vendor"
+OV_REMOUNTS="
+	/system/bin
+	/system/lib64
+	/vendor/bin
+	/vendor/lib64
+"
 
 if ! adb shell whoami | grep -q root; then
 	echo 'please adb root first'
