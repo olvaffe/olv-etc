@@ -31,16 +31,25 @@ volume=""
 chapter=""
 for dir in "$@"; do
 	match=$(basename "$dir" | sed "s/$pattern/\1/")
-	number=$((10#$match)) || exit 1
 
 	case "$type" in
 		volume)
-			volume="$number"
-			archive=$(printf "$title v%02d" "$number")
+			match=$((10#$match))
+			volume=$(printf "%d" "$match")
+			archive=$(printf "$title v%02d" "$match")
 			;;
 		chapter)
-			chapter="$number"
-			archive=$(printf "$title c%03d" "$number")
+			case "$match" in
+				*.*)
+					chapter=$(printf "%.1f" "$match")
+					archive=$(printf "$title c%05.1f" "$match")
+					;;
+				*)
+					match=$((10#$match))
+					chapter=$(printf "%d" "$match")
+					archive=$(printf "$title c%03d" "$match")
+					;;
+			esac
 			;;
 		*)
 			echo "unknown type $type"
