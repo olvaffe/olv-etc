@@ -37,10 +37,6 @@
 [credential]
 	helper = store
 
-[format]
-	coverLetter = auto
-	coverFromDescription = auto
-
 [init]
 	defaultBranch = main
 
