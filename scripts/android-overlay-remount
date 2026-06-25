@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# before adb remount works..
+# This script is transient while adb remount is persistent.
 
 OV_TMPFS="/data/overlay-remount"
 OV_REMOUNTS="
 	/system/bin
 	/system/lib64
 	/vendor/bin
+	/vendor/etc
 	/vendor/lib64
 "
 
@@ -33,6 +34,7 @@ for remount in $OV_REMOUNTS; do
 	fi
 done
 
+echo "disabling selinux"
 adb shell setenforce 0
 
 echo "done"
