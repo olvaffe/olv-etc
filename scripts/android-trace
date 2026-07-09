@@ -1,0 +1,25 @@
+#!/bin/sh
+
+set -e
+
+# adb shell cat /sys/kernel/tracing/available_events
+events="
+"
+
+tracefs="/sys/kernel/tracing"
+
+reset() {
+	adb shell "echo 0 > $tracefs/tracing_on"
+	adb shell "echo > $tracefs/set_event"
+
+	adb shell "echo > $tracefs/trace"
+	adb shell "echo 16384 > $tracefs/buffer_size_kb"
+}
+
+trap reset EXIT
+reset
+
+adb shell "echo '$events' > $tracefs/set_event"
+adb shell "echo 1 > $tracefs/tracing_on"
+
+adb shell "cat $tracefs/trace_pipe"
