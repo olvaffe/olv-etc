@@ -1,0 +1,94 @@
+#!/bin/sh
+
+set -e
+
+act="$1"
+srcdir="$2"
+
+if [ -z "$srcdir" ]; then
+	srcdir="$PWD"
+fi
+
+variant="nonqmaa"
+tarball="$(basename "$srcdir")-uprev.tar.zst"
+
+fw="
+	vendor/firmware/gen70500_gmu.bin
+	vendor/firmware/gen70500_sqe.fw
+	vendor/firmware/gen70500_zap.mbn
+"
+
+common="
+	vendor/lib64/libadreno_app_profiles.so
+	vendor/lib64/libadreno_utils.so
+	vendor/lib64/libgsl.so
+	vendor/lib64/libllvm-glnext.so
+	vendor/lib64/libllvm-qgl.so
+"
+
+vulkan="
+	vendor/lib64/egl/libVkLayer_ADRENO_qprofiler.so
+	vendor/lib64/hw/vulkan.adreno.so
+"
+
+tools="
+	vendor/lib64/libgpudataproducer.so
+"
+
+egl="
+	vendor/lib64/egl/eglSubDriverAndroid.so
+	vendor/lib64/egl/libEGL_adreno.so
+	vendor/lib64/egl/libGLESv1_CM_adreno.so
+	vendor/lib64/egl/libGLESv2_adreno.so
+	vendor/lib64/egl/libq3dtools_esx.so
+"
+
+cl="
+	vendor/lib64/egl/libq3dtools_adreno.so
+	vendor/lib64/libadreno_compiler_cl.so
+	vendor/lib64/libCB.so
+	vendor/lib64/libkcl.so
+	vendor/lib64/libkernelmanager.so
+	vendor/lib64/libllvm-qcom.so
+	vendor/lib64/libOpenCL_adreno.so
+"
+
+adreno_src() {
+	templ="$1"
+
+	src1="$srcdir/$variant/$templ"
+	src2="$srcdir/${templ#*/}"
+	src3="$srcdir/$templ"
+
+	if [ -f "$src1" ]; then
+		echo "$src1"
+	elif [ -f "$src2" ]; then
+		echo "$src2"
+	else
+		echo "$src3"
+	fi
+}
+
+adreno_push() {
+	for templ in $common $vulkan $tools; do
+		src=$(adreno_src "$templ")
+		adb push "$src" "/$templ"
+	done
+
+}
+
+adreno_pack() {
+	tar --zst -cf "$tarball" -C "$srcdir" "firmware" "$variant/vendor/lib64"
+}
+
+case "$act" in
+	"push")
+		adreno_push
+		;;
+	"pack")
+		adreno_pack
+		;;
+	*)
+		echo "usage: $0 <push|pack> [srcdir]"
+		;;
+esac
