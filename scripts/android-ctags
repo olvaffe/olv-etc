@@ -1,31 +1,83 @@
 #!/bin/sh
 
-TOP="$ANDROID_BUILD_TOP"
-if [ -z "$TOP" ]; then
-	TOP="$PWD"
+top="$ANDROID_BUILD_TOP"
+if [ -z "$top" ]; then
+	top="$PWD"
 fi
 
-REPOS="
+aosp_p1="
 	bionic
-	external/avb
 	external/drm_hwcomposer
 	external/minigbm
-	frameworks/av
 	frameworks/native
 	hardware/interfaces
 	hardware/libhardware
-	packages/modules/adb
 	system/core
 	system/libbase
 	system/logging
 "
 
-EXTRAS="
+aosp_p2="
+	build/make
+	build/soong
+	external/avb
+	frameworks/av
+	frameworks/libs/systemui
+	hardware/google/interfaces
+	hardware/google/pixel
+	packages/modules/adb
+	system/desktop/adb-dbc-bridge
+	system/desktop/ec
+	system/desktop/security
+	system/fs/fs_mgr
+	system/hardware/interfaces
+	system/libprocinfo
+	system/libsysprop
+	system/libueventd-rs
+	system/libvintf
+	system/linkerconfig
+	system/memory/libdmabufheap
+	system/memory/libmeminfo
+	system/memory/lmkd
+	system/memory/mmd
+	system/sepolicy
+	system/server_configurable_flags
+	system/tools/mkbootimg
+	system/unwinding
+	system/vold
+	test/graphics
+	test/suite_harness
+	test/vts
+	tools/tradefederation/core
+"
+
+aosp_p3="
+	art
+	bootable/recovery
+	device/google/cuttlefish
+	libcore
+	libnativehelper
+	system/bpf
+	system/bpfprogs
+	system/desktop/cros-codecs
+	system/security
+	system/netd
+	system/update_engine
+"
+
+aosp_p4="
+	cts
+	development
+	frameworks/base
+	system/extras
+"
+
+aosp_extras="
 	frameworks/base/cmds
 	frameworks/base/core/jni
 	frameworks/base/libs
 	out/soong/.intermediates/hardware/interfaces/graphics
 "
 
-(cd "$TOP" && ctags -R $REPOS $EXTRAS)
-(cd "$TOP/frameworks/base" && ctags -R)
+(cd "$top" && ctags -R $aosp_p1 $aosp_p2 $aosp_extras)
+(cd "$top/frameworks/base" && ctags -R)
