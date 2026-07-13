@@ -152,9 +152,9 @@ dev_mesa="
 	glslang-tools
 	libclang-cpp-dev
 	libclang-dev
-	libclc-19-dev
+	libclc-21-dev
 	libdrm-dev
-	libllvmspirvlib-19-dev
+	libllvmspirvlib-21-dev
 	libwayland-dev
 	libx11-xcb-dev
 	libxcb1-dev
