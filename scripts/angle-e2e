@@ -1,0 +1,68 @@
+#!/bin/sh
+
+set -e
+
+# host files
+e2e_apk="out/Android/angle_end2end_tests_apk/angle_end2end_tests-debug.apk"
+e2e_exp="src/tests/angle_end2end_tests_expectations.txt"
+
+e2e_pkg="com.android.angle.test"
+e2e_runner="org.chromium.build.gtest_apk.NativeTestInstrumentationTestRunner"
+e2e_runner_param="org.chromium.native_test.NativeTestInstrumentationTestRunner"
+e2e_test_activity="com.android.angle.test.AngleUnitTestActivity"
+e2e_test_param="org.chromium.native_test.NativeTest"
+
+# dut files
+e2e_data="/data/media/10/chromium_tests_root"
+e2e_data_ns="/sdcard/chromium_tests_root"
+e2e_log="angle-e2e-log.txt"
+
+if [ "$#" -ne 1 ]; then
+	echo "usage: $0 [gtest params]"
+	exit 1
+fi
+
+prepare() {
+	if ! adb shell "pm list instrumentation $e2e_pkg" | grep -q "$e2e_pkg"; then
+		echo "Could not find $e2e_pkg. The package can be installed with"
+		echo
+		echo "  $ adb install -r -g $e2e_apk"
+		exit 1
+	fi
+
+	if ! adb shell "test -f $e2e_data/src/tests/angle_end2end_tests_expectations.txt"; then
+		echo "Could not find expectation file. The expectation file can be installed with"
+		echo
+		echo "  $ adb push $e2e_exp $e2e_data/$e2e_exp"
+		echo "  or"
+		echo "  $ adb shell mkdir -p $e2e_data/$(dirname $e2e_exp)"
+		echo "  $ adb shell touch $e2e_data/$e2e_exp"
+		exit 1
+	fi
+
+	adb shell rm -f "$e2e_data/$e2e_log"
+}
+
+run() {
+	flags="$@"
+
+	adb shell am instrument -w \
+		-e "$e2e_runner_param.StdoutFile" "$e2e_data_ns/$e2e_log" \
+		-e "$e2e_runner_param.ShardNanoTimeout" 1000000000000000000 \
+		-e "$e2e_runner_param.NativeTestActivity" "$e2e_test_activity" \
+		-e "$e2e_test_param.CommandLineFlags" "$flags" \
+		"$e2e_pkg/$e2e_runner"
+}
+
+cleanup() {
+	adb shell am force-stop "$e2e_pkg"
+
+	adb pull "$e2e_data/$e2e_log"
+	adb shell rm -f "$e2e_data/$e2e_log"
+
+	cat "$e2e_log"
+}
+
+prepare
+run "$@"
+cleanup
