@@ -28,6 +28,7 @@ xts_10m="
 xts_30m="
 	CtsDeqpTestCases:dEQP-GLES3.*
 	CtsDeqpTestCases:dEQP-GLES31.*
+	CtsDeqpTestCases:dEQP-VK.wsi.*
 "
 
 xts_disabled="
@@ -54,6 +55,13 @@ test_modules() {
 			filter="${modules#CtsDeqpTestCases:}"
 			modules="CtsDeqpTestCases"
 			args="$args --module-arg 'CtsDeqpTestCases:include-filter:$filter'"
+
+			if [ "$filter" = "dEQP-VK.wsi.*" ]; then
+				args="$args --module-arg 'CtsDeqpTestCases:include-filter:dEQP-VK.api.image_compression_control.swapchain.*'"
+				args="$args --module-arg 'CtsDeqpTestCases:include-filter:dEQP-VK.image.swapchain_mutable.*'"
+				args="$args --module-arg 'CtsDeqpTestCases:include-filter:dEQP-VK.info.platform'"
+				args="$args --module-arg 'CtsDeqpTestCases:include-filter:dEQP-VK.protected_memory.interaction.wsi.*'"
+			fi
 			;;
 	esac
 
