@@ -1,0 +1,69 @@
+#!/bin/sh
+
+if [ -z "$ANDROID_PRODUCT_OUT" ]; then
+	echo "environment not set up"
+	exit 1
+fi
+
+xts_1m="
+	CtsGpuTestCases
+	CtsNativeHardwareTestCases
+	VtsHalGraphicsAllocatorAidl_TargetTest
+	VtsHalGraphicsMapperStableC_TargetTest
+"
+
+xts_3m="
+	CtsGpuProfilingDataTestCases
+	CtsOpenGLTestCases
+	CtsUiRenderingTestCases
+	VtsGpuTests
+"
+
+xts_10m="
+	CtsSkQPTestCases
+	CtsDeqpTestCases:dEQP-EGL.*
+	CtsDeqpTestCases:dEQP-GLES2.*
+"
+
+xts_30m="
+	CtsDeqpTestCases:dEQP-GLES3.*
+	CtsDeqpTestCases:dEQP-GLES31.*
+"
+
+xts_disabled="
+	CtsCameraTestCases
+	CtsGpuMetricsHostTestCases
+	CtsGpuToolsHostTestCases
+	CtsGraphicsTestCases
+	CtsHardwareTestCases
+	CtsMediaTestCases
+	CtsMediaV2TestCases
+	CtsOsTestCases
+	CtsVideoTestCases
+	CtsViewTestCases
+	CtsVirtualDevicesCameraTestCases
+	GpuServiceVendorTests
+"
+
+test_modules() {
+	modules="$@"
+
+	args="--enable-parameterized-modules false"
+	case "$modules" in
+		CtsDeqpTestCases:*)
+			filter="${modules#CtsDeqpTestCases:}"
+			modules="CtsDeqpTestCases"
+			args="$args --module-arg 'CtsDeqpTestCases:include-filter:$filter'"
+			;;
+	esac
+
+	atest $modules -- $args
+}
+
+test_modules "$xts_1m"
+test_modules "$xts_3m"
+
+modules="$xts_10m $xts_30m"
+for mod in $modules; do
+	test_modules "$mod"
+done
