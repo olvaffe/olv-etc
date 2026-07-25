@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+
+import sys
+
+import cairo
+import lcms2
+from PIL import Image
+
+SIZE = (3840, 2160)
+HEART_SCALE = 0.5
+HEART_COLOR = (1.0, 0.0, 0.0)
+
+lcms2.implementation.RGB_COLORSPACES["Display P3"] = {
+    "red": [0.680, 0.320, 1.0],
+    "green": [0.265, 0.690, 1.0],
+    "blue": [0.150, 0.060, 1.0],
+    "white point": lcms2.implementation.RGB_COLORSPACES["_sRGB"]["white point"],
+    "tone curve": lcms2.implementation.RGB_COLORSPACES["_sRGB"]["tone curve"],
+}
+
+
+def srgb_to_p3(fg: tuple[float, float, float]) -> tuple[float, float, float]:
+    srgb = lcms2.Profile("_sRGB")
+    p3 = lcms2.Profile("Display P3")
+    xform = lcms2.Transform(srgb, "RGB_FLT", p3, "RGB_FLT")
+
+    bg = xform.apply(fg)
+    return tuple(float(c) for c in bg)
+
+
+def generate_heart(width: int, height: int) -> bytes:
+    surf = cairo.ImageSurface(cairo.FORMAT_RGB24, width, height)
+    ctx = cairo.Context(surf)
+
+    bg_color = srgb_to_p3(HEART_COLOR)
+    ctx.set_source_rgb(*bg_color)
+    ctx.paint()
+
+    ctx.save()
+
+    xlate = (width / 2, height / 2)
+    scale = min(width, height) * HEART_SCALE
+    ctx.translate(*xlate)
+    ctx.scale(scale, scale)
+
+    ctx.move_to(0, -0.32)
+    ctx.curve_to(-0.28, -0.56, -0.55, -0.32, -0.55, -0.06)
+    ctx.curve_to(-0.55, 0.20, -0.25, 0.36, 0, 0.56)
+    ctx.curve_to(0.25, 0.36, 0.55, 0.20, 0.55, -0.06)
+    ctx.curve_to(0.55, -0.32, 0.28, -0.56, 0, -0.32)
+    ctx.close_path()
+
+    ctx.set_source_rgb(*HEART_COLOR)
+    ctx.fill()
+
+    ctx.restore()
+
+    return surf.get_data()
+
+
+def generate_png(out: str):
+    buf = generate_heart(*SIZE)
+    img = Image.frombuffer("RGB", SIZE, buf, "raw", "BGRX", 0, 1)
+
+    icc = lcms2.Profile("Display P3").to_bytes()
+
+    img.save(out, format="PNG", icc_profile=icc)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        sys.exit(f"usage: {sys.argv[0]} <output.png>")
+    generate_png(sys.argv[1])
