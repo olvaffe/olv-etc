@@ -36,6 +36,7 @@ cli_base="
 cli_std="
 	$cli_base
 	bc
+	file
 	git
 	locales
 	lsof
