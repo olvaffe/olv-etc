@@ -19,6 +19,7 @@ arch="$3"
 dist_name="deqp-$version-$arch"
 
 dist_out_exec="
+	executor/testlog-to-xml
 	external/vulkancts/modules/vulkan/deqp-vk
 	external/openglcts/modules/glcts
 	modules/egl/deqp-egl
@@ -37,6 +38,7 @@ dist_out_data="
 
 dist_src_data="
 	android/cts/main
+	doc/testlog-stylesheet
 	external/vulkancts/mustpass/main/vk-default.txt
 	external/vulkancts/mustpass/main/vk-default
 "

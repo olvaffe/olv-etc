@@ -1,0 +1,97 @@
+#!/bin/sh
+
+adb="adb shell"
+topdir="/data/local/tmp"
+
+if [ "$#" -lt 2 ]; then
+	echo "usage: $0 <deqp-dir> <out-dir> [<suite> ...]"
+	exit 1
+fi
+
+deqpdir="$topdir/$1"
+outdir="$topdir/$2"
+shift 2
+
+suites="$@"
+if [ -z "$suites" ]; then
+	suites="egl gles2 gles3 gles31 vk"
+fi
+
+for suite in $suites; do
+	if ! $adb test -x "$deqpdir/deqp-$suite"; then
+		echo "no $deqpdir/deqp-$suite"
+		exit 1
+	fi
+done
+
+if ! $adb test -x "$topdir/deqp-runner"; then
+	echo "no $topdir/deqp-runner"
+	exit 1
+fi
+
+if $adb test -d "$outdir"; then
+	echo "$outdir already exists. Ctrl-C to exit."
+	read yn
+	$adb rm -rf "$outdir"
+fi
+
+setup_suite() {
+	suite="$1"
+
+	$adb "ls $deqpdir/main/$suite-main-*.txt > $outdir/caselist-$suite.txt"
+
+	$adb "cat > $outdir/suite-$suite.toml" <<EOF
+[[deqp]]
+deqp = "$deqpdir/deqp-$suite"
+caselists = ["$outdir/caselist-$suite.txt"]
+skips = ["$outdir/skip.txt"]
+deqp_args = [
+    "--deqp-surface-type=pbuffer",
+    "--deqp-gl-config-name=rgba8888d24s8ms0",
+]
+EOF
+}
+
+setup_skip() {
+	$adb "cat > $outdir/skip.txt" <<EOF
+dEQP-VK.api.image_compression_control.swapchain.*
+dEQP-VK.image.swapchain_mutable.*
+dEQP-VK.info.platform
+dEQP-VK.protected_memory.interaction.wsi.*
+dEQP-VK.wsi.*
+EOF
+}
+
+setup_out() {
+	$adb mkdir -p "$outdir"
+
+	setup_skip
+	for suite in $suites; do
+		setup_suite "$suite"
+	done
+}
+
+run() {
+	suite="$1"
+
+	fraction="1"
+	if [ "$suite" = "vk" ]; then
+		fraction="9"
+	fi
+
+	for i in $(seq "$fraction"); do
+		$adb "$topdir/deqp-runner" suite \
+			--suite "$outdir/suite-$suite.toml" \
+			--output "$outdir/result-$suite-$i" \
+			--fraction "$fraction" \
+			--fraction-start "$i" \
+			--shader-cache-dir "$outdir" \
+			--testlog-to-xml "$deqpdir/testlog-to-xml"
+	done
+}
+
+setup_out
+
+for suite in $suites; do
+	run "$suite"
+done
