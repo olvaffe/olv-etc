@@ -10,6 +10,7 @@ fi
 
 deqpdir="$topdir/$1"
 outdir="$topdir/$2"
+localdir=$(basename "$outdir")
 shift 2
 
 suites="$@"
@@ -29,10 +30,11 @@ if ! $adb test -x "$topdir/deqp-runner"; then
 	exit 1
 fi
 
-if $adb test -d "$outdir"; then
-	echo "$outdir already exists. Ctrl-C to exit."
+if $adb test -d "$outdir" || test -d "$localdir"; then
+	echo "remote $outdir and/or local "$localdir" already exist. Ctrl-C to exit."
 	read yn
 	$adb rm -rf "$outdir"
+	rm -rf "$localdir"
 fi
 
 setup_suite() {
@@ -64,6 +66,7 @@ EOF
 
 setup_out() {
 	$adb mkdir -p "$outdir"
+	mkdir -p "$localdir"
 
 	setup_skip
 	for suite in $suites; do
@@ -87,6 +90,9 @@ run() {
 			--fraction-start "$i" \
 			--shader-cache-dir "$outdir" \
 			--testlog-to-xml "$deqpdir/testlog-to-xml"
+
+		$adb tar -zcf "$outdir/result-$suite-$i.tar.gz" "result-$suite-$i" -C "$outdir"
+		adb pull "$outdir/result-$suite-$i.tar.gz" "$localdir/result-$suite-$i.tar.gz"
 	done
 }
 
