@@ -9,12 +9,12 @@ if [ ! -d "$src_dir/external/vulkancts" ]; then
 fi
 
 if [ "$#" -ne 3 ]; then
-	echo "usage: $0 <out-dir> <x86_64|aarch64> <version>"
+	echo "usage: $0 <out-dir> <version> <x86_64|aarch64>"
 	exit 1
 fi
 out_dir=$(realpath "$1")
-arch="$2"
-version="$3"
+version="$2"
+arch="$3"
 
 dist_name="deqp-$version-$arch"
 
@@ -36,6 +36,7 @@ dist_out_data="
 "
 
 dist_src_data="
+	android/cts/main
 	external/vulkancts/mustpass/main/vk-default.txt
 	external/vulkancts/mustpass/main/vk-default
 "
@@ -55,7 +56,10 @@ echo "stripping executables..."
 (cd "$out_dir" && $arch-linux-gnu-strip -g $dist_out_exec)
 
 echo "creating tarball..."
-tar -chf "$dist_name.tar.zst" --zstd "$dist_name"
+tar -chf "$dist_name.tar" "$dist_name"
 rm -rf "$dist_name"
 
-echo "created $dist_name.tar.zst"
+echo "creating $dist_name.tar.zst..."
+zstd "$dist_name.tar"
+echo "creating $dist_name.tar.gz..."
+gzip "$dist_name.tar"
