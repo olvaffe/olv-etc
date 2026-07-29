@@ -61,6 +61,7 @@ test_modules() {
 				args="$args --module-arg 'CtsDeqpTestCases:include-filter:dEQP-VK.image.swapchain_mutable.*'"
 				args="$args --module-arg 'CtsDeqpTestCases:include-filter:dEQP-VK.info.platform'"
 				args="$args --module-arg 'CtsDeqpTestCases:include-filter:dEQP-VK.protected_memory.interaction.wsi.*'"
+				args="$args --module-arg 'CtsDeqpTestCases:include-filter:dEQP-VK.synchronization2.internally_synchronized_queues#*_wsi*'"
 			fi
 			;;
 	esac

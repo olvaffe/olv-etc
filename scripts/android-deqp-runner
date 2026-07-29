@@ -60,7 +60,7 @@ dEQP-VK.api.image_compression_control.swapchain.*
 dEQP-VK.image.swapchain_mutable.*
 dEQP-VK.info.platform
 dEQP-VK.protected_memory.interaction.wsi.*
-dEQP-VK.synchronization2.internally_synchronized_queues.android_.*wsi.*
+dEQP-VK.synchronization2.internally_synchronized_queues.*wsi.*
 dEQP-VK.wsi.*
 EOF
 }
