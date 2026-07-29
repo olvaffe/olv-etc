@@ -79,11 +79,12 @@ run() {
 	suite="$1"
 
 	fraction="1"
+	fraction_base="1"
 	if [ "$suite" = "vk" ]; then
 		fraction="9"
 	fi
 
-	for i in $(seq "$fraction"); do
+	for i in $(seq "$fraction_base" "$fraction"); do
 		$adb "$topdir/deqp-runner" suite \
 			--suite "$outdir/suite-$suite.toml" \
 			--output "$outdir/result-$suite-$i" \
