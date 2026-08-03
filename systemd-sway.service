@@ -7,6 +7,7 @@ Before=graphical-session.target
 Slice=session.slice
 Type=notify
 NotifyAccess=all
+Environment=WLR_RENDERER=vulkan
 ExecStartPre=/usr/bin/dbus-update-activation-environment --systemd XDG_CURRENT_DESKTOP=sway
 ExecStart=/usr/bin/sway
 ExecStopPost=/usr/bin/systemctl --user unset-environment XDG_SESSION_TYPE SWAYSOCK WAYLAND_DISPLAY DISPLAY
