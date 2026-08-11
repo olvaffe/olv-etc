@@ -21,21 +21,19 @@ server {
 
 server {
 	listen 443 ssl;
-	server_name librespeed.olv.rip;
-	root /srv/www/librespeed;
+	server_name airsane.olv.rip;
 
-	location ~ \.php$ {
-		include snippets/fastcgi-php.conf;
-		fastcgi_pass unix:/run/php/php-fpm.sock;
+	location / {
+		proxy_pass http://localhost:8090;
 	}
 }
 
 server {
 	listen 443 ssl;
-	server_name airsane.olv.rip;
+	server_name calibre-web.olv.rip;
 
 	location / {
-		proxy_pass http://localhost:8090;
+		proxy_pass http://localhost:8083;
 	}
 }
 
@@ -65,5 +63,16 @@ server {
 
 	location / {
 		proxy_pass http://localhost:5000;
+	}
+}
+
+server {
+	listen 443 ssl;
+	server_name librespeed.olv.rip;
+	root /srv/www/librespeed;
+
+	location ~ \.php$ {
+		include snippets/fastcgi-php.conf;
+		fastcgi_pass unix:/run/php/php-fpm.sock;
 	}
 }
