@@ -198,6 +198,10 @@ hw_intel="
 	mesa-vulkan-drivers
 "
 
+hw_mtk="
+	firmware-mediatek
+"
+
 hw_wifi="
 	iw
 	iwd
