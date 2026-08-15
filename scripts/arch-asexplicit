@@ -17,6 +17,7 @@ cli_base="
 	logrotate
 	openssh
 	rsync
+	smartmontools
 	sudo
 	usbutils
 "

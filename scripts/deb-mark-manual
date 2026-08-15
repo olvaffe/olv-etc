@@ -26,6 +26,7 @@ cli_base="
 	pciutils
 	procps
 	rsync
+	smartmontools
 	sudo
 	systemd-resolved
 	usbutils
