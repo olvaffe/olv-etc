@@ -181,8 +181,8 @@ hw_mtk="
 
 hw_wifi="
 	iw
-	iwd
 	wireless-regdb
+	wpa_supplicant
 "
 
 hw_usbnet="
@@ -206,7 +206,6 @@ hw_xps="
 	bcm20702a1-firmware
 	broadcom-wl-dkms
 	linux-headers
-	wpa_supplicant
 "
 
 cros_x86="

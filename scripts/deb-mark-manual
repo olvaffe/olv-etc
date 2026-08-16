@@ -205,8 +205,8 @@ hw_mtk="
 
 hw_wifi="
 	iw
-	iwd
 	wireless-regdb
+	wpasupplicant
 "
 
 hw_usbnet="

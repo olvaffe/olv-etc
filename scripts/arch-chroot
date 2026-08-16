@@ -303,7 +303,7 @@ arch_chroot_phase3_bootable() {
 	echo "phase3: performing bootable setup..."
 
 	chroot "$sysroot" pacman -S --needed --noconfirm \
-		dosfstools openssh sudo git iwd \
+		dosfstools openssh sudo git wpa_supplicant \
 		zram-generator
 
 	if [ "$machine" = "x86_64" ]; then
