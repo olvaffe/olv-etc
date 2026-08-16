@@ -239,20 +239,20 @@ case "$host" in
 			pkgs="$pkgs $hw_intel $hw_xps"
 		fi
 		;;
-	"rex"|"brya"|"skyrim")
+	"rex"|"skyrim")
 		pkgs="$pkgs $cli_std $gui_base"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_custom"
 		pkgs="$pkgs $hw_x86 $hw_usbnet $hw_dut"
 		pkgs="$pkgs $cros_x86"
 
-		if [ "$host" = "rex" -o "$host" = "brya" ]; then
+		if [ "$host" = "rex" ]; then
 			pkgs="$pkgs $hw_intel"
 		elif [ "$host" = "skyrim" ]; then
 			pkgs="$pkgs $hw_amd"
 		fi
 		;;
-	"navi"|"corsola"|"cherry"|"trogdor")
+	"navi"|"corsola"|"trogdor")
 		pkgs="$pkgs $cli_std $gui_base"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_custom"
@@ -274,9 +274,6 @@ case "$host" in
 		elif [ "$host" = "hamoa" -o "$host" = "purwa" ]; then
 			pkgs="$pkgs $hw_uefi $hw_qcom"
 		fi
-		;;
-	"crostini")
-		pkgs="$pkgs $cli_std $dev_min $cros_crostini"
 		;;
 	*)
 		echo "unknown device: $host"
