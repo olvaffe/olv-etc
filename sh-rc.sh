@@ -6,6 +6,7 @@
 [ -f "$HOME/olv-etc/sh-paths.sh" ] && . "$HOME/olv-etc/sh-paths.sh"
 [ -f "$HOME/olv-etc/sh-aliases.sh" ] && . "$HOME/olv-etc/sh-aliases.sh"
 
+export ANDROID_HOME="$HOME/android/sdk"
 export CARGO_HOME="$HOME/.local/share/cargo"
 export DOCKER_CONFIG="$HOME/.config/docker"
 export PYTHON_HISTORY="$HOME/.local/state/python_history"

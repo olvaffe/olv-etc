@@ -11,7 +11,7 @@ append_path() {
 	[ -d "$1" ] && PATH="$PATH:$1"
 }
 
-prepend_path "$HOME/android/sdk/build-tools/36.0.0"
+prepend_path "$HOME/android/sdk/build-tools/37.0.0"
 prepend_path "$HOME/android/sdk/platform-tools"
 prepend_path "$HOME/.local/share/cargo/bin"
 prepend_path "$HOME/.local/share/venv/bin"
