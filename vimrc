@@ -4,6 +4,7 @@ filetype plugin on
 filetype indent on
 
 set viminfofile=~/.config/vim/viminfo
+set directory=~/.local/state//
 set mouse=
 
 " color settings
