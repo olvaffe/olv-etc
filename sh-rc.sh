@@ -6,6 +6,11 @@
 [ -f "$HOME/olv-etc/sh-paths.sh" ] && . "$HOME/olv-etc/sh-paths.sh"
 [ -f "$HOME/olv-etc/sh-aliases.sh" ] && . "$HOME/olv-etc/sh-aliases.sh"
 
+export CARGO_HOME="$HOME/.local/share/cargo"
+export DOCKER_CONFIG="$HOME/.config/docker"
+export PYTHON_HISTORY="$HOME/.local/state/python_history"
+export RUSTUP_HOME="$HOME/.local/share/rustup"
+
 HISTFILE="$HOME/.local/state/sh.history"
 HISTSIZE=64000
 HISTFILESIZE=64000
