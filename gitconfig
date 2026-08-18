@@ -6,7 +6,7 @@
 
 [alias]
 	# work with remotes
-	fa = fetch --prune --all
+	fa = fetch --multiple --prune --all
 	pr = pull --rebase
 	ro = !"git remote set-url --push $1 DISABLED #"
 
@@ -37,6 +37,9 @@
 [credential]
 	helper = store
 
+[diff]
+	submodule = log
+
 [init]
 	defaultBranch = main
 
@@ -54,6 +57,9 @@
 
 [b4]
 	send-endpoint-web = https://lkml.kernel.org/_b4_submit
+
+[status]
+	submoduleSummary = true
 
 [user]
 	name = Chia-I Wu
