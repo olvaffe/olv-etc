@@ -21,7 +21,7 @@ class EBook:
         self.publisher = None
         self.language = None
 
-        self._re_title = re.compile(r'^(.*?)(第|-|\()?(\d+)(集|冊|完|\)|（.）)?(完|END)?$')
+        self._re_title = re.compile(r'^(.*?)(第|-|\(|\（)?(\d+)(集|冊|完|\)|\）|（.）)?(完|END|End)?$')
         self._re_author_prefix = re.compile(r'^.*[:：)](.+)$')
         self._re_author_suffix = re.compile(r'^(.+)[(].*$')
         self._sep_creator = ['／', '、', '/', ' x ']
