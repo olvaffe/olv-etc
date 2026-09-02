@@ -18,10 +18,12 @@ bootable="$3"
 [ -z "$machine" ] && machine=$(uname -m)
 [ -n "$bootable" ] && bootable="1"
 
-bootstrap_tarball_x86="https://mirror.fcix.net/archlinux/iso/latest/archlinux-bootstrap-x86_64.tar.zst"
-bootstrap_mirror_x86="https://mirror.fcix.net/archlinux/\$repo/os/\$arch"
+bootstrap_tarball_x86="https://fastly.mirror.pkgbuild.com/iso/latest/archlinux-bootstrap-x86_64.tar.zst"
+bootstrap_mirror_x86="https://fastly.mirror.pkgbuild.com/\$repo/os/\$arch"
+bootstrap_cgpt_x86="http://ftp.us.debian.org/debian/pool/main/v/vboot-utils/cgpt_0~R106-15054.B+dfsg-0.1_amd64.deb"
 bootstrap_tarball_arm="https://arch-linux-repo.drzee.net/arch/tarballs/os/aarch64/archlinux-bootstrap-latest-aarch64.tar.zst"
 bootstrap_mirror_arm="https://arch-linux-repo.drzee.net/arch/\$repo/os/\$arch"
+bootstrap_cgpt_arm="http://ftp.us.debian.org/debian/pool/main/v/vboot-utils/cgpt_0~R106-15054.B+dfsg-0.1_arm64.deb"
 bootstrap_keyid_arm="0CF25682E6BA0751"
 hostname="arch-chroot"
 
@@ -29,10 +31,12 @@ case "$machine" in
 	x86_64)
 		bootstrap_tarball="$bootstrap_tarball_x86"
 		bootstrap_mirror="$bootstrap_mirror_x86"
+		bootstrap_cgpt="$bootstrap_cgpt_x86"
 		;;
 	aarch64)
 		bootstrap_tarball="$bootstrap_tarball_arm"
 		bootstrap_mirror="$bootstrap_mirror_arm"
+		bootstrap_cgpt="$bootstrap_cgpt_arm"
 		;;
 	*)
 		echo "Unsupported machine $machine."
@@ -95,8 +99,7 @@ arch_chroot_phase1_bootstrap() {
 
 	echo "phase1: downloading rootfs to $sysroot..."
 
-	tar_args="-x --warning=no-unknown-keyword"
-	tar_args="$tar_args --zstd --strip-components=1"
+	tar_args="-x --zstd --strip-components=1 --warning=no-unknown-keyword"
 	curl -L "$bootstrap_tarball" | tar -C "$sysroot" $tar_args
 
 	[ -z "$bootable" ] && chown -R "$real_uid:$real_gid" "$sysroot"
@@ -128,15 +131,15 @@ arch_chroot_phase2_mount_sys() {
 	# pacman CheckSpace expects / to be a mountpoint
 	mount --bind "$sysroot" "$sysroot"
 
-	mount -t tmpfs none "$sysroot/tmp"
 	mount -t tmpfs none "$sysroot/run"
+	mount -t tmpfs none "$sysroot/tmp"
 }
 
 arch_chroot_phase2_bind_mount_sys() {
 	echo "phase2: bind-mounting system filesystems..."
 
-	mount --bind "/sys" "$sysroot/sys"
 	mount --rbind "/dev" "$sysroot/dev"
+	mount --rbind "/sys" "$sysroot/sys"
 }
 
 arch_chroot_phase2_bind_mount_app() {
@@ -238,15 +241,6 @@ arch_chroot_phase3_bootstrap() {
 
 	echo "phase3: bootstrapping $sysroot..."
 
-	echo "$hostname" > "$sysroot/etc/hostname"
-	ln -sf /usr/share/zoneinfo/America/Los_Angeles "$sysroot/etc/localtime"
-
-	locale="en_US.UTF-8"
-	echo "LANG=$locale" > "$sysroot/etc/locale.conf"
-	sed -i "s/^#$locale/$locale/" "$sysroot/etc/locale.gen"
-	chroot "$sysroot" locale-gen
-
-	echo "Server = $bootstrap_mirror" > "$sysroot/etc/pacman.d/mirrorlist"
 	chroot "$sysroot" pacman-key --init
 	if [ "$machine" = "x86_64" ]; then
 		chroot "$sysroot" pacman-key --populate
@@ -255,30 +249,38 @@ arch_chroot_phase3_bootstrap() {
 		chroot "$sysroot" pacman-key --lsign-key "$bootstrap_keyid_arm"
 	fi
 
+	echo "Server = $bootstrap_mirror" > "$sysroot/etc/pacman.d/mirrorlist"
+	chroot "$sysroot" pacman -Sy --disable-sandbox
+
 	# work out packages to remove
 	explicit_packages=$(chroot "$sysroot" pacman -Qeq)
 	dep_packages=""
 	for pkg in $explicit_packages; do
 		case "$pkg" in
-			base|archlinuxarm-keyring) ;;
+			base) ;;
 			*) dep_packages="$dep_packages $pkg"
 		esac
 	done
 	if [ -n "$dep_packages" ]; then
 		chroot "$sysroot" pacman -D --asdep $dep_packages
 	fi
+
+	# remove packages
 	while true; do
 		remove_packages=$(chroot "$sysroot" pacman -Qttdq || true)
 		[ -n "$remove_packages" ] || break
 		chroot "$sysroot" pacman -R --noconfirm $remove_packages
 	done
 
-	chroot "$sysroot" pacman -Syu --disable-sandbox --needed --noconfirm vim
+	locale="en_US.UTF-8"
+	echo "LANG=$locale" > "$sysroot/etc/locale.conf"
+	sed -i "s/^#$locale/$locale/" "$sysroot/etc/locale.gen"
+	chroot "$sysroot" locale-gen
+
+	echo "$hostname" > "$sysroot/etc/hostname"
+	ln -sf /usr/share/zoneinfo/America/Los_Angeles "$sysroot/etc/localtime"
 
 	echo "root:test0000" | chroot "$sysroot" chpasswd
-
-	rm -f "$sysroot/pkglist.x86_64.txt"
-	rm -f "$sysroot/version"
 
 	[ -n "$bootable" ] && touch "$sysroot/arch-chroot-phase3-bootable"
 
@@ -300,23 +302,13 @@ arch_chroot_phase3_bootable() {
 
 	echo "phase3: performing bootable setup..."
 
-	chroot "$sysroot" pacman -S --disable-sandbox --needed --noconfirm \
-		dosfstools openssh sudo git wpa_supplicant \
+	curl -o "$sysroot/tmp/cgpt.deb" "$bootstrap_cgpt"
+	ar -p "$sysroot/tmp/cgpt.deb" data.tar.xz | tar -Jx -C "$sysroot/usr/local/bin" --strip-components=3 ./usr/bin/cgpt
+
+	chroot "$sysroot" pacman -Syu --disable-sandbox --needed --noconfirm \
+		base vim dosfstools \
+		openssh sudo wpa_supplicant \
 		zram-generator
-
-	if [ "$machine" = "x86_64" ]; then
-		chroot "$sysroot" pacman -S --disable-sandbox --needed --noconfirm base-devel
-
-		mkdir -p "$sysroot/tmp/aur"
-		for pkg in cgpt-bin; do
-			chroot "$sysroot" git clone "https://aur.archlinux.org/$pkg.git" "/tmp/aur/$pkg"
-			chroot "$sysroot" chown -R nobody:nobody "/tmp/aur/$pkg"
-			chroot "$sysroot" env -C "/tmp/aur/$pkg" sudo -u nobody makepkg
-			tarball=$(basename "$sysroot/tmp/aur/$pkg/"*.tar.zst)
-			chroot "$sysroot" pacman -U --disable-sandbox --needed --noconfirm "/tmp/aur/$pkg/$tarball"
-		done
-		rm -rf "$sysroot/tmp/aur"
-	fi
 
 	yes | chroot "$sysroot" pacman -Scc
 
