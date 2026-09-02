@@ -20,8 +20,9 @@ bootable="$3"
 
 bootstrap_tarball_x86="https://mirror.fcix.net/archlinux/iso/latest/archlinux-bootstrap-x86_64.tar.zst"
 bootstrap_mirror_x86="https://mirror.fcix.net/archlinux/\$repo/os/\$arch"
-bootstrap_tarball_arm="http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz"
-bootstrap_mirror_arm="http://mirror.archlinuxarm.org/\$arch/\$repo"
+bootstrap_tarball_arm="https://arch-linux-repo.drzee.net/arch/tarballs/os/aarch64/archlinux-bootstrap-latest-aarch64.tar.zst"
+bootstrap_mirror_arm="https://arch-linux-repo.drzee.net/arch/\$repo/os/\$arch"
+bootstrap_keyid_arm="0CF25682E6BA0751"
 hostname="arch-chroot"
 
 case "$machine" in
@@ -95,11 +96,7 @@ arch_chroot_phase1_bootstrap() {
 	echo "phase1: downloading rootfs to $sysroot..."
 
 	tar_args="-x --warning=no-unknown-keyword"
-	if [ "$machine" = "x86_64" ]; then
-		tar_args="$tar_args --zstd --strip-components=1"
-	else
-		tar_args="$tar_args -z"
-	fi
+	tar_args="$tar_args --zstd --strip-components=1"
 	curl -L "$bootstrap_tarball" | tar -C "$sysroot" $tar_args
 
 	[ -z "$bootable" ] && chown -R "$real_uid:$real_gid" "$sysroot"
@@ -251,7 +248,12 @@ arch_chroot_phase3_bootstrap() {
 
 	echo "Server = $bootstrap_mirror" > "$sysroot/etc/pacman.d/mirrorlist"
 	chroot "$sysroot" pacman-key --init
-	chroot "$sysroot" pacman-key --populate
+	if [ "$machine" = "x86_64" ]; then
+		chroot "$sysroot" pacman-key --populate
+	else
+		chroot "$sysroot" pacman-key --recv-keys "$bootstrap_keyid_arm"
+		chroot "$sysroot" pacman-key --lsign-key "$bootstrap_keyid_arm"
+	fi
 
 	# work out packages to remove
 	explicit_packages=$(chroot "$sysroot" pacman -Qeq)
@@ -271,13 +273,9 @@ arch_chroot_phase3_bootstrap() {
 		chroot "$sysroot" pacman -R --noconfirm $remove_packages
 	done
 
-	chroot "$sysroot" pacman -Syu --needed --noconfirm vim
+	chroot "$sysroot" pacman -Syu --disable-sandbox --needed --noconfirm vim
 
 	echo "root:test0000" | chroot "$sysroot" chpasswd
-
-	if [ "$machine" = "aarch64" ]; then
-		chroot "$sysroot" userdel -r alarm
-	fi
 
 	rm -f "$sysroot/pkglist.x86_64.txt"
 	rm -f "$sysroot/version"
@@ -292,7 +290,7 @@ arch_chroot_phase3_bootstrap() {
 
 arch_chroot_phase3_hostname() {
 	echo "phase3: setting hostname..."
-	chroot "$sysroot" hostnamectl hostname "$hostname"
+	chroot "$sysroot" hostnamectl hostname "$hostname" || true
 }
 
 arch_chroot_phase3_bootable() {
@@ -302,12 +300,12 @@ arch_chroot_phase3_bootable() {
 
 	echo "phase3: performing bootable setup..."
 
-	chroot "$sysroot" pacman -S --needed --noconfirm \
+	chroot "$sysroot" pacman -S --disable-sandbox --needed --noconfirm \
 		dosfstools openssh sudo git wpa_supplicant \
 		zram-generator
 
 	if [ "$machine" = "x86_64" ]; then
-		chroot "$sysroot" pacman -S --needed --noconfirm base-devel
+		chroot "$sysroot" pacman -S --disable-sandbox --needed --noconfirm base-devel
 
 		mkdir -p "$sysroot/tmp/aur"
 		for pkg in cgpt-bin; do
@@ -315,7 +313,7 @@ arch_chroot_phase3_bootable() {
 			chroot "$sysroot" chown -R nobody:nobody "/tmp/aur/$pkg"
 			chroot "$sysroot" env -C "/tmp/aur/$pkg" sudo -u nobody makepkg
 			tarball=$(basename "$sysroot/tmp/aur/$pkg/"*.tar.zst)
-			chroot "$sysroot" pacman -U --needed --noconfirm "/tmp/aur/$pkg/$tarball"
+			chroot "$sysroot" pacman -U --disable-sandbox --needed --noconfirm "/tmp/aur/$pkg/$tarball"
 		done
 		rm -rf "$sysroot/tmp/aur"
 	fi
