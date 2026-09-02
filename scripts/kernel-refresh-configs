@@ -1,0 +1,45 @@
+#!/bin/sh
+
+srcdir="$HOME/olv-notes/linux/kconfig"
+
+x86_configs="
+	amd
+	intel
+	qemu-x86
+"
+
+arm64_configs="
+	mtk
+	qcom
+	qemu-arm64
+	rk
+"
+
+match="$1"
+
+config_one() {
+	conf="$1"
+	shift
+
+	[ -z "$match" -o "$match" == "$conf" ] || return
+
+	O=$(echo "$conf" | tr '[:lower:]' '[:upper:]')
+
+	if true; then
+		rm -rf "$O"
+		mkdir -p "$O"
+		cp "$srcdir/defconfig-$conf" "$O/.config"
+	fi
+
+	make O="$O" "$@" olddefconfig
+	make O="$O" "$@" savedefconfig
+
+	cp "$O/defconfig" "$srcdir/defconfig-$conf"
+}
+
+for conf in $x86_configs; do
+	config_one "$conf" CC="ccache gcc"
+done
+for conf in $arm64_configs; do
+	config_one "$conf" ARCH="arm64" CROSS_COMPILE="aarch64-linux-gnu-" CC="ccache aarch64-linux-gnu-gcc"
+done
