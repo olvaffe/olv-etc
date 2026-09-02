@@ -208,14 +208,6 @@ hw_xps="
 	linux-headers
 "
 
-cros_x86="
-	cgpt-bin
-"
-
-cros_arm="
-	vboot-utils
-"
-
 cros_crostini="
 	cros-container-guest-tools-git
 "
@@ -243,7 +235,6 @@ case "$host" in
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_custom"
 		pkgs="$pkgs $hw_x86 $hw_usbnet $hw_dut"
-		pkgs="$pkgs $cros_x86"
 
 		if [ "$host" = "rex" ]; then
 			pkgs="$pkgs $hw_intel"
@@ -256,7 +247,6 @@ case "$host" in
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_custom"
 		pkgs="$pkgs $hw_arm $hw_usbnet $hw_dut"
-		pkgs="$pkgs $cros_arm"
 
 		if [ "$host" = "trogdor" ]; then
 			pkgs="$pkgs $hw_qcom"
