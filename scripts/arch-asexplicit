@@ -132,24 +132,20 @@ dev_mesa="
 	spirv-llvm-translator
 "
 
-kernel_common="
+kernel_min="
 	zram-generator
 "
 
 kernel_x86="
-	$kernel_common
+	$kernel_min
 	linux
-"
-
-kernel_custom="
-	$kernel_common
 "
 
 hw_x86="
 	  turbostat
 "
 
-hw_arm="
+hw_alarm="
 	archlinuxarm-keyring
 "
 
@@ -208,10 +204,6 @@ hw_xps="
 	linux-headers
 "
 
-cros_crostini="
-	cros-container-guest-tools-git
-"
-
 pkgs=""
 
 host="$(uname -n)"
@@ -233,7 +225,7 @@ case "$host" in
 	"rex"|"skyrim")
 		pkgs="$pkgs $cli_std $gui_base"
 		pkgs="$pkgs $dev_base $dev_mesa"
-		pkgs="$pkgs $kernel_custom"
+		pkgs="$pkgs $kernel_min"
 		pkgs="$pkgs $hw_x86 $hw_usbnet $hw_dut"
 
 		if [ "$host" = "rex" ]; then
@@ -245,8 +237,8 @@ case "$host" in
 	"navi"|"corsola"|"trogdor")
 		pkgs="$pkgs $cli_std $gui_base"
 		pkgs="$pkgs $dev_base $dev_mesa"
-		pkgs="$pkgs $kernel_custom"
-		pkgs="$pkgs $hw_arm $hw_usbnet $hw_dut"
+		pkgs="$pkgs $kernel_min"
+		pkgs="$pkgs $hw_alarm $hw_usbnet $hw_dut"
 
 		if [ "$host" = "trogdor" ]; then
 			pkgs="$pkgs $hw_qcom"
@@ -255,8 +247,8 @@ case "$host" in
 	"s15"|"hamoa"|"purwa"|"opi")
 		pkgs="$pkgs $cli_std $gui_base"
 		pkgs="$pkgs $dev_base $dev_mesa"
-		pkgs="$pkgs $kernel_custom"
-		pkgs="$pkgs $hw_arm $hw_usbnet $hw_dut"
+		pkgs="$pkgs $kernel_min"
+		pkgs="$pkgs $hw_alarm $hw_usbnet $hw_dut"
 
 		if [ "$host" = "s15" ]; then
 			pkgs="$pkgs $hw_uefi $hw_qcom $hw_wifi"

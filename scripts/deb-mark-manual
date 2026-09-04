@@ -140,7 +140,6 @@ dev_cross="
 # for kernel (~100M)
 # all except libelf-dev are for cros kernel
 dev_kernel="
-	cgpt
 	device-tree-compiler
 	libelf-dev
 	lz4
@@ -170,17 +169,17 @@ dev_mesa="
 	spirv-tools-dev
 "
 
-kernel_common="
+kernel_min="
 	systemd-zram-generator
 "
 
 kernel_x86="
-	$kernel_common
+	$kernel_min
 	linux-image-amd64
 "
 
 kernel_arm="
-	$kernel_common
+	$kernel_min
 	linux-image-arm64
 "
 
