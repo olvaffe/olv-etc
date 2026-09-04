@@ -141,17 +141,17 @@ kernel_x86="
 	linux
 "
 
+kernel_uki="
+	sbctl
+	systemd-ukify
+"
+
 hw_x86="
 	  turbostat
 "
 
 hw_alarm="
 	archlinuxarm-keyring
-"
-
-hw_uefi="
-	sbctl
-	systemd-ukify
 "
 
 hw_intel="
@@ -211,8 +211,8 @@ case "$host" in
 	"ridge"|"t580"|"xps")
 		pkgs="$pkgs $cli_full $gui_full"
 		pkgs="$pkgs $dev_base $dev_cross $dev_kernel $dev_mesa"
-		pkgs="$pkgs $kernel_x86"
-		pkgs="$pkgs $hw_x86 $hw_uefi $hw_wifi"
+		pkgs="$pkgs $kernel_x86 $kernel_uki"
+		pkgs="$pkgs $hw_x86 $hw_wifi"
 
 		if [ "$host" = "ridge" ]; then
 			pkgs="$pkgs $hw_amd $hw_mtk $hw_ridge"
@@ -251,9 +251,9 @@ case "$host" in
 		pkgs="$pkgs $hw_alarm $hw_usbnet $hw_dut"
 
 		if [ "$host" = "s15" ]; then
-			pkgs="$pkgs $hw_uefi $hw_qcom $hw_wifi"
+			pkgs="$pkgs $kernel_uki $hw_qcom $hw_wifi"
 		elif [ "$host" = "hamoa" -o "$host" = "purwa" ]; then
-			pkgs="$pkgs $hw_uefi $hw_qcom"
+			pkgs="$pkgs $kernel_uki $hw_qcom"
 		fi
 		;;
 	*)

@@ -183,12 +183,12 @@ kernel_arm="
 	linux-image-arm64
 "
 
-hw_x86="
-	linux-cpupower
+kernel_uki="
+	systemd-ukify
 "
 
-hw_uefi="
-	systemd-ukify
+hw_x86="
+	linux-cpupower
 "
 
 hw_intel="
