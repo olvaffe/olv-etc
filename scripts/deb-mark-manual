@@ -187,32 +187,35 @@ kernel_uki="
 	systemd-ukify
 "
 
-hw_x86="
-	linux-cpupower
-"
-
-hw_intel="
+soc_intel="
 	firmware-intel-graphics
-	firmware-iwlwifi
 	intel-microcode
 	mesa-vulkan-drivers
 "
 
-hw_mtk="
+soc_mtk="
 	firmware-mediatek
 "
 
-hw_wifi="
+net_intel="
+	firmware-iwlwifi
+"
+
+net_rt="
+	firmware-realtek
+"
+
+net_wifi="
 	iw
 	wireless-regdb
 	wpasupplicant
 "
 
-hw_usbnet="
-	firmware-realtek
+misc_x86="
+	linux-cpupower
 "
 
-hw_rpi="
+mach_rpi="
 	cnrdrvcups-ufr2-us
 	git
 	hdparm
@@ -228,7 +231,7 @@ hw_rpi="
 	zip
 "
 
-hw_npi="
+mach_npi="
 	firmware-realtek
 	kea-dhcp4-server
 	nftables
@@ -236,7 +239,7 @@ hw_npi="
 	unbound
 "
 
-cros_crostini="
+mach_crostini="
 	cros-garcon
 	cros-port-listener
 	cros-sommelier
@@ -250,13 +253,13 @@ pkgs=""
 host="$(uname -n)"
 case "$host" in
 	"rpi")
-		pkgs="$pkgs $cli_base $kernel_arm $hw_rpi"
+		pkgs="$pkgs $cli_base $kernel_arm $mach_rpi"
 		;;
 	"npi")
-		pkgs="$pkgs $cli_base $kernel_arm $hw_npi"
+		pkgs="$pkgs $cli_base $kernel_arm $mach_npi"
 		;;
 	"penguin")
-		pkgs="$pkgs $cli_std $dev_min $cros_crostini"
+		pkgs="$pkgs $cli_std $dev_min $mach_crostini"
 		;;
 	*)
 		echo "unknown device: $host"

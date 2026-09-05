@@ -146,59 +146,69 @@ kernel_uki="
 	systemd-ukify
 "
 
-hw_x86="
-	  turbostat
-"
-
-hw_alarm="
-	archlinuxarm-keyring
-"
-
-hw_intel="
-	linux-firmware-intel
+soc_intel="
 	intel-ucode
+	linux-firmware-intel
 	vulkan-intel
 "
 
-hw_amd="
+soc_amd="
 	amd-ucode
 	linux-firmware-amdgpu
 	vulkan-radeon
 "
 
-hw_qcom="
+soc_mtk="
+	linux-firmware-mediatek
+	linux-firmware-other
+	vulkan-panfrost
+"
+
+soc_qcom="
+	linux-firmware-atheros
 	linux-firmware-qcom
 	vulkan-freedreno
 "
 
-hw_mtk="
+net_mtk="
 	linux-firmware-mediatek
 "
 
-hw_wifi="
+net_rt="
+	linux-firmware-realtek
+"
+
+net_wifi="
 	iw
 	wireless-regdb
 	wpa_supplicant
 "
 
-hw_usbnet="
-	linux-firmware-realtek
+net_bt="
+	bluez
+	bluez-utils
 "
 
-hw_dut="
+misc_x86="
+	  turbostat
+"
+
+misc_alarm="
+	archlinuxarm-keyring
+"
+
+misc_dut="
 	seatd
 "
 
-hw_ridge="
-	bluez
-	bluez-utils
+mach_ridge="
 	evemu
 	pavucontrol
 	steam
 	xorg-xwayland
 "
 
-hw_xps="
+mach_xps="
 	bcm20702a1-firmware
 	broadcom-wl-dkms
 	linux-headers
@@ -212,48 +222,51 @@ case "$host" in
 		pkgs="$pkgs $cli_full $gui_full"
 		pkgs="$pkgs $dev_base $dev_cross $dev_kernel $dev_mesa"
 		pkgs="$pkgs $kernel_x86 $kernel_uki"
-		pkgs="$pkgs $hw_x86 $hw_wifi"
+		pkgs="$pkgs $net_wifi $misc_x86"
 
 		if [ "$host" = "ridge" ]; then
-			pkgs="$pkgs $hw_amd $hw_mtk $hw_ridge"
+			pkgs="$pkgs $soc_amd $net_mtk $net_bt $mach_ridge"
 		elif [ "$host" = "t580" ]; then
-			pkgs="$pkgs $hw_intel"
+			pkgs="$pkgs $soc_intel"
 		elif [ "$host" = "xps" ]; then
-			pkgs="$pkgs $hw_intel $hw_xps"
+			pkgs="$pkgs $soc_intel $mach_xps"
 		fi
 		;;
 	"rex"|"skyrim")
 		pkgs="$pkgs $cli_std $gui_base"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_min"
-		pkgs="$pkgs $hw_x86 $hw_usbnet $hw_dut"
+		pkgs="$pkgs $net_rt $misc_x86 $misc_dut"
 
 		if [ "$host" = "rex" ]; then
-			pkgs="$pkgs $hw_intel"
+			pkgs="$pkgs $soc_intel"
 		elif [ "$host" = "skyrim" ]; then
-			pkgs="$pkgs $hw_amd"
+			pkgs="$pkgs $soc_amd"
 		fi
 		;;
 	"navi"|"corsola"|"trogdor")
 		pkgs="$pkgs $cli_std $gui_base"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_min"
-		pkgs="$pkgs $hw_alarm $hw_usbnet $hw_dut"
+		pkgs="$pkgs $net_rt $misc_alarm $misc_dut"
 
-		if [ "$host" = "trogdor" ]; then
-			pkgs="$pkgs $hw_qcom"
+		if [ "$host" = "navi" -o "$host" = "corsola" ]; then
+			pkgs="$pkgs $soc_mtk"
+		elif [ "$host" = "trogdor" ]; then
+			pkgs="$pkgs $soc_qcom"
 		fi
 		;;
 	"s15"|"hamoa"|"purwa"|"opi")
 		pkgs="$pkgs $cli_std $gui_base"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_min"
-		pkgs="$pkgs $hw_alarm $hw_usbnet $hw_dut"
+		pkgs="$pkgs $net_rt $misc_alarm $misc_dut"
 
-		if [ "$host" = "s15" ]; then
-			pkgs="$pkgs $kernel_uki $hw_qcom $hw_wifi"
-		elif [ "$host" = "hamoa" -o "$host" = "purwa" ]; then
-			pkgs="$pkgs $kernel_uki $hw_qcom"
+		if [ "$host" = "s15" -o "$host" = "hamoa" -o "$host" = "purwa" ]; then
+			pkgs="$pkgs $kernel_uki $soc_qcom"
+			if [ "$host" = "s15" ]; then
+				pkgs="$pkgs $net_wifi"
+			fi
 		fi
 		;;
 	*)
