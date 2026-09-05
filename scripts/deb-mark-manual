@@ -193,10 +193,6 @@ soc_intel="
 	mesa-vulkan-drivers
 "
 
-soc_mtk="
-	firmware-mediatek
-"
-
 net_intel="
 	firmware-iwlwifi
 "
