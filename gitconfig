@@ -68,3 +68,6 @@
 
 [url "https://gitlab.freedesktop.org/"]
 	insteadOf = git@gitlab.freedesktop.org:
+
+[repo]
+	superprojectChoice = true

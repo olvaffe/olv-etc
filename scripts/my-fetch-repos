@@ -3,6 +3,7 @@
 git_repos="
 	chromiumos
 	projects/linux
+	projects/mesa
 "
 fetched_repos=""
 failed_repos=""
