@@ -10,6 +10,7 @@ UseDNS=no
 
 [DHCPv6]
 UseDNS=no
+PrefixDelegationHint=::/60
 
 [IPv6AcceptRA]
 UseDNS=no
