@@ -1,0 +1,7 @@
+[Match]
+Name=iot
+
+[Network]
+Address=10.86.30.1/24
+IPv6SendRA=yes
+#DHCPPrefixDelegation=yes

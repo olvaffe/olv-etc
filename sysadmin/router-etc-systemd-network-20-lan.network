@@ -5,3 +5,4 @@ Name=lan
 Address=192.168.86.1/24
 IPv6SendRA=yes
 DHCPPrefixDelegation=yes
+VLAN=iot
