@@ -15,6 +15,7 @@ AllowedIPs=10.86.90.20/32
 #   [Interface]
 #   PrivateKey=<KEY>
 #   Address=10.86.90.20/24
+#   DNS=192.168.86.1
 #
 #   [Peer]
 #   PublicKey=<KEY>
