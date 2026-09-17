@@ -194,7 +194,7 @@ misc_x86="
 "
 
 misc_alarm="
-	archlinuxarm-keyring
+	archports-keyring
 "
 
 misc_dut="
