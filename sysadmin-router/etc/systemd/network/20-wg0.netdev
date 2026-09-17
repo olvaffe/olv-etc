@@ -8,16 +8,16 @@ ListenPort=51820
 
 [WireGuardPeer]
 PublicKey=<KEY>
-AllowedIPs=10.86.90.20/32
+AllowedIPs=10.87.90.20/32
 
 # Peers' /etc/wireguard/wg0.conf should have
 #
 #   [Interface]
 #   PrivateKey=<KEY>
-#   Address=10.86.90.20/24
+#   Address=10.87.90.20/24
 #   DNS=192.168.86.1
 #
 #   [Peer]
 #   PublicKey=<KEY>
-#   AllowedIPs=10.86.90.0/24,192.168.86.0/24
+#   AllowedIPs=10.87.90.0/24,192.168.86.0/24
 #   Endpoint=olv.rip:51820

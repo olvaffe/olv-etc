@@ -3,4 +3,4 @@ Name=wg0
 Kind=wireguard
 
 [Network]
-Address=10.86.90.1/24
+Address=10.87.90.1/24
