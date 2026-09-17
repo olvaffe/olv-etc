@@ -1,6 +1,6 @@
-# /dev/mmcblk1p1, size 1GB, used 0.3GB
-UUID=<UUID>	/boot	vfat	defaults	0	2
 # /dev/mmcblk1p2, size 4GB, used 0.8GB
-UUID=<UUID>	/	ext4	defaults	0	1
+PARTUUID=ee4394f7-9286-224a-8406-6c51ab211459	/	ext4	noatime				0	1
+# /dev/mmcblk1p1, size 1GB, used 0.3GB
+PARTUUID=65f3de73-4553-4349-bd44-627eb97546c7	/boot	vfat	noatime,umask=0077,nofail	0	2
 # /dev/mmcblk1p3, size 8GB, used 0.3GB
-UUID=<UUID>	/var	ext4	defaults	0	2
+PARTUUID=84139d39-ec2a-754c-9592-6149c6271f8b	/var	ext4	noatime,nodev,nosuid		0	2

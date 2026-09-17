@@ -1,7 +1,11 @@
 [Match]
 Name=iot
 
+[Link]
+RequiredForOnline=no-carrier
+
 [Network]
+ConfigureWithoutCarrier=yes
 Address=10.87.30.1/24
 IPv6SendRA=yes
 DHCPPrefixDelegation=yes

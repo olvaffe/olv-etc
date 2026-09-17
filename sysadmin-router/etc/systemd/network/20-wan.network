@@ -1,6 +1,9 @@
 [Match]
 Name=wan
 
+[Link]
+RequiredForOnline=no
+
 [Network]
 DHCP=yes
 IPv6AcceptRA=yes
