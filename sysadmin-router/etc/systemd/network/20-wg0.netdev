@@ -27,9 +27,9 @@ AllowedIPs=10.87.90.23/32
 #   [Interface]
 #   PrivateKey=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 #   Address=10.87.90.XX/24
-#   DNS=192.168.86.1
+#   DNS=10.87.20.1
 #
 #   [Peer]
 #   PublicKey=9KnDzHfhdPMLG0sjANMq8JpZ2sBmduy5iVPET7ImchE=
-#   AllowedIPs=10.87.90.0/24,192.168.86.0/24
+#   AllowedIPs=10.87.90.0/24,10.87.20.0/24
 #   Endpoint=olv.rip:51820

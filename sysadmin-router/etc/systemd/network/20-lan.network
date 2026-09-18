@@ -7,7 +7,6 @@ RequiredForOnline=no-carrier
 [Network]
 ConfigureWithoutCarrier=yes
 Address=10.87.20.1/24
-Address=192.168.86.1/24
 IPv6SendRA=yes
 DHCPPrefixDelegation=yes
 VLAN=iot
