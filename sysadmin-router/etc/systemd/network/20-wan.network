@@ -17,3 +17,5 @@ PrefixDelegationHint=::/60
 
 [IPv6AcceptRA]
 UseDNS=no
+# xfinity issue
+UseMTU=no
