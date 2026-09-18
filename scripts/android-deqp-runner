@@ -48,6 +48,7 @@ deqp = "$deqpdir/deqp-$suite"
 caselists = ["$outdir/caselist-$suite.txt"]
 skips = ["$outdir/skip.txt"]
 deqp_args = [
+    "--deqp-watchdog=enable",
     "--deqp-surface-type=pbuffer",
     "--deqp-gl-config-name=rgba8888d24s8ms0",
 ]
