@@ -1,0 +1,14 @@
+[Unit]
+Description=Home Router Exporter
+After=network.target
+
+[Service]
+AmbientCapabilities=CAP_NET_ADMIN
+DynamicUser=yes
+ExecStart=/usr/local/bin/home-router-exporter
+Restart=on-failure
+SupplementaryGroups=_kea unbound
+Type=exec
+
+[Install]
+WantedBy=multi-user.target
