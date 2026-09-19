@@ -1,10 +1,10 @@
-# /dev/sda1, size 1GB, used 0.3GB
-UUID=<UUID>	/boot	vfat	defaults	0	2
 # /dev/sda2, size 4GB, used 2.2GB
-UUID=<UUID>	/	ext4	defaults	0	1
+PARTUUID=60ce46c6-7b89-c74d-9c73-b710d8d495e7	/	ext4	noatime				0	1
+# /dev/sda1, size 1GB, used 0.3GB
+PARTUUID=18257cc7-2a31-e544-85d4-572569af5866	/boot	vfat	noatime,umask=0077,nofail	0	2
 # /dev/sda3, size 8GB, used 2.0GB
-UUID=<UUID>	/var	ext4	defaults	0	2
-# /dev/sda4, size 32GB, used 9.6GB
-UUID=<UUID>	/home	ext4	defaults	0	2
-# /dev/sda5, rest, used 480GB
-UUID=<UUID>	/srv	ext4	defaults	0	2
+PARTUUID=f01f4eb2-1c51-cd46-a8a9-61a9261d171b	/var	ext4	noatime,nodev,nosuid		0	2
+# /dev/sda4, size 32GB, used 20GB
+PARTUUID=6ddacb91-7b48-2f40-855e-58e9b08a30d3	/home	ext4	noatime,nodev,nosuid		0	2
+# /dev/sda5, rest, used 535GB
+PARTUUID=cd364bc8-f561-684e-8031-bfbcad4a16a8	/srv	ext4	noatime,nodev,nosuid		0	2

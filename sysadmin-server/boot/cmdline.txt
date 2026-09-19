@@ -1,1 +1,1 @@
-console=tty0 root=PARTUUID=<UUID> rootwait fsck.repair=yes
+console=tty0 root=PARTUUID=60ce46c6-7b89-c74d-9c73-b710d8d495e7 rootwait panic=10 fsck.repair=yes

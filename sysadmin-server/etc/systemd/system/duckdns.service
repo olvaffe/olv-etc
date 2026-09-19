@@ -2,5 +2,5 @@
 Description=Update Duck DNS records
 
 [Service]
-ExecStart=/opt/scripts/bin/duckdns
+ExecStart=/opt/scripts/libexec/duckdns
 User=notroot
