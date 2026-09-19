@@ -8,6 +8,3 @@ PublishPort=5000:5000
 
 [Service]
 Restart=always
-
-[Install]
-WantedBy=default.target
