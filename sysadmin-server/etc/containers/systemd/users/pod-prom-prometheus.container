@@ -1,5 +1,5 @@
 [Container]
-Pod=prom.pod
+Pod=pod-prom.pod
 Image=docker.io/prom/prometheus:latest
 Timezone=local
 Volume=%h/prometheus-config:/etc/prometheus
@@ -7,6 +7,3 @@ Volume=%h/prometheus-data:/prometheus
 
 [Service]
 Restart=always
-
-[Install]
-WantedBy=default.target

@@ -1,12 +1,11 @@
 [Container]
 Image=lscr.io/linuxserver/calibre-web:latest
 Timezone=local
+Environment=PUID=0
+Environment=PGID=0
 Volume=%h/calibre-web-config:/config
-Volume=/srv/ebooks:/books
+Volume=/srv/ebooks/olv/calibre:/books
 PublishPort=8083:8083
 
 [Service]
 Restart=always
-
-[Install]
-WantedBy=default.target

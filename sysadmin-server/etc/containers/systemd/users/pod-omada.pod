@@ -9,6 +9,3 @@ PublishPort=29811-29817:29811-29817
 
 [Service]
 Restart=always
-
-[Install]
-WantedBy=default.target

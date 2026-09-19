@@ -1,5 +1,5 @@
 [Container]
-Pod=prom.pod
+Pod=pod-prom.pod
 Image=docker.io/prom/node-exporter:latest
 Timezone=local
 Volume=/:/host/rootfs:ro
@@ -10,6 +10,3 @@ Exec=--path.rootfs='/host/rootfs' --path.procfs='/host/procfs' --path.sysfs='/ho
 
 [Service]
 Restart=always
-
-[Install]
-WantedBy=default.target

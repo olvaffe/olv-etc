@@ -1,5 +1,5 @@
 [Container]
-Pod=omada.pod
+Pod=pod-omada.pod
 Image=docker.io/mongo:4.4.18
 Timezone=local
 Volume=%h/mongo-db:/data/db
@@ -9,6 +9,3 @@ Environment=MONGO_INITDB_DATABASE="omada"
 
 [Service]
 Restart=always
-
-[Install]
-WantedBy=default.target

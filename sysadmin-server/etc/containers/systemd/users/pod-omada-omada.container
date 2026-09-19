@@ -1,18 +1,15 @@
 [Container]
-Pod=omada.pod
-Image=docker.io/mbentley/omada-controller:6.0
+Pod=pod-omada.pod
+Image=docker.io/mbentley/omada-controller:6.3
 Timezone=local
 Ulimit=nofile=4096:8192
 Volume=%h/omada-data:/opt/tplink/EAPController/data
 Volume=%h/omada-logs:/opt/tplink/EAPController/logs
 Environment=MONGO_EXTERNAL="true"
-Environment=EAP_MONGOD_URI="mongodb://omada:0m4d4@systemd-mongo:27017/omada"
+Environment=EAP_MONGOD_URI="mongodb://omada:0m4d4@systemd-pod-omada-mongo:27017/omada"
 HealthCmd=none
 StopTimeout=60
 
 [Service]
 Restart=always
 TimeoutSec=70
-
-[Install]
-WantedBy=default.target
