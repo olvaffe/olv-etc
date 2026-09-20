@@ -1,0 +1,27 @@
+[
+  {
+    "hw-address": "XX:XX:XX:XX:XX:XX",
+    "ip-address": "10.87.20.5",
+    "hostname": "eap1"
+  },
+  {
+    "hw-address": "XX:XX:XX:XX:XX:XX",
+    "ip-address": "10.87.20.6",
+    "hostname": "eap2"
+  },
+  {
+    "hw-address": "XX:XX:XX:XX:XX:XX",
+    "ip-address": "10.87.20.10",
+    "hostname": "rpi"
+  },
+  {
+    "hw-address": "XX:XX:XX:XX:XX:XX",
+    "ip-address": "10.87.20.15",
+    "hostname": "ridge"
+  },
+  {
+    "hw-address": "XX:XX:XX:XX:XX:XX",
+    "ip-address": "10.87.20.16",
+    "hostname": "berry"
+  }
+]
