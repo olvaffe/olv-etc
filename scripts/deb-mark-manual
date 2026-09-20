@@ -230,6 +230,7 @@ mach_rpi="
 mach_npi="
 	firmware-realtek
 	kea-dhcp4-server
+	mdns-reflector
 	nftables
 	systemd-journal-remote
 	unbound
