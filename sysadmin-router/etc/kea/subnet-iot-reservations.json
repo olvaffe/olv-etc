@@ -1,1 +1,27 @@
-[]
+[
+  {
+    "hw-address": "XX:XX:XX:XX:XX:XX",
+    "ip-address": "10.87.30.10",
+    "hostname": "XXX"
+  },
+  {
+    "hw-address": "XX:XX:XX:XX:XX:XX",
+    "ip-address": "10.87.30.11",
+    "hostname": "XXX"
+  },
+  {
+    "hw-address": "XX:XX:XX:XX:XX:XX",
+    "ip-address": "10.87.30.12",
+    "hostname": "XXX"
+  },
+  {
+    "hw-address": "XX:XX:XX:XX:XX:XX",
+    "ip-address": "10.87.30.13",
+    "hostname": "XXX"
+  },
+  {
+    "hw-address": "XX:XX:XX:XX:XX:XX",
+    "ip-address": "10.87.30.15",
+    "hostname": "XXX"
+  }
+]
