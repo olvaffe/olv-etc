@@ -2,35 +2,71 @@
 
 set -e
 
-backup_dst="/root/backups"
-backup_srcs="
+umask 077
+
+server_files="
+	/var/lib/pod-calibre/calibre-web-config
+	/var/lib/pod-ha/ha-config/backups
+	/var/lib/pod-jellyfin/jellyfin-config/data/backups
+	/var/lib/pod-kavita/kavita-config/backups
+	/var/lib/pod-omada/omada-data/autobackup
+	/var/lib/pod-prom/grafana-data/grafana.db
+	/var/lib/pod-prom/prometheus-config/prometheus.yml
 	/etc
-	/opt/scripts
-	/var/log
-	/var/lib
+	/opt/scripts/libexec/duckdns
+	/srv/ebooks/olv/calibre/metadata.db
+	/var/lib/porkbun-client
 "
-backup_keep="4"
 
-tarball_shortname="$(hostname)-backup"
-tarball_timestamp="$(date +%Y%m%d)"
-tarball_suffix="tar.zst"
-tarball_fullname="$tarball_shortname-$tarball_timestamp.$tarball_suffix"
+router="npi"
+router_files="
+	/etc/kea/subnet-iot-reservations.json
+	/etc/kea/subnet-lan-reservations.json
+	/etc/systemd/network/20-wg0.netdev
+	/var/lib/kea/kea-leases4.csv
+	/var/lib/kea/kea-leases4.csv.2
+"
 
-backup() {
-	mkdir -p "$backup_dst"
-	echo "backing up to $backup_dst/$tarball_fullname"...
-	tar --zstd --sort=name -cf "$backup_dst/$tarball_fullname" $backup_srcs || true
-}
+backup_dir="/var/opt/scripts/backups"
+backup_retention="4"
+backup_tar="tar --zstd --sort=name"
+backup_timestamp="$(date +%Y%m%d)"
+backup_suffix="tar.zst"
 
-cleanup() {
-	readarray -d' ' tarballs < <(echo "$backup_dst/$tarball_shortname-"*".$tarball_suffix")
+backup_rotate() {
+	host="$1"
 
-	drop_count=$((${#tarballs[@]} - $backup_keep))
+	readarray -d' ' tarballs < <(echo "$backup_dir/$host-"*".$backup_suffix")
+
+	drop_count=$((${#tarballs[@]} - $backup_retention))
 	if (($drop_count > 0)); then
 		echo "removing oldest $drop_count backup(s)..."
 		rm -f ${tarballs[@]:0:$drop_count}
 	fi
 }
 
-backup
-cleanup
+backup_local() {
+	host="$(hostname)"
+
+	tarball_path="$backup_dir/$host-$backup_timestamp.$backup_suffix"
+	echo "backing up $host..."
+	$backup_tar -cf "$tarball_path" --transform="s,^,$host/," "$@"
+
+	backup_rotate "$host"
+}
+
+backup_remote() {
+	host="$1"
+	shift
+
+	tarball_path="$backup_dir/$host-$backup_timestamp.$backup_suffix"
+	echo "backing up $host..."
+	ssh "$host" "sudo $backup_tar -c --transform='s,^,$host/,' $@" | \
+		sudo tee "$tarball_path" > /dev/null
+
+	backup_rotate "$host"
+}
+
+mkdir -p "$backup_dir"
+backup_local $server_files
+#backup_remote "$router" $router_files
