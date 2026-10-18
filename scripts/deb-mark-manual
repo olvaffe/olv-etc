@@ -245,6 +245,15 @@ mach_crostini="
 	gnupg
 "
 
+mach_android="
+	cloud-init
+	gnupg
+	libbpf-tools
+	netplan.io
+	socat
+	systemd-zram-generator
+"
+
 pkgs=""
 
 host="$(uname -n)"
@@ -257,6 +266,9 @@ case "$host" in
 		;;
 	"penguin")
 		pkgs="$pkgs $cli_std $dev_min $mach_crostini"
+		;;
+	"debian")
+		pkgs="$pkgs $cli_std $dev_min $mach_android"
 		;;
 	*)
 		echo "unknown device: $host"
