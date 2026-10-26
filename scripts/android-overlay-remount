@@ -4,6 +4,7 @@
 
 OV_TMPFS="/data/overlay-remount"
 OV_REMOUNTS="
+	/product
 	/system/bin
 	/system/lib64
 	/vendor/bin

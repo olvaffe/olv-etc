@@ -193,7 +193,7 @@ misc_x86="
 	  turbostat
 "
 
-misc_alarm="
+misc_arm="
 	archports-keyring
 "
 
@@ -248,7 +248,7 @@ case "$host" in
 		pkgs="$pkgs $cli_std $gui_base"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_min"
-		pkgs="$pkgs $net_rt $misc_alarm $misc_dut"
+		pkgs="$pkgs $net_rt $misc_arm $misc_dut"
 
 		if [ "$host" = "navi" -o "$host" = "corsola" ]; then
 			pkgs="$pkgs $soc_mtk"
@@ -260,7 +260,7 @@ case "$host" in
 		pkgs="$pkgs $cli_std $gui_base"
 		pkgs="$pkgs $dev_base $dev_mesa"
 		pkgs="$pkgs $kernel_min"
-		pkgs="$pkgs $net_rt $misc_alarm $misc_dut"
+		pkgs="$pkgs $net_rt $misc_arm $misc_dut"
 
 		if [ "$host" = "s15" -o "$host" = "hamoa" -o "$host" = "purwa" ]; then
 			pkgs="$pkgs $kernel_uki $soc_qcom"

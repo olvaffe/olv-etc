@@ -1,6 +1,8 @@
 #!/bin/sh
 
 git_repos="
+	android/android16-6.12-desktop-bluey
+	android/main
 	chromiumos
 	projects/linux
 	projects/mesa

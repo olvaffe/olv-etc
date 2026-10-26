@@ -228,7 +228,6 @@ mach_rpi="
 "
 
 mach_npi="
-	firmware-realtek
 	kea-dhcp4-server
 	mdns-reflector
 	nftables
@@ -262,7 +261,7 @@ case "$host" in
 		pkgs="$pkgs $cli_base $kernel_arm $mach_rpi"
 		;;
 	"npi")
-		pkgs="$pkgs $cli_base $kernel_arm $mach_npi"
+		pkgs="$pkgs $cli_base $kernel_arm $net_rt $mach_npi"
 		;;
 	"penguin")
 		pkgs="$pkgs $cli_std $dev_min $mach_crostini"
