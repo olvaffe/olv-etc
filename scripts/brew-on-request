@@ -1,0 +1,14 @@
+#!/bin/bash
+
+brew_formulae="
+	bash
+	meson
+"
+
+brew_casks="
+	aerospace
+"
+
+brew_expected=$(echo "$brew_formulae $brew_casks" | sed -e 's/^[[:blank:]]*//' -e '/^$/d' | sort)
+brew_installed=$((brew list --installed-on-request && brew list --cask) | sort)
+diff -u <(printf '%s\n' "$brew_expected") <(printf '%s\n' "$brew_installed")

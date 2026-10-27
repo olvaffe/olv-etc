@@ -11,6 +11,10 @@ append_path() {
 	[ -d "$1" ] && PATH="$PATH:$1"
 }
 
+prepend_path "/opt/homebrew/bin"
+prepend_path "/opt/homebrew/sbin"
+append_path "/Library/Apple/usr/bin"
+
 prepend_path "$HOME/android/sdk/build-tools/37.0.0"
 prepend_path "$HOME/android/sdk/platform-tools"
 prepend_path "$HOME/.local/share/cargo/bin"

@@ -37,7 +37,12 @@ install() {
 		return
 	fi
 
-	src_rel=$(realpath --relative-to="$dst_dir" "$src")
+	if [ "$(uname -s)" = "Darwin" ]; then
+		src_rel="$src"
+	else
+		src_rel=$(realpath --relative-to="$dst_dir" "$src")
+	fi
+
 	if ln -sfn "$src_rel" "$dst"; then
 		echo "$name installed"
 	fi
@@ -67,3 +72,7 @@ install "systemd-sway-session.target" ".config/systemd/user/sway-session.target"
 install "tmux.conf" ".config/tmux/tmux.conf"
 install "vimrc" ".config/vim/vimrc"
 install "vim-pack" ".config/vim/pack"
+
+if [ "$(uname -s)" = "Darwin" ]; then
+	install "aerospace.toml" ".config/aerospace/aerospace.xml"
+fi

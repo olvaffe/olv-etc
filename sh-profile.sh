@@ -16,7 +16,9 @@ if [ -z "$SSH_AUTH_SOCK" ]; then
 	export SSH_AUTH_SOCK
 fi
 
-dbus-update-activation-environment --systemd SSH_AUTH_SOCK
+if command -v dbus-update-activation-environment  > /dev/null; then
+	dbus-update-activation-environment --systemd SSH_AUTH_SOCK
+fi
 
 [ -z "$WAYLAND_DISPLAY" -a $(tty) = "/dev/tty1" ] && \
 	command -v sway > /dev/null && \

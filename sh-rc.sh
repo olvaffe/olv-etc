@@ -12,6 +12,12 @@ export DOCKER_CONFIG="$HOME/.config/docker"
 export PYTHON_HISTORY="$HOME/.local/state/python_history"
 export RUSTUP_HOME="$HOME/.local/share/rustup"
 
+if [ -d "/opt/homebrew" ]; then
+	export HOMEBREW_PREFIX="/opt/homebrew"
+	export HOMEBREW_REPOSITORY="/opt/homebrew"
+	export HOMEBREW_CELLAR="/opt/homebrew/Cellar"
+fi
+
 HISTFILE="$HOME/.local/state/sh.history"
 HISTSIZE=64000
 HISTFILESIZE=64000
@@ -22,11 +28,11 @@ if [ -n "$BASH_VERSION" ]; then
 
 	hn="$(uname -n)"
 	case "$hn" in
-		olv-glaptop*)
-			hn="x1"
-			;;
 		olv-ct*)
 			hn="ct"
+			;;
+		olv-mac*)
+			hn="mac"
 			;;
 		*)
 			hn="\h"
@@ -48,5 +54,7 @@ if command -v tput > /dev/null; then
 fi
 
 if command -v dircolors > /dev/null; then
-    eval $(dircolors -b)
+	eval $(dircolors -b)
+else
+	export LSCOLORS="ExGxFxdaCxDaDahbadacec"
 fi
