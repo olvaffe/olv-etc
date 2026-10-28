@@ -1,0 +1,10 @@
+[window]
+decorations = "Buttonless"
+
+[window.padding]
+y = 10
+
+[[keyboard.bindings]]
+key = "Insert"
+mods = "Shift"
+action = "Paste"

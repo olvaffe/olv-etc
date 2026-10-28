@@ -75,4 +75,5 @@ install "vim-pack" ".config/vim/pack"
 
 if [ "$(uname -s)" = "Darwin" ]; then
 	install "aerospace.toml" ".config/aerospace/aerospace.toml"
+	install "alacritty-macos.toml" ".config/alacritty/alacritty-os.toml"
 fi
