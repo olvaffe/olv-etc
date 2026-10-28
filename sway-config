@@ -22,7 +22,6 @@ bindswitch --locked lid:off output $edp enable
 
 input type:touchpad {
     tap enabled
-    tap_button_map lmr
 }
 
 ### sway-bar

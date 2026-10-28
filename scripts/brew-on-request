@@ -7,6 +7,7 @@ brew_formulae="
 
 brew_casks="
 	aerospace
+	middleclick
 "
 
 brew_expected=$(echo "$brew_formulae $brew_casks" | sed -e 's/^[[:blank:]]*//' -e '/^$/d' | sort)
