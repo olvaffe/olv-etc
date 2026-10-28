@@ -74,5 +74,5 @@ install "vimrc" ".config/vim/vimrc"
 install "vim-pack" ".config/vim/pack"
 
 if [ "$(uname -s)" = "Darwin" ]; then
-	install "aerospace.toml" ".config/aerospace/aerospace.xml"
+	install "aerospace.toml" ".config/aerospace/aerospace.toml"
 fi
