@@ -8,3 +8,8 @@ y = 10
 key = "Insert"
 mods = "Shift"
 action = "Paste"
+
+[[keyboard.bindings]]
+key = "Key6"
+mods = "Control"
+chars = "\u001e"
