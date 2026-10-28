@@ -54,4 +54,4 @@ alt-shift-l = 'move right'
 # floating
 alt-shift-space = 'layout floating tiling'
 
-alt-f = 'fullscreen'
+alt-f = 'macos-native-fullscreen'
