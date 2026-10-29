@@ -7,6 +7,12 @@ brew_formulae="
 
 brew_casks="
 	aerospace
+	font-noto-color-emoji
+	font-noto-sans
+	font-noto-sans-cjk
+	font-noto-sans-mono
+	font-noto-serif
+	font-noto-serif-cjk
 	middleclick
 "
 

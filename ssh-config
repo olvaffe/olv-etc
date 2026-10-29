@@ -44,7 +44,7 @@ Host lnx-opi
 Host dut-*
 	User root
 	CanonicalizeHostname yes
-	IdentityFile ~/.ssh/cros-testing_rsa
+	IdentityFile ~/chromiumos/chromite/ssh_keys/testing_rsa
 	UserKnownHostsFile /dev/null
 	StrictHostKeyChecking no
 	SetEnv TERM=xterm-256color
@@ -52,7 +52,7 @@ Host dut-*
 Host lnx-*
 	User olv
 	CanonicalizeHostname yes
-	IdentityFile ~/.ssh/cros-testing_rsa
+	IdentityFile ~/chromiumos/chromite/ssh_keys/testing_rsa
 	UserKnownHostsFile /dev/null
 	StrictHostKeyChecking no
 
