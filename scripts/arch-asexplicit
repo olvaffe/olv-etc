@@ -27,9 +27,11 @@ cli_std="
 	$cli_base
 	bc
 	git
+	jq
 	lsof
 	man-db
 	man-pages
+	picocom
 	python
 	strace
 	tmux
@@ -40,9 +42,7 @@ cli_std="
 # for workstations (~150M)
 cli_full="
 	$cli_std
-	jq
 	nordvpn-bin
-	picocom
 	wireguard-tools
 "
 
