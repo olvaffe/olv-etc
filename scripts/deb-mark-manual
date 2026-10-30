@@ -57,6 +57,7 @@ cli_std="
 # for workstations (~50M)
 cli_full="
 	$cli_std
+	fido2-tools
 	gnupg
 	systemd-container
 	wireguard-tools
@@ -66,7 +67,6 @@ cli_full="
 gui_min="
 	alacritty
 	fonts-noto-core
-	i3status
 	polkitd
 	sway
 "
@@ -76,6 +76,8 @@ gui_base="
 	$gui_min
 	brightnessctl
 	grim
+	i3status
+	libinput-tools
 	mesa-utils
 	slurp
 	swayidle

@@ -42,6 +42,7 @@ cli_std="
 # for workstations (~150M)
 cli_full="
 	$cli_std
+	libfido2
 	nordvpn-bin
 	wireguard-tools
 "
@@ -49,7 +50,6 @@ cli_full="
 # for terminal (~450M)
 gui_min="
 	alacritty
-	i3status
 	noto-fonts
 	polkit
 	sway
@@ -60,6 +60,8 @@ gui_base="
 	$gui_min
 	brightnessctl
 	grim
+	i3status
+	libinput-tools
 	mesa-utils
 	slurp
 	swayidle
@@ -202,7 +204,6 @@ misc_dut="
 "
 
 mach_ridge="
-	evemu
 	pavucontrol
 	steam
 	xorg-xwayland
