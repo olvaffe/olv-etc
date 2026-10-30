@@ -77,7 +77,6 @@ gui_base="
 	brightnessctl
 	grim
 	i3status
-	libinput-tools
 	mesa-utils
 	slurp
 	swayidle
@@ -96,6 +95,7 @@ gui_std="
 	fonts-noto-cjk
 	fonts-noto-color-emoji
 	google-chrome-stable
+	libinput-tools
 	mako-notifier
 	pipewire-pulse
 "
