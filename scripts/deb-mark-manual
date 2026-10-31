@@ -33,7 +33,7 @@ cli_base="
 	whiptail
 "
 
-# for workstations, vms, and duts (~200M)
+# for workstations, vms, and duts (~250M)
 cli_std="
 	$cli_base
 	bc
@@ -63,7 +63,7 @@ cli_full="
 	wireguard-tools
 "
 
-# for terminal (~400M)
+# for terminal (~650M)
 gui_min="
 	alacritty
 	fonts-noto-core
@@ -71,23 +71,23 @@ gui_min="
 	sway
 "
 
-# for basic use (~250M)
+# for basic use (~200M)
 gui_base="
 	$gui_min
 	brightnessctl
 	grim
 	i3status
+	mako-notifier
 	mesa-utils
 	slurp
 	swayidle
-	swayimg
 	swaylock
 	vulkan-tools
 	wayland-utils
 	wl-clipboard
 "
 
-# for real use (~1100M)
+# for real use (~1200M)
 gui_std="
 	$gui_base
 	fcitx5
@@ -95,16 +95,16 @@ gui_std="
 	fonts-noto-cjk
 	fonts-noto-color-emoji
 	google-chrome-stable
-	libinput-tools
-	mako-notifier
 	pipewire-pulse
 "
 
-# for optional features (~500M)
+# for optional features (~600M)
 gui_full="
 	$gui_std
 	cups
+	libinput-tools
 	mpv
+	swayimg
 	xdg-desktop-portal-gtk
 	xdg-desktop-portal-wlr
 "

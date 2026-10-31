@@ -47,7 +47,7 @@ cli_full="
 	wireguard-tools
 "
 
-# for terminal (~450M)
+# for terminal (~550M)
 gui_min="
 	alacritty
 	noto-fonts
@@ -55,46 +55,46 @@ gui_min="
 	sway
 "
 
-# for basic use (~250M)
+# for basic use (~50M)
 gui_base="
 	$gui_min
 	brightnessctl
 	grim
 	i3status
+	mako
 	mesa-utils
 	slurp
 	swayidle
-	swayimg
 	swaylock
 	vulkan-tools
 	wayland-utils
 	wl-clipboard
 "
 
-# for real use (~1000M)
+# for real use (~1200M)
 gui_std="
 	$gui_base
 	fcitx5-chewing
 	fcitx5-configtool
 	fcitx5-gtk
 	google-chrome
-	libinput-tools
-	mako
 	noto-fonts-cjk
 	noto-fonts-emoji
 	pipewire-pulse
 "
 
-# for optional features (~300M)
+# for optional features (~500M)
 gui_full="
 	$gui_std
 	cups
+	libinput-tools
 	mpv
+	swayimg
 	xdg-desktop-portal-gtk
 	xdg-desktop-portal-wlr
 "
 
-# for tooling (~350M)
+# for tooling (~250M)
 dev_min="
 	ctags
 	gdb
@@ -102,7 +102,7 @@ dev_min="
 	trace-cmd
 "
 
-# for development (~750M)
+# for development (~900M)
 dev_base="
 	$dev_min
 	base-devel
@@ -112,7 +112,7 @@ dev_base="
 	meson
 "
 
-# for cross-compile (~600M)
+# for cross-compile (~700M)
 dev_cross="
 	aarch64-linux-gnu-gcc
 	qemu-user-static
