@@ -201,6 +201,7 @@ misc_arm="
 
 misc_dut="
 	seatd
+	vboot-minimal-git
 "
 
 mach_ridge="
