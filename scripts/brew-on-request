@@ -3,6 +3,7 @@
 brew_formulae="
 	bash
 	meson
+	universal-ctags
 "
 
 brew_casks="
