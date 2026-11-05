@@ -2,9 +2,15 @@
 
 brew_formulae="
 	bash
+	ccache
+	clang-format
 	libusb
 	meson
+	picocom
+	python@3.15
+	tmux
 	universal-ctags
+	zstd
 "
 
 brew_casks="
