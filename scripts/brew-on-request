@@ -2,6 +2,7 @@
 
 brew_formulae="
 	bash
+	libusb
 	meson
 	universal-ctags
 "
