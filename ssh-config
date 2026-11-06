@@ -59,6 +59,5 @@ Host lnx-*
 Host *
 	ControlMaster auto
 	ControlPath ~/.ssh/control-%r@%h:%p
-	ControlPersist 60
-	ServerAliveCountMax 2
-	ServerAliveInterval 10
+	ControlPersist 30
+	ServerAliveInterval 5
