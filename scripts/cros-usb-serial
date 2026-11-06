@@ -5,7 +5,7 @@ import argparse
 import os
 import sys
 import threading
-from typing import List, NamedTuple, Optional, Tuple
+from typing import Iterator, NamedTuple
 
 import usb.core
 import usb.util
@@ -19,19 +19,20 @@ GOOGLE_SERIAL_PROTOCOL = 0x01
 
 class SerialInterface(NamedTuple):
     dev: usb.core.Device
-    bus: Optional[int]
-    port_numbers: Tuple[int, ...]
-    address: Optional[int]
+    cfg: usb.core.Configuration
     intf: usb.core.Interface
     ep_in: usb.core.Endpoint
     ep_out: usb.core.Endpoint
+    product: str
     name: str
 
 
-def enumerate_interfaces() -> List[SerialInterface]:
-    """Finds all Google usb-serial-simple interfaces across 0x18d1 USB devices."""
-    results: List[SerialInterface] = []
-    devices = usb.core.find(find_all=True, idVendor=GOOGLE_VENDOR_ID)
+def enumerate_interfaces() -> Iterator[SerialInterface]:
+    """Yields Google usb-serial-simple interfaces across 0x18d1 USB devices."""
+    devices = sorted(
+        usb.core.find(find_all=True, idVendor=GOOGLE_VENDOR_ID),
+        key=lambda dev: (dev.bus, dev.port_numbers or (dev.address,)),
+    )
 
     for dev in devices:
         try:
@@ -43,7 +44,8 @@ def enumerate_interfaces() -> List[SerialInterface]:
         except usb.core.USBError:
             continue
 
-        for intf in cfg:
+        product_name = None
+        for intf in sorted(cfg, key=lambda item: item.bInterfaceNumber):
             if (
                 intf.bInterfaceClass != USB_CLASS_VENDOR_SPEC
                 or intf.bInterfaceSubClass != GOOGLE_SERIAL_SUBCLASS
@@ -68,48 +70,45 @@ def enumerate_interfaces() -> List[SerialInterface]:
             if ep_in is None or ep_out is None:
                 continue
 
+            if product_name is None:
+                product_name = ""
+                if dev.iProduct:
+                    try:
+                        product_name = usb.util.get_string(dev, dev.iProduct) or ""
+                    except (usb.core.USBError, ValueError):
+                        pass
+
             intf_name = ""
             if intf.iInterface:
                 try:
                     intf_name = usb.util.get_string(dev, intf.iInterface) or ""
-                except usb.core.USBError:
+                except (usb.core.USBError, ValueError):
                     pass
 
-            results.append(
-                SerialInterface(
-                    dev=dev,
-                    bus=getattr(dev, "bus", None),
-                    port_numbers=tuple(getattr(dev, "port_numbers", None) or ()),
-                    address=getattr(dev, "address", None),
-                    intf=intf,
-                    ep_in=ep_in,
-                    ep_out=ep_out,
-                    name=intf_name,
-                )
+            yield SerialInterface(
+                dev=dev,
+                cfg=cfg,
+                intf=intf,
+                ep_in=ep_in,
+                ep_out=ep_out,
+                product=product_name,
+                name=intf_name,
             )
 
-    results.sort(
-        key=lambda item: (
-            item.bus or 0,
-            item.port_numbers,
-            item.address or 0,
-            item.dev.idProduct,
-            item.intf.bInterfaceNumber,
-        )
+
+def print_interface(idx: int, item: SerialInterface, file=sys.stdout) -> None:
+    parts = [f"{item.dev.idVendor:04x}:{item.dev.idProduct:04x}"]
+    if item.product:
+        parts.append(item.product)
+    if item.name:
+        parts.append(item.name)
+    desc = " ".join(parts)
+    print(
+        f"[{idx}] {desc} "
+        f"(bus={item.dev.bus} addr={item.dev.address} "
+        f"bInterfaceNumber={item.intf.bInterfaceNumber})",
+        file=file,
     )
-    return results
-
-
-def print_interfaces(ifaces: List[SerialInterface], file=sys.stdout) -> None:
-    for idx, item in enumerate(ifaces):
-        label = f" ({item.name})" if item.name else ""
-        print(
-            f"[{idx}] {item.dev.idVendor:04x}:{item.dev.idProduct:04x} "
-            f"bus={item.bus} addr={item.address} "
-            f"bInterfaceNumber={item.intf.bInterfaceNumber}{label} "
-            f"(IN=0x{item.ep_in.bEndpointAddress:02x}, OUT=0x{item.ep_out.bEndpointAddress:02x})",
-            file=file,
-        )
 
 
 reader_running = True
@@ -181,7 +180,7 @@ def bridge_stdio(target: SerialInterface) -> None:
         reattach_kernel_driver(dev, intf_num)
 
 
-def main() -> None:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Enumerate and connect to Google usb-serial-simple USB interfaces."
     )
@@ -193,25 +192,41 @@ def main() -> None:
         help="Interface index (0..N-1) to connect to. If omitted, lists interfaces.",
     )
     args = parser.parse_args()
+    if args.interface is not None and args.interface < 0:
+        parser.error(f"Interface index {args.interface} must be >= 0.")
+    return args
 
-    ifaces = enumerate_interfaces()
-    if not ifaces:
+
+def main() -> None:
+    args = parse_args()
+
+    target = None
+    count = 0
+    for idx, iface in enumerate(enumerate_interfaces()):
+        count += 1
+        if args.interface is None:
+            print_interface(idx, iface, file=sys.stdout)
+        elif idx == args.interface:
+            target = iface
+            break
+
+    if count == 0:
         print(
             f"No matching Google serial interfaces (0xff/0x50/0x01) found for vendor {GOOGLE_VENDOR_ID:04x}.",
             file=sys.stderr,
         )
         sys.exit(1)
 
-    if args.interface is None:
-        print_interfaces(ifaces, file=sys.stdout)
-        return
+    if args.interface is not None:
+        if target is None:
+            print(
+                f"Interface index {args.interface} out of range (0..{count - 1}).",
+                file=sys.stderr,
+            )
+            sys.exit(1)
 
-    if not (0 <= args.interface < len(ifaces)):
-        parser.error(
-            f"Interface index {args.interface} out of range (0..{len(ifaces) - 1})."
-        )
-
-    bridge_stdio(ifaces[args.interface])
+        print_interface(args.interface, target, file=sys.stderr)
+        bridge_stdio(target)
 
 
 if __name__ == "__main__":
