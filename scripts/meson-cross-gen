@@ -4,10 +4,10 @@
 #
 #  - specify both sysroot and ndk_root if pkg-config is used
 
-ndk_api="28"
+ndk_api="35"
 
 if [ $# -lt 4 ]; then
-	echo "$0 <linux|cros|ndk> <x86|arm> <64|32> <sysroot> [ndk_root]"
+	echo "$0 <lin|cros|ndk> <x86|arm> <64|32> <sysroot> [ndk_root]"
 	exit 1
 fi
 
@@ -15,112 +15,138 @@ flavor="$1"
 arch="$2"
 bits="$3"
 sysroot="$4"
-toolchain_root="$5"
+ndk_root="$5"
 
-init_vars() {
-	# https://mesonbuild.com/Reference-tables.html#cpu-families
-	# https://wiki.debian.org/Multiarch/Tuples
-	# https://clang.llvm.org/docs/CrossCompilation.html
-	meson_system=""
-	meson_cpu_family=""
-	meson_cpu=""
-	local target_arch=""
-	local target_vendor=""
-	local target_sys="linux"
-	local target_env=""
-
+init_target_vars() {
 	case "$arch-$bits" in
 		x86-64)
-			meson_cpu_family="x86_64"
-			meson_cpu="x86_64"
-			target_arch="x86_64"
+			target_lin="x86_64-linux-gnu"
+			target_cros="x86_64-linux-gnu"
+			target_ndk="x86_64-linux-android$ndk_api"
+			rust_target_lin="x86_64-unknown-linux-gnu"
+			rust_target_ndk="x86_64-linux-android"
 			;;
 		x86-32)
-			meson_cpu_family="x86"
-			meson_cpu="i686"
-			target_arch="i386"
+			target_lin="i686-linux-gnu"
+			target_cros="i686-cros-linux-gnu"
+			target_ndk="i686-linux-android$ndk_api"
+			rust_target_lin="i686-unknown-linux-gnu"
+			rust_target_ndk="i686-linux-android"
 			;;
 		arm-64)
-			meson_cpu_family="aarch64"
-			meson_cpu="aarch64"
-			target_arch="aarch64"
+			target_lin="aarch64-linux-gnu"
+			target_cros="aarch64-cros-linux-gnu"
+			target_ndk="aarch64-linux-android$ndk_api"
+			rust_target_lin="aarch64-unknown-linux-gnu"
+			rust_target_ndk="aarch64-linux-android"
 			;;
 		arm-32)
-			meson_cpu_family="arm"
-			meson_cpu="armv7a"
-			target_arch="arm"
-			target_env="eabihf"
+			target_lin="arm-linux-gnueabihf"
+			target_cros="armv7a-cros-linux-gnueabihf"
+			target_ndk="armv7a-linux-androideabi$ndk_api"
+			rust_target_lin="armv7-unknown-linux-gnueabihf"
+			rust_target_ndk="armv7-linux-androideabi"
 			;;
 		*)
 			echo "unknown $arch-$bits"
 			exit 1
 			;;
 	esac
+
 	case "$flavor" in
-		linux)
-			meson_system="linux"
-			target_env="gnu$target_env"
+		lin)
+			target="$target_lin"
+			rust_target="$rust_target_lin"
 			;;
 		cros)
-			meson_system="linux"
-			target_arch="$meson_cpu"
-			target_vendor="cros-"
-			target_env="gnu$target_env"
+			target="$target_cros"
+			rust_target="$rust_target_lin"
 			;;
 		ndk)
-			meson_system="android"
-			target_arch="$meson_cpu"
-			target_env="android${target_env%hf}$ndk_api"
+			target="$target_ndk"
+			rust_target="$rust_target_ndk"
 			;;
 		*)
 			echo "unknown $flavor"
 			exit 1
 			;;
 	esac
+}
 
-	local target_triple="$target_arch-$target_vendor$target_sys-$target_env"
-	llvm_config=""
-	c_link_args=""
-	cpp_args=""
+init_mach_vars() {
+	case "$flavor" in
+		lin|cros)
+			mach_system="linux"
+			;;
+		ndk)
+			mach_system="android"
+			;;
+	esac
+
+	case "$arch-$bits" in
+		x86-64)
+			mach_cpu_family="x86_64"
+			mach_cpu="x86_64"
+			;;
+		x86-32)
+			mach_cpu_family="x86"
+			mach_cpu="i686"
+			;;
+		arm-64)
+			mach_cpu_family="aarch64"
+			mach_cpu="aarch64"
+			;;
+		arm-32)
+			mach_cpu_family="arm"
+			mach_cpu="armv7a"
+			;;
+	esac
+}
+
+init_vars() {
+	init_target_vars
+	init_mach_vars
+
+	llvm_config="not-exist"
+	c_args=""
 	cpp_link_args=""
 
 	case "$flavor" in
-		linux)
+		lin)
 			toolchain_prefix=""
-			if [ "$arch" != "x86" ]; then
-				toolchain_prefix="$target_triple-"
-			fi
 
-			common_args="'--sysroot=' + sysroot"
-			if [ "$arch-$bits" = "x86-32" ]; then
-				common_args="'-m32', $common_args"
-			fi
+			sysroot_args="'--sysroot=' + sysroot"
+			bindgen_args="'--sysroot=' + sysroot"
 			;;
 		cros)
 			toolchain_prefix=""
-			common_args="'-target', '$target_triple', '--sysroot=' + sysroot"
-			llvm_config="/usr/lib/llvm/bin/llvm-config-host"
+
+			sysroot_args="'--sysroot=' + sysroot"
+			bindgen_args="'--sysroot=' + sysroot"
+
+			llvm_config="usr/lib/llvm/bin/llvm-config-host"
 			;;
 		ndk)
-			if [ -z "$toolchain_root" ]; then
-				toolchain_root="$sysroot"
+			if [ -z "$ndk_root" ]; then
+				ndk_root="$sysroot"
 				sysroot="/not-exist"
 			fi
+			toolchain_prefix="$ndk_root/toolchains/llvm/prebuilt/linux-x86_64/bin"
 
-			toolchain_prefix="$toolchain_root/toolchains/llvm/prebuilt/linux-x86_64/bin/"
-			common_args="'-target', '$target_triple', '-isystem', sysroot + '/usr/include'"
+			sysroot_args=""
+			bindgen_args="'--target=' + target, '--sysroot=' + toolchain_prefix / '../sysroot', '-isystem', sysroot / 'usr/include'"
+
+			c_args="'-isystem', sysroot / 'usr/include'"
 			cpp_link_args="'-static-libstdc++'"
 			;;
 	esac
 
-	local basedirs="/usr/lib /usr/lib64 /usr/lib/$target_triple /usr/share"
+	local basedirs="usr/lib usr/lib64 usr/lib/$target usr/share"
 	pkgconfigdirs=""
 	for b in $basedirs; do
-		if [ -d "$sysroot$b/pkgconfig" ]; then
-			pkgconfigdirs="$pkgconfigdirs:$sysroot$b/pkgconfig"
-		fi
+		pkgconfigdirs="$pkgconfigdirs, sysroot / '$b/pkgconfig'"
 	done
-	pkgconfigdirs="${pkgconfigdirs#:}"
+	pkgconfigdirs="${pkgconfigdirs#, }"
 }
 
 init_vars
@@ -128,42 +154,48 @@ init_vars
 gen_constants() {
 	cat <<EOF
 [constants]
+target = '$target'
+rust_target = '$rust_target'
 toolchain_prefix = '$toolchain_prefix'
 sysroot = '$sysroot'
-common_args = [$common_args]
+sysroot_args = [$sysroot_args]
+bindgen_args = [$bindgen_args]
 EOF
 }
 
 gen_binaries_gcc() {
 	cat <<EOF
 [binaries]
-ar = toolchain_prefix + 'ar'
-c = ['ccache', toolchain_prefix + 'gcc']
-cpp = ['ccache', toolchain_prefix + 'g++']
-strip = toolchain_prefix + 'strip'
-pkgconfig = '/usr/bin/pkg-config'
+ar = toolchain_prefix / target + '-ar'
+c = ['ccache', toolchain_prefix / target + '-gcc']
+cpp = ['ccache', toolchain_prefix / target + '-g++']
+rust = ['rustc', '--target', rust_target]
+strip = toolchain_prefix / target + '-strip'
+pkg-config = '/usr/bin/pkg-config'
 EOF
 }
 
 gen_binaries_llvm() {
 	cat <<EOF
 [binaries]
-ar = toolchain_prefix + 'llvm-ar'
-c = ['ccache', toolchain_prefix + 'clang']
-cpp = ['ccache', toolchain_prefix + 'clang++']
-strip = toolchain_prefix + 'llvm-strip'
-pkgconfig = '/usr/bin/pkg-config'
-llvm-config = sysroot + '$llvm_config'
+ar = toolchain_prefix / 'llvm-ar'
+c = ['ccache', toolchain_prefix / 'clang', '--target=' + target]
+cpp = ['ccache', toolchain_prefix / 'clang++', '--target=' + target]
+rust = ['rustc', '--target', rust_target]
+strip = toolchain_prefix / 'llvm-strip'
+pkg-config = '/usr/bin/pkg-config'
+llvm-config = sysroot / '$llvm_config'
 EOF
 }
 
 gen_builtin_options() {
 	cat <<EOF
 [built-in options]
-c_args = common_args + []
-c_link_args = common_args + [$c_link_args]
-cpp_args = common_args + [$cpp_args]
-cpp_link_args = common_args + [$cpp_link_args]
+c_args = sysroot_args + [$c_args]
+c_link_args = sysroot_args + []
+cpp_args = sysroot_args + [$c_args]
+cpp_link_args = sysroot_args + [$cpp_link_args]
+rust_link_args = sysroot_args + []
 EOF
 }
 
@@ -172,16 +204,17 @@ gen_properties() {
 	cat <<EOF
 [properties]
 sys_root = sysroot
-pkg_config_libdir = '$pkgconfigdirs'
+pkg_config_libdir = [$pkgconfigdirs]
+bindgen_clang_arguments = bindgen_args + []
 EOF
 }
 
 gen_host_machine() {
 	cat <<EOF
 [host_machine]
-system = '$meson_system'
-cpu_family = '$meson_cpu_family'
-cpu = '$meson_cpu'
+system = '$mach_system'
+cpu_family = '$mach_cpu_family'
+cpu = '$mach_cpu'
 endian = 'little'
 EOF
 }
@@ -189,7 +222,7 @@ EOF
 gen_constants
 echo
 case "$flavor" in
-	linux)
+	lin)
 		gen_binaries_gcc
 		;;
 	cros|ndk)
