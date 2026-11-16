@@ -6,6 +6,7 @@ brew_formulae="
 	clang-format
 	libusb
 	meson
+	mpv
 	picocom
 	python@3.15
 	tmux
