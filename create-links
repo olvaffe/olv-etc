@@ -50,6 +50,13 @@ install() {
 
 create_xdg_base_dirs
 
+agent_dir=".gemini/config"
+[ -d ~/android ] && install "agents/skills/local-checkout-android.md" "$agent_dir/skills/local-checkout-android/SKILL.md"
+[ -d ~/chromiumos ] && install "agents/skills/local-checkout-chromeos.md" "$agent_dir/skills/local-checkout-chromeos/SKILL.md"
+install "agents/skills/local-checkout-linux.md" "$agent_dir/skills/local-checkout-linux/SKILL.md"
+install "agents/skills/local-checkout-mesa.md" "$agent_dir/skills/local-checkout-mesa/SKILL.md"
+install "agents/skills/local-checkout-vulkan.md" "$agent_dir/skills/local-checkout-vulkan/SKILL.md"
+
 install "alacritty.toml" ".config/alacritty/alacritty.toml"
 install "fontconfig-fonts.conf" ".config/fontconfig/fonts.conf"
 install "gdbearlyinit" ".config/gdb/gdbearlyinit"
