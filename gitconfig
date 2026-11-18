@@ -67,7 +67,7 @@
 	signingKey = CB8AD797474A101B
 
 [url "https://gitlab.freedesktop.org/"]
-	insteadOf = git@gitlab.freedesktop.org:
+	insteadOf = git@ssh.gitlab.freedesktop.org:
 
 [repo]
 	superprojectChoice = true
