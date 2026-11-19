@@ -2,18 +2,21 @@
 name: local-checkout-android
 description: >-
   Navigates the local Android main branch checkout at ~/android/main and downstream Kleaf
-  kernel checkouts at ~/android/android<version>-<kernel>-<board>. Use when working on or
-  referencing Android platform, graphics/display HALs, board configs, or Android kernels.
+  kernel checkouts at ~/android/android*. Use when working on or referencing Android
+  platform, Android Desktop boards & follower variants, graphics/display HALs, runtime
+  firmware services, or Android kernels (often paired with AP/EC/GSC firmware from
+  local-checkout-chromeos).
 ---
 
 # Android Platform (`~/android/main`) & Kernels (`~/android/android*`)
 
-`~/android/main` is the local Android `main` `repo` checkout, with Kleaf kernel checkouts alongside it at `~/android/android<version>-<kernel>-<board>` (expand `~` to the user's home directory when calling `read_file`).
+`~/android/main` is the local Android `main` `repo` checkout, with Kleaf kernel checkouts alongside it at `~/android/android*` (typically named `android<ver>-<kver>-desktop-<target>`; expand `~` to the user's home directory when calling `read_file`).
 
 ## Workspace & Search Guardrails
 
 - **Cross-project read-only:** When launched from another workspace, treat `~/android/main` and `~/android/android*` strictly as **read-only** unless explicitly asked to edit them.
-- **Subrepo-scoped git commands:** Both `~/android/main` and `~/android/android*` are large `repo` forests with huge `out/`, `bazel-*`, and `prebuilts/` trees. **Never** scan `out/`, `bazel-*`, or `prebuilts/` during source searches (except targeted AIDL/HIDL generated headers under `~/android/main/out/soong/.intermediates/hardware/interfaces/graphics/`). Always run `git -C <subrepo_path> grep -n '<pattern>'` inside the specific git subrepo.
+- **Cross-checkout AP/EC/GSC firmware (`~/chromiumos`):** Android Desktop boards build AP (`coreboot`, `depthcharge`, `vboot`, `TF-A`), EC (`zephyr`), and GSC (`ti50`) firmware from `~/chromiumos`—use `local-checkout-chromeos` when investigating bootloader/AP/EC/GSC firmware or firmware↔kernel handoff.
+- **Subrepo-scoped git commands:** Both `~/android/main` and `~/android/android*` are large `repo` forests with huge `out/`, `bazel-*`, and `prebuilts/` trees. **Never** scan `out/`, `bazel-*`, or `prebuilts/` during source searches. Always run `git -C <subrepo_path> grep -n '<pattern>'` inside the specific git subrepo.
 - **Repo-local customizations:** Launching Jetski directly inside `~/android/main` also loads its built-in `.agents` / `.gemini` customizations (`build`, `atest`, `aconfig`, `alint`, `xrefs`, etc.).
 
 ## 1. Platform Checkout (`~/android/main`)
@@ -29,9 +32,9 @@ description: >-
 - **Test Suites & Harness**:
   - `cts`, `external/deqp`, `test/{graphics,vts,suite_harness}`, `tools/tradefederation/core`.
 
-## 2. Kernel Checkouts (`~/android/android<version>-<kernel>-<board>`)
+## 2. Kernel Checkouts (`~/android/android*`)
 
-- Kleaf/Bazel multi-repo kernel trees live at `~/android/android<version>-<kernel>-<board>` (`tools/bazel`, `build/kernel/kleaf/`, `common/`, `common-modules/`).
+- Run `ls -d ~/android/android*` to list local Kleaf checkouts, and inspect `<checkout>/.repo/manifests/default.xml` to confirm the manifest branch.
 - Compare downstream kernel changes against mainline Linux via `~/projects/linux` (`local-checkout-linux`).
 
 ## Access Troubleshooting
