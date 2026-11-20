@@ -31,8 +31,9 @@ config_one() {
 		cp "$srcdir/defconfig-$conf" "$O/.config"
 	fi
 
-	make O="$O" "$@" olddefconfig
-	make O="$O" "$@" savedefconfig
+	# until we need CONFIG_RUST
+	make O="$O" RUSTC="false" "$@" olddefconfig
+	make O="$O" RUSTC="false" "$@" savedefconfig
 
 	cp "$O/defconfig" "$srcdir/defconfig-$conf"
 }
