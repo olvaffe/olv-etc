@@ -59,6 +59,7 @@ cli_full="
 	$cli_std
 	fido2-tools
 	gnupg
+	msmtp
 	systemd-container
 	wireguard-tools
 "

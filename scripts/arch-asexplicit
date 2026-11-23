@@ -43,6 +43,7 @@ cli_std="
 cli_full="
 	$cli_std
 	libfido2
+	msmtp
 	nordvpn-bin
 	wireguard-tools
 "
